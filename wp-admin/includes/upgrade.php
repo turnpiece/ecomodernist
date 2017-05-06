@@ -2762,10 +2762,8 @@ function translate_level_to_role($level) {
 function wp_check_mysql_version() {
 	global $wpdb;
 	$result = $wpdb->check_database_version();
-	if ( is_wp_error( $result ) ) {
-		echo $result->get_error_message();
-		exit(1);
-	}
+	if ( is_wp_error( $result ) )
+		die( $result->get_error_message() );
 }
 
 /**
