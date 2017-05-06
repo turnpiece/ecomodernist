@@ -30,6 +30,10 @@ You're the boss, so have fun editing!
     width: 360px;
 }
 
+.site-title img {
+	max-height: 100px;
+}
+
 
 
 /*--------------------------------------------------------------
