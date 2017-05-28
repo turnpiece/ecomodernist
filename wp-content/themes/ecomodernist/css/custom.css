@@ -38,7 +38,9 @@ You're the boss, so have fun editing!
 	color: #ccc;
 }
 
-
+.entry-content a {
+	text-decoration: underline;
+}
 
 /*--------------------------------------------------------------
 2.0 - Responsive media queries (mobile styles)
