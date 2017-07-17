@@ -2,7 +2,7 @@
 /**
  * Author: Hoang Ngo
  */
-namespace WP_Defender\Component;
+namespace WP_Defender\Component;	   			 	 		  		  	 	
 
 class Error_Code {
 	const NOT_WRITEABLE = 1;

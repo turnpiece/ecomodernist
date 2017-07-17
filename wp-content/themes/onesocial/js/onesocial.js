@@ -158,7 +158,7 @@ var BuddyBossMain = ( function ( $, window, undefined ) {
             if ( $.cookie( 'switch_mode' ) != 'mobile' ) {
 //                    if(($mobile_css.attr('media') != 'all')) {
                 if ( ( !translation.only_mobile ) ) {
-                    if ( viewport().width < 480 ) {
+                    if ( viewport().width <= 480 ) {
                         $( 'body' ).removeClass( 'is-desktop' ).addClass( 'is-mobile' );
                     } else {
                         $( 'body' ).removeClass( 'is-mobile' ).addClass( 'is-desktop' );
@@ -204,6 +204,14 @@ var BuddyBossMain = ( function ( $, window, undefined ) {
                     width: $( window ).width() - 240,
                     height: $( window ).outerHeight( true ) + 200
                 } );
+            }
+
+            // Mobile "My Profile" nav
+            if ( is_mobile ) {
+                if ( 0 !== $('#menu-my-profile').length ) {
+                    var myProfileMenu = '<li id="wp-admin-bar-my-account-settings" class="menupop"><a class="ab-item" aria-haspopup="true" href="#">'+translation.other+'</a><div class="ab-sub-wrapper">'+$('#menu-my-profile')[0].outerHTML+'</div><li>';
+                    $(myProfileMenu).appendTo('#wp-admin-bar-my-account-buddypress');
+                }
             }
 
             // Log out link in left panel
@@ -287,7 +295,23 @@ var BuddyBossMain = ( function ( $, window, undefined ) {
         // Re-render layout after everything's loaded
         $window.bind( 'load', function () {
             do_render();
+            init_mobile_my_profile_menu();
         } );
+
+        // Mobile "My Profile" nav
+        function init_mobile_my_profile_menu() {
+
+            if ( is_mobile ) {
+                if ( 0 !== $('#menu-my-profile').length ) {
+                    var myProfileMenu = '<li id="wp-admin-bar-my-account-settings" class="menupop"><a class="ab-item" aria-haspopup="true" href="#">'+translation.other+'</a><div class="ab-sub-wrapper">'+$('#menu-my-profile')[0].outerHTML+'</div><li>';
+                    $(myProfileMenu).appendTo('#wp-admin-bar-my-account-buddypress');
+                    //Fix - mobile left panel links  to be clicked twice
+                    jQuery("#wpadminbar.mobile").find("#menu-my-profile a").on("click.wp-mobile-hover", function(e) {
+                        e.stopPropagation();
+                    });
+                }
+            }
+        }
 
         // Re-render layout on resize
         var throttle;
@@ -344,7 +368,7 @@ var BuddyBossMain = ( function ( $, window, undefined ) {
         $( document ).ajaxSuccess( function () {
             setTimeout( function () {
                 Waypoint.refreshAll();
-                waypoints = $( '#main-wrap img, .svg-graphic' )
+                waypoints = $( '#main-wrap img.not-loaded, .svg-graphic' )
                     .waypoint( {
                         handler: function ( direction ) {
                             if ( this.element !== undefined ) {
@@ -1063,7 +1087,8 @@ var BuddyBossMain = ( function ( $, window, undefined ) {
                 },
                 scroll: {
                     items: 1,
-                    fx: 'crossfade'
+                    fx: 'crossfade',
+                    onBefore: $carouselHighlight,
                 },
                 auto: false,
                 prev: {
@@ -1081,6 +1106,15 @@ var BuddyBossMain = ( function ( $, window, undefined ) {
             } );
 
         }
+
+        //carouFredSel added "loaded" css class to the active slide
+        var $carouselHighlight = function() {
+            var $this = $("#posts-carousel ul");
+            var items = $this.triggerHandler("currentVisible");     //get all visible items
+            $this.children().removeClass("loaded");                 // remove all .active classes
+            items.filter(":eq(1)").addClass("loaded");              // add .active class to n-th item
+        };
+
         if ( $( '#posts-carousel' ).length > 0 ) {
             initFullwidthCarousel();
         }
@@ -1238,7 +1272,7 @@ var BuddyBossMain = ( function ( $, window, undefined ) {
         function initCheckboxes() {
             if ( !inputsEnabled ) {
                 //only few buddypress and bbpress related fields
-                $( '#frm_buddyboss-media-tag-friends input[type="checkbox"], #buddypress table.notifications input, #send_message_form input[type="checkbox"], #profile-edit-form input[type="checkbox"],  #profile-edit-form input[type="radio"], #message-threads input, #settings-form input[type="radio"], #create-group-form input[type="radio"], #create-group-form input[type="checkbox"], #invite-list input[type="checkbox"], #group-settings-form input[type="radio"], #group-settings-form input[type="checkbox"], #new-post input[type="checkbox"], .bbp-form input[type="checkbox"], .bbp-form .input[type="radio"], .register-section .input[type="radio"], .register-section input[type="checkbox"], .message-check, #select-all-messages' ).each( function () {
+                $( '#frm_buddyboss-media-tag-friends input[type="checkbox"], #buddypress table.notifications input, #send_message_form input[type="checkbox"], #profile-edit-form input[type="checkbox"],  #profile-edit-form input[type="radio"], #message-threads input, #settings-form input[type="radio"], #create-group-form input[type="radio"], #create-group-form input[type="checkbox"], #invite-list input[type="checkbox"], #group-settings-form input[type="radio"], #group-settings-form input[type="checkbox"], #new-post input[type="checkbox"], .bbp-form input[type="checkbox"], .bbp-form .input[type="radio"], .register-section .input[type="radio"], .register-section input[type="checkbox"], .message-check, #select-all-messages, #siteLoginBox input[type="checkbox"], #siteRegisterBox input[type="checkbox"]' ).each( function () {
                     var $this = $( this );
                     $this.addClass( 'styled' );
                     if ( $this.next( "label" ).length == 0 && $this.next( "strong" ).length == 0 ) {
@@ -1389,7 +1423,7 @@ var BuddyBossMain = ( function ( $, window, undefined ) {
                 } );
 
                 //notification content
-                jQuery( "#all-notificatios .pop" ).html( data.notification_content );
+                jQuery( "#all-notificatios .pop ul" ).html( data.notification_content );
             }
         } );
 

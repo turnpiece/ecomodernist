@@ -3,7 +3,7 @@ Contributors: RedSand, blackhawkcybersec, rsm-support
 Donate link: https://www.redsandmarketing.com/go/donate/wp-spamshield/
 Tags: anti-spam, antispam, comments, security, spam
 Requires at least: 4.0
-Tested up to: 4.7
+Tested up to: 4.8
 Stable tag: trunk
 License: GPLv2
 
@@ -95,7 +95,6 @@ If you have any issues with the plugin, we are here to help. Simply submit a sup
 10. Enhanced Comment Blacklist option. Instead of just sending comments to moderation as with WordPress's default Comment Blacklist functionality, with this turned on, anything that matches a string in the blacklist will be **completely blocked**. Block specific human spammers by IP, email address, or a number of other options. The Enhanced Comment Blacklist has some improvements over the default WordPress blacklist functionality, and adds a link in the comment & contact form notification emails that will let you blacklist a spammer's IP with one click. It also provides some advanced custom options for blocking spam on everything else that WP-SpamShield protects.
 11. WP-SpamShield Whitelist option. Allows you to specify certain users who you want to let bypass the antispam filters.
 12. This plugin is legal to use in Germany and the EU, and does not violate European privacy laws. It does not use any type of cloud-based service, spam data is not transmitted from your server to any other server, and all anti-spam processing happens directly on your website's server.
-13. A truly plug and play replacement and upgrade for WP-SpamFree. (This plugin is a far more advanced fork of WP-SpamFree with dramatically improved page load speed, security, and spam blocking power, by its original author.) It will import your old data from WP-SpamFree automatically upon installation and activation, and features you were using on your site previously such as contact forms and spam stats will continue to work without any changes to pages, posts, or theme.
 
 = Languages Available =
 
@@ -171,7 +170,7 @@ To find web hosts that meet and exceed the requirements, [see our list of recomm
 
 **You're done! Sit back and see what it feels like to live without blog comment spam, trackback spam, contact form spam, and registration spam!**
 
-**NOTE: If you're using a caching plugin, you will need to clear the plugin's cache after you install WP-SpamShield. It's a good practice to clear the cache after updating plugins as well.**
+**NOTE: If you're using a caching plugin, you should clear the plugin's cache after you install WP-SpamShield. It's a good practice to clear the cache after adding/removing/updating plugins as well. WP-SpamShield will automatically clear the cache for a number of popular cache plugins.**
 
 = Displaying Stats on Your Blog =
 Want to show off your blocked spam stats on your site and tell others about WP-SpamShield? **It's easy, just add a widget and drag and drop it where you like, in several color and size options.** You have a choice of the regular size counters in 5 colors, the small counter in 5 colors, or the *End Blog Spam* graphic. ( `</BLOGSPAM>` )
@@ -300,6 +299,42 @@ If you have any further questions, please submit them on the main [WP-SpamShield
 10. Widget - WP-SpamShield Counter - Graphic: Style 9
 
 == Changelog ==
+
+= 1.9.16 =
+*released 07/11/17*
+
+* Made various code enhancements and improvements.
+* Fixed a compatibility issue with JetPack Comments.
+* Fixed a compatibility issue with certain WooCommerce Payment Gateways.
+* Maintenance: Updated existing spam filters.
+
+= 1.9.15 =
+*released 06/30/17*
+
+* Made various code enhancements and improvements.
+* Fixed a compatibility issue with the Easy Digital Downloads plugin.
+* Maintenance: Updated existing spam filters.
+
+= 1.9.14 =
+*released 06/16/17*
+
+* Made various code enhancements and improvements.
+* Maintenance: Updated existing spam filters.
+
+= 1.9.13 =
+*released 06/08/17*
+
+* Made various code enhancements and improvements.
+* Maintenance: Updated existing spam filters.
+
+= 1.9.12 =
+*released 06/03/17*
+
+* Made various code enhancements and improvements.
+* Compatibility fix for a new issue starting in Contact Form 7 version 4.8. In CF7 version 4.8, some changes were made to the form processing and now the REST API is used. This release fixes the issue while maintaining backwards compatibility with previous versions of CF7.
+* Added an improved automatic cache purge feature. When plugins are activated, deactivated, or updated, WP-SpamShield automatically purges the page cache for a number of caching plugins, including WP Super Cache, WP Fastest Cache, Autoptimize, and more. This ensures the smooth operation and anti-spam functionality.
+* Improved some filters in the anti-spam algorithm.
+* Maintenance: Updated existing spam filters.
 
 = 1.9.11 =
 *released 05/20/17*
@@ -1049,7 +1084,7 @@ If you have any further questions, please submit them on the main [WP-SpamShield
 For a complete list of changes to the plugin, view the [Changelog](https://www.redsandmarketing.com/plugins/wp-spamshield/changelog/).
 
 == Upgrade Notice ==
-= 1.9.11 =
+= 1.9.16 =
 
-* Made various code enhancements and improvements, and updated the spam filters. Please see Changelog for details.
+* Made various code enhancements and improvements, fixed compatibility issues with JetPack Comments and certain WooCommerce Payment Gateways, and updated the spam filters. Please see Changelog for details.
 

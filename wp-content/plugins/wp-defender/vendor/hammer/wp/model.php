@@ -159,7 +159,7 @@ abstract class Model extends \Hammer\Base\Model {
 		$sql    = $sql . ' ' . implode( ' ', $join ) . ' ' . implode( ' AND ', $where );
 		if ( ! empty( $orderBy ) && static::buildOrderBy( $orderBy ) != false ) {
 			$sql = $sql . ' ORDER BY ' . static::buildOrderBy( $orderBy );
-			if ( ! empty( $order ) ) {
+			if ( ! empty( $order ) && in_array( strtolower( $order ), array( 'desc', 'asc' ) ) ) {
 				$sql = $sql . ' ' . $order;
 			}
 		}
@@ -191,7 +191,7 @@ abstract class Model extends \Hammer\Base\Model {
 		$sql    = $sql . ' ' . implode( ' ', $join ) . ' ' . implode( ' AND ', $where );
 		if ( ! empty( $orderBy ) && static::buildOrderBy( $orderBy ) != false ) {
 			$sql = $sql . ' ORDER BY ' . static::buildOrderBy( $orderBy );
-			if ( ! empty( $order ) ) {
+			if ( ! empty( $order ) && in_array( strtolower( $order ), array( 'desc', 'asc' ) ) ) {
 				$sql = $sql . ' ' . $order;
 			}
 		}
@@ -222,7 +222,11 @@ abstract class Model extends \Hammer\Base\Model {
 	 * @return null|string
 	 */
 	public static function count( $attributes = array() ) {
-		$join  = static::buildJoins();
+		if ( ! empty( $attributes ) ) {
+			$join = static::buildJoins();
+		} else {
+			$join = array();
+		}
 		$where = static::buildWhere( $attributes );
 		$sql   = "SELECT count(ID) FROM " . self::getWPDB()->posts . ' AS t0 ' . implode( ' ', $join ) . ' ' . implode( ' AND ', $where );
 
@@ -294,7 +298,7 @@ abstract class Model extends \Hammer\Base\Model {
 		$joins = array();
 		$i     = 1;
 		foreach ( $_metas as $k => $field ) {
-			$joins[] = static::getWPDB()->prepare( 'INNER JOIN ' . static::getWPDB()->postmeta . ' as t' . $i . ' ON t' . $i . '.post_id=ID AND t' . $i . '.meta_key=%s', $field );
+			$joins[] = static::getWPDB()->prepare( 'LEFT JOIN ' . static::getWPDB()->postmeta . ' as t' . $i . ' ON t' . $i . '.post_id=ID AND t' . $i . '.meta_key=%s', $field );
 			$i ++;
 		}
 
@@ -361,7 +365,7 @@ abstract class Model extends \Hammer\Base\Model {
 		$fields = self::getMaps();
 		//check for meta value first
 		$i = array_search( $attribute, array_keys( $fields[1] ) );
-		if ( $i == false ) {
+		if ( $i === false ) {
 			//we need to check wp value
 			if ( isset( $fields[0][ $attribute ] ) ) {
 				return 't0.' . $fields[0][ $attribute ];

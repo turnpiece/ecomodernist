@@ -13,25 +13,28 @@ use WP_Defender\Module\Hardener\Rule_Service;
 
 class Security_Key_Service extends Rule_Service implements IRule_Service {
 	const CACHE_KEY = 'security_key';
+	const DEFAULT_DAYS = '60 days';
 
 	/**
 	 * @return bool
 	 */
 	public function check() {
 		$last = Settings::instance()->getDValues( self::CACHE_KEY );
+		$reminder = Settings::instance()->getDValues( 'securityReminderDate' );
 		if ( $last ) {
-			$reminder = Settings::instance()->getDValues( 'securityReminderDate' );
 			if ( $reminder == null ) {
-				$reminder = strtotime( '+30 days', $last );
+				$reminder = strtotime( '+' . self::DEFAULT_DAYS, $last );
 			}
 			if ( $reminder < time() ) {
 				return false;
 			}
 
 			return true;
-		} else {
-			return false;
+		} elseif ( $reminder != null && $reminder < time() ) {
+			return true;
 		}
+
+		return false;
 	}
 
 	/**

@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Plugin Name: Defender
+ * Plugin Name: WP Defender Pro
  * Plugin URI: https://premium.wpmudev.org/project/wp-defender/
- * Version:     1.5
+ * Version:     1.6.2
  * Description: Get regular security scans, vulnerability reports, safety recommendations and customized hardening for your site in just a few clicks. Defender is the analyst and enforcer who never sleeps.
  * Author:      WPMU DEV
  * Author URI:  http://premium.wpmudev.org/
@@ -12,6 +12,8 @@
  * Text Domain: wpdef
  * Network: true
  */
+
+
 class WP_Defender {
 
 	/**
@@ -110,7 +112,7 @@ class WP_Defender {
 	 */
 	private function includeVendors() {
 		$phpVersion = phpversion();
-		if ( version_compare( $phpVersion, '5.3', '>=' ) ) {
+		if ( version_compare( $phpVersion, '5.3', '>=' ) &&  ! function_exists( 'initCacheEngine' ) ) {
 			include_once $this->plugin_path . 'vendor' . DIRECTORY_SEPARATOR . 'hammer' . DIRECTORY_SEPARATOR . 'bootstrap.php';
 		}
 
@@ -206,8 +208,9 @@ if ( ! function_exists( 'is_plugin_active' ) ) {
 	include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 }
 
-if ( is_plugin_active( 'defender/wp-defender.php' ) ) {
-	deactivate_plugins( array( 'defender/wp-defender.php' ) );
+if ( is_plugin_active( 'defender-security/wp-defender.php' ) ) {
+	deactivate_plugins( array( 'defender-security/wp-defender.php' ) );
+	update_site_option( 'defenderJustUpgrade', 1 );
 }
 
 if ( ! function_exists( 'wp_defender' ) ) {
@@ -229,7 +232,7 @@ if ( ! function_exists( 'wp_defender' ) ) {
 		wp_clear_scheduled_hook( 'lockoutReportCron' );
 		wp_clear_scheduled_hook( 'auditReportCron' );
 		wp_clear_scheduled_hook( 'cleanUpOldLog' );
-		wp_clear_scheduled_hook('scanReportCron');
+		wp_clear_scheduled_hook( 'scanReportCron' );
 	}
 
 	function wp_defender_activate() {

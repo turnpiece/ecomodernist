@@ -14,7 +14,8 @@ if ( !function_exists( 'boss_generate_option_css' ) ) {
 
 			/* Accent color */
 			a { color: <?php echo $accent_color; ?>; }
-            .widget_mc4wp_form_widget form p input[type="submit"], .widget.widget_newsletterwidget form p input[type="submit"],
+            .widget_mc4wp_form_widget form p input[type="submit"], .widget.widget_newsletterwidget form div input[type="submit"],
+			.widget.widget_newsletterwidget form p input[type="submit"],
             .footer-widget #switch-mode input[type="submit"],
             .woocommerce #respond input#submit, 
             .woocommerce a.button, 
@@ -126,6 +127,7 @@ if ( !function_exists( 'boss_generate_option_css' ) ) {
 			.entry-header .entry-title a:hover,
 			.widget_search #searchform button i:before,
 			.widget #bbp-search-index-form button i:before,
+			.widget .woocommerce-product-search button i:before,
 			.entry-meta a.read-more,
 			.settings #buddypress div#subnav.item-list-tabs ul li.current a,
 			.bb-user-notifications .avatar + a,

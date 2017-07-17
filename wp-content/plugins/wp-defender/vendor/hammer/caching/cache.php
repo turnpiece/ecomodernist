@@ -148,7 +148,7 @@ abstract class Cache extends Component {
 	 *
 	 * @return bool
 	 */
-	protected abstract function addValue( $key, $value, $duration );	   			 	 		  		  	 	
+	protected abstract function addValue( $key, $value, $duration );
 
 	/**
 	 * Delete a cache key

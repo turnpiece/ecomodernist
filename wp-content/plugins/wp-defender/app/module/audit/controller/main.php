@@ -8,6 +8,7 @@ namespace WP_Defender\Module\Audit\Controller;
 use Hammer\Helper\HTTP_Helper;
 use Hammer\Helper\Log_Helper;
 use Hammer\Helper\WP_Helper;
+use WP_Defender\Module\Audit\Behavior\Audit;
 use WP_Defender\Module\Audit\Component\Audit_API;
 use WP_Defender\Module\Audit\Component\Audit_Table;
 use WP_Defender\Module\Audit\Model\Settings;
@@ -43,6 +44,7 @@ class Main extends \WP_Defender\Controller {
 		$this->add_ajax_action( 'saveAuditSettings', 'saveAuditSettings' );
 		$this->add_ajax_action( 'auditOnCloud', 'auditOnCloud', true, true );
 		$this->add_ajax_action( 'dashboardSummary', 'dashboardSummary' );
+		$this->add_ajax_action( 'exportAsCvs', 'exportAsCvs' );
 
 		if ( Settings::instance()->enabled == 1 ) {
 			$this->add_action( 'wp_loaded', 'setupEvents', 1 );
@@ -54,6 +56,8 @@ class Main extends \WP_Defender\Controller {
 		     || ( ( defined( 'DOING_AJAX' ) && DOING_AJAX == true )
 		          && HTTP_Helper::retrieve_post( 'id' ) == 'audit_lite' )
 		) {
+			//load the lite version of user search on main page & when using ajax, for using the
+			//ajax hooks
 			$this->email_search->lite      = true;
 			$this->email_search->eId       = 'audit_lite';
 			$this->email_search->noExclude = true;
@@ -64,6 +68,46 @@ class Main extends \WP_Defender\Controller {
 		$this->email_search->add_hooks();
 		//report cron
 		$this->add_action( 'auditReportCron', 'auditReportCron' );
+	}
+
+	public function exportAsCvs() {
+		if ( ! $this->checkPermission() ) {
+			return;
+		}
+
+		$params  = $this->prepareAuditParams();
+		$data    = Audit_API::pullLogs( $params, 'timestamp', 'desc', true );
+		$logs    = $data['data'];
+		$fp      = fopen( 'php://memory', 'w' );
+		$headers = array(
+			__( "Summary", wp_defender()->domain ),
+			__( "Date / Time", wp_defender()->domain ),
+			__( "Context", wp_defender()->domain ),
+			__( "Type", wp_defender()->domain ),
+			__( "IP address", wp_defender()->domain ),
+			__( "User", wp_defender()->domain )
+		);
+		fputcsv( $fp, $headers );
+		foreach ( $logs as $fields ) {
+			$vars = array(
+				$fields['msg'],
+				is_array( $fields['timestamp'] )
+					? $this->formatDateTime( date( 'Y-m-d H:i:s', $fields['timestamp'][0] ) )
+					: $this->formatDateTime( date( 'Y-m-d H:i:s', $fields['timestamp'] ) ),
+				ucwords( Audit_API::get_action_text( $fields['context'] ) ),
+				ucwords( Audit_API::get_action_text( $fields['action_type'] ) ),
+				$fields['ip'],
+				$this->getDisplayName( $fields['user_id'] )
+			);
+			fputcsv( $fp, $vars );
+		}
+		$filename = 'wdf-audit-logs-export-' . date( 'ymdHis' ) . '.csv';
+		fseek( $fp, 0 );
+		header( 'Content-Type: text/csv' );
+		header( 'Content-Disposition: attachment; filename="' . $filename . '";' );
+		// make php send the generated csv lines to the browser
+		fpassthru( $fp );
+		exit();
 	}
 
 	public function dashboardSummary() {
@@ -81,7 +125,7 @@ class Main extends \WP_Defender\Controller {
 				'date_to'   => date( 'Y-m-d' ) . ' 23:59:59'
 			) );
 			wp_send_json_success( array(
-				'eventWeek' => $weekCount['total_items']
+				'eventWeek' => is_wp_error( $weekCount ) ? '-' : $weekCount['total_items']
 			) );
 		}
 
@@ -201,7 +245,12 @@ class Main extends \WP_Defender\Controller {
 			return;
 		}
 
-		$settings       = Settings::instance();
+		$settings = Settings::instance();
+
+		if ( $settings->notification == false ) {
+			return;
+		}
+
 		$lastReportSent = $settings->lastReportSent;
 		if ( $lastReportSent == null ) {
 			//no sent, so just assume last 30 days, as this only for monthly
@@ -338,7 +387,7 @@ class Main extends \WP_Defender\Controller {
                                     <p style="Margin: 0; Margin-bottom: 0; color: #555555; font-family: Helvetica, Arial, sans-serif; font-size: 15px; font-weight: normal; line-height: 26px; margin: 0; margin-bottom: 0; padding: 0 0 24px; text-align: left;">
                                         <a class="plugin-brand"
                                            href="<?php echo network_admin_url( 'admin.php?page=wdf-logging&date_from=' . date( 'm/d/Y', strtotime( $date_from ) ) . '&date_to=' . date( 'm/d/Y', strtotime( $date_to ) ) ) ?>"
-                                           style="Margin: 0; color: #ff5c28; display: inline-block; font: inherit; font-family: Helvetica, Arial, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left; text-decoration: none;"><?php _e( "You can fiew the full audit report for your site here.", wp_defender()->domain ) ?>
+                                           style="Margin: 0; color: #ff5c28; display: inline-block; font: inherit; font-family: Helvetica, Arial, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left; text-decoration: none;"><?php _e( "You can view the full audit report for your site here.", wp_defender()->domain ) ?>
                                             <img
                                                     class="icon-arrow-right"
                                                     src="<?php echo wp_defender()->getPluginUrl() ?>assets/email-images/icon-arrow-right-defender.png"
@@ -390,7 +439,7 @@ class Main extends \WP_Defender\Controller {
 
 			$no_reply_email = "noreply@" . parse_url( get_site_url(), PHP_URL_HOST );
 			$headers        = array(
-				'From: WP Defender <' . $no_reply_email . '>',
+				'From: Defender <' . $no_reply_email . '>',
 				'Content-Type: text/html; charset=UTF-8'
 			);
 			$params         = array(
@@ -529,8 +578,11 @@ class Main extends \WP_Defender\Controller {
 		foreach ( $attributes as $att => $value ) {
 			$params[ $att ] = HTTP_Helper::retrieve_get( $att, $value );
 			if ( $att == 'date_from' || $att == 'date_to' ) {
-				$df_object      = \DateTime::createFromFormat( $date_format, $params[ $att ] );
-				$params[ $att ] = $df_object->format( 'Y-m-d' );
+				$df_object = \DateTime::createFromFormat( $date_format, $params[ $att ] );
+				//check if the date string is right, if not, we use default
+				if ( is_object( $df_object ) ) {
+					$params[ $att ] = $df_object->format( 'Y-m-d' );
+				}
 			} elseif ( $att == 'user_id' ) {
 				$params['user_id'] = HTTP_Helper::retrieve_get( 'term' );
 			} elseif ( $att == 'date_range' && in_array( $value, array( 1, 7, 30 ) ) ) {
@@ -560,7 +612,7 @@ class Main extends \WP_Defender\Controller {
 	public function _renderTable( $data ) {
 		return $this->renderPartial( 'table', array(
 			'data'       => $data,
-			'pagination' => $this->pagination( $data['total_items'], $data['total_pages'] )
+			'pagination' => is_wp_error( $data ) ? '' : $this->pagination( $data['total_items'], $data['total_pages'] )
 		), false );
 	}
 
@@ -574,13 +626,14 @@ class Main extends \WP_Defender\Controller {
 		}
 
 		$links        = array();
-		$current_page = HTTP_Helper::retrieve_get( 'paged', 1 );
+		$current_page = absint( HTTP_Helper::retrieve_get( 'paged', 1 ) );
 		/**
 		 * if pages less than 7, display all
 		 * if larger than 7 we will get 3 previous page of current, current, and .., and, and previous, next, first, last links
 		 */
-		$current_url = set_url_scheme( 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+		$current_url = set_url_scheme( 'http://' . parse_url( get_site_url(), PHP_URL_HOST ) . $_SERVER['REQUEST_URI'] );
 		$current_url = remove_query_arg( array( 'hotkeys_highlight_last', 'hotkeys_highlight_first' ), $current_url );
+		$current_url = esc_url( $current_url );
 
 		$radius = 2;
 		if ( $current_page > 1 && $total_pages > $radius ) {
