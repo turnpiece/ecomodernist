@@ -38,8 +38,18 @@ You're the boss, so have fun editing!
 	color: #ccc;
 }
 
+.header-wrapper {
+    padding: 10px 15px;
+}
+
 .entry-content a {
 	text-decoration: underline;
+}
+
+.single-post .entry-header.has-image h1 {
+    padding: 15px 70px;
+    text-shadow: 0;
+    background: rgba(0, 0, 0, 0.3);
 }
 
 /*--------------------------------------------------------------
