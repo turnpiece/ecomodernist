@@ -1,8 +1,8 @@
 === OneSocial Theme ===
 Contributors: BuddyBoss
 Requires at least: 3.8
-Tested up to: 4.6.1
-Version: 1.3.0
+Tested up to: 4.7.5
+Version: 1.3.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -21,6 +21,8 @@ OneSocial is a responsive WordPress/BuddyPress theme that focuses on simplicity 
 
 == Changelog ==
 
+= 1.3.1 =
+* Enhancement - Licence Module
 = 1.3.0 =
 * Fix - Checkbox style tweak inside popup
 * Fix - Tagging drop down misplaced

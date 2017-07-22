@@ -185,7 +185,7 @@ Class BuddyBoss_Theme {
 
 		// Allow automatic updates via the WordPress dashboard
 		require_once( $this->inc_dir . '/buddyboss-theme-updater.php' );
-		new buddyboss_updater_theme( 'http://update.buddyboss.com/theme', basename( get_template_directory() ), 170 );
+		//new buddyboss_updater_theme( 'http://update.buddyboss.com/theme', basename( get_template_directory() ), 170 );
 	}
 
 	/**

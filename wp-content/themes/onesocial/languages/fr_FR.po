@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OneSocial\n"
 "Report-Msgid-Bugs-To: https://www.buddyboss.com/contact/\n"
-"POT-Creation-Date: 2017-05-18 15:04:47+00:00\n"
+"POT-Creation-Date: 2017-06-02 14:40:15+00:00\n"
 "PO-Revision-Date: 2016-05-01 14:01-0400\n"
 "Last-Translator: jean-pierre michaud <nexialys@yahoo.com>\n"
 "Language-Team: jean-pierre michaud <nexialys@yahoo.com>\n"
@@ -4267,6 +4267,7 @@ msgstr "Extrait du contenu"
 
 #: buddyboss-inc/buddyboss-framework/options-init.php:1436
 #: buddyboss-inc/buddyboss-framework/options-init.php:1437
+#: buddyboss-inc/buddyboss-theme-updater.php:10
 msgid "OneSocial Theme"
 msgstr "Thème OneSocial"
 
@@ -4346,6 +4347,12 @@ msgstr "Installer"
 #: buddyboss-inc/buddyboss-framework/plugin-support.php:379
 msgid "Buy Now"
 msgstr "Achetez Maintenant"
+
+#: buddyboss-inc/buddyboss-theme-updater.php:50
+msgid ""
+"To receive updates for BuddyBoss products, please install and activate the "
+"plugin %s"
+msgstr ""
 
 #: buddyboss-inc/buddyboss-widgets/buddyboss-profile-widget-loader.php:60
 #: template-parts/header-aside.php:43
