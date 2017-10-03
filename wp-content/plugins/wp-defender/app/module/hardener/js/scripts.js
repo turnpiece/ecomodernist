@@ -37,7 +37,25 @@ jQuery(function ($) {
             });
             $('span.hardener-nginx-extra-instructions').html(newRule);
         }
-    });
+        if ( $('.hardener-instructions-apache-litespeed').length ) {
+            $('.hardener-update-frm [name="file_paths"]').val(text_val);
+        }
+	});
+	
+	/**
+	 * Validate that the number put is greater than 0 and is actually a number
+	 */
+	$(document).on('keyup keypress paste','.defender-login-duration', function(){
+		var text_val = $(this).val();
+		if( /^-?[0-9]+$/i.test(text_val)){
+			//is integer
+			if(text_val <= 0){
+				$(this).val('');
+			}
+		} else{
+            $(this).val('');
+		}
+	});
 
     /**
      * Pevent PHP update posts toggle
@@ -48,6 +66,13 @@ jQuery(function ($) {
         }else{
             $('.hardener-frm-process-trackback [name="updatePosts"]').val('no');
         }
+    });
+
+    /**
+     * Toggle text area
+     */
+    $(document).on('click','button.hardener-php-excuted-execption', function(){
+        $('.hardener-instructions textarea.hardener-php-excuted-ignore').toggle('fast');
     });
 
     /**
@@ -65,6 +90,11 @@ jQuery(function ($) {
                 $(this).addClass('wd-hide');
             });
             $('.hardener-instructions-'+selected).removeClass('wd-hide');
+        }
+        if( selected == 'apache' || selected == 'litespeed' || selected == 'nginx'){
+            $('.hardener-instructions-extra-exceptions').removeClass('wd-hide');
+        }else{
+            $('.hardener-instructions-extra-exceptions').addClass('wd-hide');
         }
         
     });
@@ -96,14 +126,20 @@ jQuery(function ($) {
             } else {
                 $('.count-resolved').addClass('wd-hide');
             }
-            form.closest('.rule').slideUp(500, function () {
-                $(this).remove();
-                if ($('.rule').size() == 0) {
-                    setTimeout(function () {
-                        location.reload();
-                    }, 500)
-                }
-            })
+            var update_rules = true;
+            if ( typeof data.data.update !== "undefined" ) {
+                update_rules = false;
+            }
+            if ( update_rules ) {
+                form.closest('.rule').slideUp(500, function () {
+                    $(this).remove();
+                    if ($('.rule').size() == 0) {
+                        setTimeout(function () {
+                            location.reload();
+                        }, 500)
+                    }
+                });
+            }
         } else {
             Defender.showNotification('error', data.data.message);
         }

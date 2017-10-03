@@ -89,6 +89,10 @@ function swp_plugin_options() {
 function swp_build_options_page() {
 	global $swp_user_options;
 
+	if(isset($swp_user_options['activate_tweet_counts']) && true == $swp_user_options['activate_tweet_counts'] && !isset($swp_user_options['tweet_count_source']) ) {
+		$swp_user_options['tweet_count_source'] = 'newsharecounts';
+	}
+
 	// Create all of the options in one giant array.
 	$swp_options_page = array(
 		// A List of Options Page Tabs and Their Titles.
@@ -112,12 +116,19 @@ function swp_build_options_page() {
 	 * Build the header menu
 	 */
 
+ 	if( function_exists('is_swp_registered') ):
+ 		$swp_registration = is_swp_registered();
+ 	else:
+ 		$swp_registration = false;
+ 	endif;
+
 	// Wrapper for the entire content area
 	echo '<div class="sw-header-wrapper">';
 
-	echo '<div class="sw-grid sw-col-940 sw-top-menu">';
+	echo '<div class="sw-grid sw-col-940 sw-top-menu" sw-registered="' . absint( $swp_registration ) . '">';
 	echo '<div class="sw-grid sw-col-700">';
 	echo '<img class="sw-header-logo" src="' . SWP_PLUGIN_URL . '/images/admin-options-page/social-warfare-light.png" />';
+	echo '<img class="sw-header-logo-pro" src="' . SWP_PLUGIN_URL . '/images/admin-options-page/social-warfare-pro-light.png" />';
 	echo '<ul class="sw-header-menu">';
 	$i = 0;
 	foreach ( $swp_options_page['tabs']['links'] as $key => $value ) : ++$i;
@@ -135,12 +146,6 @@ function swp_build_options_page() {
 	/**
 	 * Build the Tab Container
 	 */
-
-	if( function_exists('is_swp_registered') ):
-		$swp_registration = is_swp_registered();
-	else:
-		$swp_registration = false;
-	endif;
 
 	echo '<div class="sw-admin-wrapper" sw-registered="' . absint( $swp_registration ) . '">';
 
@@ -644,8 +649,8 @@ function swp_build_options_page() {
 			/**
 			 * Plugin Registration Module
 			 */
-			if ( defined('SWPP_PLUGIN_DIR') && 'plugin_registration' === $option['type'] ) :
-				require_once SWPP_PLUGIN_DIR . '/functions/admin/options-registration.php';
+			if ( defined('SWP_PLUGIN_DIR') && 'plugin_registration' === $option['type'] ) :
+				require_once SWP_PLUGIN_DIR . '/functions/admin/options-registration.php';
 			endif;
 
 			/**
@@ -675,11 +680,11 @@ function swp_build_options_page() {
 				echo '<h2>' . __( 'Tweet Count Registration' , 'social-warfare' ) . '</h2>';
 
 				// Open the IS NOT Activated container
-				echo '<div class="sw-grid sw-col-940 swp_tweets_not_activated" dep="twitter_shares" dep_val="[false]">';
+				echo '<div class="sw-grid sw-col-940 swp_tweets_not_activated">';
 
 				// The Warning Notice & Instructions
-				echo '<p class="sw-subtitle sw-registration-text">' . __( 'In order to allow Social Warfare to track tweet counts, we\'ve partnered with NewShareCounts.com. Follow the steps below to register with NewShareCounts and allow us to track your Twitter shares.' , 'social-warfare' ) . '</p>';
-				echo '<p class="sw-subtitle sw-registration-text sw-italic">Step 1: <a style="float:none;" class="button sw-navy-button" href="http://newsharecounts.com" target="_blank">' . __( 'Click here to visit NewShareCounts.com' , 'social-warfare' ) . '</a><br />' . __( 'Step 2: At NewShareCounts.com, Enter your domain and click the "Sign In With Twitter" button.' , 'social-warfare' ) . '<img class="sw-tweet-count-demo" src="' . SWP_PLUGIN_URL . '/images/admin-options-page/new_share_counts.png" /><br />' . __( 'Step 3: Flip the switch below to "ON" and then save changes.' , 'social-warfare' ) . '</p>';
+				echo '<p class="sw-subtitle sw-registration-text">' . __( 'In order to allow Social Warfare to track tweet counts, we\'ve partnered with a couple of third-party share counting tools. Follow the steps below to register with one of these platforms and allow us to track your Twitter shares.' , 'social-warfare' ) . '</p>';
+				echo '<p class="sw-subtitle sw-registration-text sw-italic">Step 1: <a style="float:none;" class="button sw-navy-button" href="https://opensharecount.com" target="_blank">' . __( 'Click here to visit OpenShareCount.com (Recommended)' , 'social-warfare' ) . '</a>&nbsp;<a style="float:none;" class="button sw-navy-button" href="http://newsharecounts.com" target="_blank">' . __( 'Click here to visit NewShareCounts.com' , 'social-warfare' ) . '</a><br />' . __( 'Step 2: Follow the prompts on their website to create an account and add your domain to be tracked for share counts.' , 'social-warfare' ) . '<br />' . __( 'Step 3: Flip the switch below to "ON", select which tracking service the plugin should use, then save your changes.' , 'social-warfare' ) . '</p>';
 
 				// Close the IS NOT ACTIVATED container
 				echo '</div>';

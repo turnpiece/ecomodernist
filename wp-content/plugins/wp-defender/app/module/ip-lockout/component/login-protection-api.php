@@ -40,22 +40,19 @@ class Login_Protection_Api extends Component {
 			}
 		}
 
-		$logs = Log_Model::findAll( array(
+		$attempt = Log_Model::count( array(
 			'ip'      => $log->ip,
 			'type'    => Log_Model::AUTH_FAIL,
 			'blog_id' => get_current_blog_id(),
-			'date'    => array( 'compare' => '>=', 'value' => $after )
+			'date'    => array( 'compare' => '>', 'value' => $after )
 		) );
 
-
-		$attempt = count( $logs );
 		if ( ! is_object( $model ) ) {
 			//no record, create one
 			$model         = new IP_Model();
 			$model->ip     = $log->ip;
 			$model->status = IP_Model::STATUS_NORMAL;
 		}
-
 		$model->attempt = $attempt;
 		if ( $model->attempt >= $settings->login_protection_login_attempt || $force == true ) {
 			$model->status       = IP_Model::STATUS_BLOCKED;
@@ -75,6 +72,8 @@ class Login_Protection_Api extends Component {
 			$lock_log->user_agent = $_SERVER['HTTP_USER_AGENT'];
 			if ( $force && $blacklist ) {
 				$lock_log->log = esc_html__( "Lockout occurred: Attempting to login with a banned username.", wp_defender()->domain );
+			} elseif ( ! empty( $log->tried ) ) {
+				$lock_log->log = sprintf( esc_html__( "Lockout occurred: Too many failed login attempts for the username %s", wp_defender()->domain ), $log->tried );
 			} else {
 				$lock_log->log = esc_html__( "Lockout occurred: Too many failed login attempts", wp_defender()->domain );
 			}
@@ -120,7 +119,7 @@ class Login_Protection_Api extends Component {
 			'type'    => Log_Model::ERROR_404,
 			'blog_id' => get_current_blog_id(),
 			'date'    => array(
-				'compare' => '>=',
+				'compare' => '>',
 				'value'   => $after
 			)
 		) );
@@ -131,7 +130,18 @@ class Login_Protection_Api extends Component {
 			$model->ip     = $log->ip;
 			$model->status = IP_Model::STATUS_NORMAL;
 		}
+
+		//filter out the extension
+		$ignoresFileTypes = $settings->get404Ignorelist();
+		foreach ( $logs as $k => $log ) {
+			$ext = pathinfo( $log->log, PATHINFO_EXTENSION );
+			if ( in_array( $ext, $ignoresFileTypes ) ) {
+				unset( $logs[ $k ] );
+			}
+		}
+
 		if ( count( $logs ) >= $settings->detect_404_threshold ) {
+			//we need to check the extension
 			$model->status          = IP_Model::STATUS_BLOCKED;
 			$model->release_time    = strtotime( '+ ' . $settings->detect_404_lockout_duration . ' seconds' );
 			$model->lockout_message = $settings->detect_404_lockout_message;
@@ -173,6 +183,7 @@ class Login_Protection_Api extends Component {
 
 	/**
 	 * @param null $time - unix timestamp
+	 *
 	 * @deprecated
 	 * @return int
 	 */
@@ -190,6 +201,7 @@ class Login_Protection_Api extends Component {
 
 	/**
 	 * @param null $time - unix timestamp
+	 *
 	 * @deprecated
 	 * @return int
 	 */
@@ -283,7 +295,7 @@ class Login_Protection_Api extends Component {
 			$data[] = $line;
 
 		}
-		fclose( $file );
+		fclose( $fp );
 
 		return $data;
 	}
@@ -384,5 +396,108 @@ class Login_Protection_Api extends Component {
 		}
 
 		return false;
+	}
+
+	public static function maybeSendNotification( $type, $model, $settings ) {
+		$lastSentKey = $type == 'login' ? 'lastSentLockout' : 'lastSent404';
+		$stopTimeKey = $type == 'login' ? 'stopTimeLockout' : 'stopTime404';
+		if ( $settings->cooldown_enabled ) {
+			//check the last time,and check the status
+			$lastSent    = $model->getMeta( $lastSentKey );
+			$stopTime    = $model->getMeta( $stopTimeKey, false );
+			$currentTime = apply_filters( 'wd_lockout_notification_current_time', time() );
+			if ( $stopTime && $currentTime < $stopTime ) {
+				//no further email
+				return false;
+			}
+			//we need to check if we can lock
+			if ( $lastSent == false ) {
+				//no info, we need to init
+				$lastSent = time();
+				$model->updateMeta( $lastSentKey, $lastSent );
+			}
+			//we have last sent value here, now need to check the amount from now to last sent
+			if ( $stopTime && $lastSent < $stopTime ) {
+				$lastSent = $stopTime;
+			}
+
+			$count = Log_Model::count( array(
+				'type'    => $type == 'login' ? Log_Model::AUTH_LOCK : Log_Model::LOCKOUT_404,
+				'blog_id' => get_current_blog_id(),
+				'date'    => array(
+					'compare' => '>',
+					'value'   => $lastSent
+				)
+			) );
+			if ( $count >= $settings->cooldown_number_lockout ) {
+				$model->updateMeta( $stopTimeKey, strtotime( '+' . $settings->cooldown_period . ' hours' ) );
+				$model->updateMeta( $lastSentKey, time() );
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 *
+	 */
+	public static function createTables() {
+		global $wpdb;
+
+		$charsetCollate = $wpdb->get_charset_collate();
+		$tableName1     = $wpdb->base_prefix . 'defender_lockout';
+		$tableName2     = $wpdb->base_prefix . 'defender_lockout_log';
+		$sql            = "CREATE TABLE IF NOT EXISTS `{$tableName1}` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `ip` varchar(255) DEFAULT NULL,
+  `status` varchar(16) DEFAULT NULL,
+  `lockout_message` text,
+  `release_time` int(11) DEFAULT NULL,
+  `lock_time` int(11) DEFAULT NULL,
+  `lock_time_404` int(11) DEFAULT NULL,
+  `attempt` int(11) DEFAULT NULL,
+  `attempt_404` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) $charsetCollate;
+CREATE TABLE `{$tableName2}` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `log` text,
+  `ip` varchar(255) DEFAULT NULL,
+  `date` int(11) DEFAULT NULL,
+  `type` varchar(16) DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `blog_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) $charsetCollate;
+";
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		dbDelta( $sql );
+	}
+
+	public static function alterTableFor171() {
+		global $wpdb;
+		$tableName1 = $wpdb->base_prefix . 'defender_lockout_log';
+		$tableName2 = $wpdb->base_prefix . 'defender_lockout';
+		$sql        = "ALTER TABLE " . $tableName1 . " ADD COLUMN `tried` VARCHAR(255);";
+		global $wpdb;
+		$wpdb->query( $sql );
+		$sql = "ALTER TABLE " . $tableName2 . " ADD COLUMN `meta` text;";
+		global $wpdb;
+		$wpdb->query( $sql );
+	}
+
+	/**
+	 * @return bool
+	 */
+	public static function checkIfTableExists() {
+		global $wpdb;
+		$tableName1 = $wpdb->base_prefix . 'defender_lockout';
+		$tableName2 = $wpdb->base_prefix . 'defender_lockout_log';
+		if ( $wpdb->get_var( "SHOW TABLES LIKE '$tableName1'" ) != $tableName1 ||
+		     $wpdb->get_var( "SHOW TABLES LIKE '$tableName2'" ) != $tableName2 ) {
+			return false;
+		}
+
+		return true;
 	}
 }

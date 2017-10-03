@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 "Project-Id-Version: Facebook Thumb Fixer\n"
-"POT-Creation-Date: 2017-07-22 15:49+0800\n"
-"PO-Revision-Date: 2017-07-22 15:49+0800\n"
+"POT-Creation-Date: 2017-08-07 19:56+0800\n"
+"PO-Revision-Date: 2017-08-07 19:56+0800\n"
 "Last-Translator: Michael Ott <hello@michaelott.id.au>\n"
 "Language-Team: Michael Ott <hello@michaelott.id.au>\n"
 "MIME-Version: 1.0\n"
@@ -80,71 +80,71 @@ msgstr ""
 msgid "Homepage Object Type"
 msgstr ""
 
-#: _facebook-thumb-fixer.php:195
+#: _facebook-thumb-fixer.php:196
 #, php-format
 msgid "Learn about Object Types <a href=\"%1$s\" target=\"_blank\">here</a>."
 msgstr ""
 
-#: _facebook-thumb-fixer.php:203
+#: _facebook-thumb-fixer.php:204
 msgid ""
-"<strong>Note: </strong>If no selction is made, the Object Type for your home "
-"page will be \"website\"."
+"<strong>Note: </strong>If no selection is made, the Object Type for your "
+"home page will be \"website\"."
 msgstr ""
 
-#: _facebook-thumb-fixer.php:289
+#: _facebook-thumb-fixer.php:291
 #, php-format
 msgid ""
-"If no selction is made, the Object Type for this %1$s will be \"article\". "
+"If no selection is made, the Object Type for this %1$s will be \"article\". "
 "Learn about Object Types <a href=\"%2$s\" target=\"_blank\">here</a>."
 msgstr ""
 
-#: _facebook-thumb-fixer.php:296
+#: _facebook-thumb-fixer.php:298
 msgid ""
 "Preview and debugging are not possible when open graph tags are disabled."
 msgstr ""
 
-#: _facebook-thumb-fixer.php:300
+#: _facebook-thumb-fixer.php:302
 #, php-format
 msgid "Disable for this %s"
 msgstr ""
 
-#: _facebook-thumb-fixer.php:351
+#: _facebook-thumb-fixer.php:353
 msgid "FB Thumb Fixer"
 msgstr ""
 
-#: _facebook-thumb-fixer.php:355
+#: _facebook-thumb-fixer.php:357
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
-#: _facebook-thumb-fixer.php:368
+#: _facebook-thumb-fixer.php:370
 #, php-format
 msgid ""
 "Well done! You have a default Facebook thumbnail set. You can change it any "
 "time <a href=\"%1$s\">here</a>."
 msgstr ""
 
-#: _facebook-thumb-fixer.php:370 home-preview.php:2
+#: _facebook-thumb-fixer.php:372 home-preview.php:2
 msgid "Homepage Preview"
 msgstr ""
 
-#: _facebook-thumb-fixer.php:371
+#: _facebook-thumb-fixer.php:373
 msgid ""
 "This is an approximate preview of your homepage when shared on Facebook:"
 msgstr ""
 
-#: _facebook-thumb-fixer.php:406
+#: _facebook-thumb-fixer.php:408
 #, php-format
 msgid ""
 "<strong>Note: </strong>Facebook <a href=\"%1$s\" target=\"_blank"
 "\">recommends</a> your image be 1200 x 630 or 600 x 315."
 msgstr ""
 
-#: _facebook-thumb-fixer.php:408
+#: _facebook-thumb-fixer.php:410
 #, php-format
 msgid "Your image (shown here scaled down) appears to be good at %1$s x %2$s."
 msgstr ""
 
-#: _facebook-thumb-fixer.php:415
+#: _facebook-thumb-fixer.php:417
 #, php-format
 msgid ""
 "<strong>Oops! </strong>Although you do have a default Facebook thumbnail, "
@@ -152,18 +152,18 @@ msgid ""
 "target=\"_blank\">recommended</a> by Facebook."
 msgstr ""
 
-#: _facebook-thumb-fixer.php:422
+#: _facebook-thumb-fixer.php:424
 #, php-format
 msgid ""
 "You currently do not have a Default Facebook Thumbnail set. Set one <a href="
 "\"%1$s\">here</a>."
 msgstr ""
 
-#: _facebook-thumb-fixer.php:444
+#: _facebook-thumb-fixer.php:446
 msgid "Where can I get support?"
 msgstr ""
 
-#: _facebook-thumb-fixer.php:446
+#: _facebook-thumb-fixer.php:448
 #, php-format
 msgid ""
 "Reach for support at the <a href=\"%1$s\" target=\"_blank\">Wordpress plug-"

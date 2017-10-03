@@ -519,38 +519,47 @@
 		$cttOptions.trigger( 'change' );
 	}
 
-	function toggleRegistration( status ) {
-		$( '.registration-wrapper' ).attr( 'registration', status );
-		$( '.sw-admin-wrapper' ).attr( 'sw-registered', status );
+	function toggleRegistration( status , key ) {
+		$( '.registration-wrapper.'+key ).attr( 'registration', status );
+		if('pro' == key) {
+			$( '.sw-admin-wrapper' ).attr( 'sw-registered', status );
+			$( '.sw-top-menu' ).attr( 'sw-registered', status );
+		}
 	}
 
 	/*******************************************************
 		Register the Plugin
 	*******************************************************/
-	function registerPlugin() {
+	function registerPlugin(key,item_id) {
 		var registered = false;
 		var data = {
-			action: 'swp_ajax_passthrough',
+			action: 'swp_register_plugin',
 			security: swpAdminOptionsData.registerNonce,
 			activity: 'register',
-			email: $( 'input[name="emailAddress"]' ).val()
+			name_key: key,
+			item_id: item_id,
+			license_key: $( 'input[name="'+key+'_license_key"]' ).val()
 		};
 
 		loadingScreen();
 
+		console.log(data);
+
 		$.post( ajaxurl, data, function( response ) {
 			// If the response was a failure...
-			if ( ! response.success ) {
+			console.log(response);
+			response = JSON.parse(response);
+
+			console.log(response);
+			if ( !response.success ) {
 				alert( 'Failure: ' + response.data );
 			} else {
-				// If the response was a success
-				$( 'input[name="premiumCode"]' ).val( response.data.premiumCode );
-				toggleRegistration( '1' );
+				toggleRegistration( '1' , key);
 				registered = true;
 			}
-		});
 
-		clearLoadingScreen();
+			clearLoadingScreen();
+		});
 
 		return registered;
 	}
@@ -558,45 +567,54 @@
 	/*******************************************************
 		Unregister the Plugin
 	*******************************************************/
-	function unregisterPlugin() {
+	function unregisterPlugin(key,item_id) {
 		var unregistered = false;
 		var ajaxData = {
-			action: 'swp_ajax_passthrough',
+			action: 'swp_unregister_plugin',
 			security: swpAdminOptionsData.registerNonce,
 			activity: 'unregister',
-			email: $( 'input[name="emailAddress"]' ).val(),
-			key: $( 'input[name="premiumCode"]' ).val()
+			name_key: key,
+			item_id: item_id,
 		};
-
+		console.log(ajaxData);
 		loadingScreen();
 
 		// Ping the home server to create a registration log
 		$.post( ajaxurl, ajaxData, function( response ) {
 			// If the response was a failure...
-			if ( ! response.success ) {
+			//
+			console.log(response);
+			response = JSON.parse(response);
+			if ( !response.success ) {
 				alert( 'Failure: ' + response.data );
 			} else {
 				// If the response was a success
-				$( 'input[name="premiumCode"]' ).val( '' );
-				$( 'input[name="emailAddress"]' ).val( '' );
-				toggleRegistration( '0' );
+				$( 'input[name="'+key+'_license_key"]' ).val( '' );
+				toggleRegistration( '0' , key );
 				unregistered = true;
 			}
+
+			clearLoadingScreen();
 		});
 
-		clearLoadingScreen();
 
 		return unregistered;
 	}
 
 	function handleRegistration() {
-		$( '#register-plugin' ).on( 'click', function() {
-			registerPlugin();
+		$( '.register-plugin' ).on( 'click', function() {
+			var key = $(this).attr('swp-addon');
+			var item_id = $(this).attr('swp-item-id');
+			console.log(key);
+			registerPlugin(key,item_id);
 			return false;
 		});
 
-		$( '#unregister-plugin' ).on( 'click', function() {
-			unregisterPlugin();
+		$( '.unregister-plugin' ).on( 'click', function() {
+			var key = $(this).attr('swp-addon');
+			var item_id = $(this).attr('swp-item-id');
+			console.log(key);
+			unregisterPlugin(key,item_id);
 			return false;
 		});
 	}

@@ -1749,6 +1749,13 @@
     .wp-defender .table tbody tr:last-child th, .wp-defender .table tbody tr:last-child td {
       border-bottom: none;
       padding-bottom: 0; }
+  .wp-defender strong.small {
+    color: #888;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 22px; }
+  .wp-defender .wd-select-inline {
+    display: inline-block; }
   .wp-defender .def-dashboard .hardener-widget .dev-list {
     margin: 0 0 30px; }
     .wp-defender .def-dashboard .hardener-widget .dev-list a {
@@ -1981,7 +1988,7 @@
         display: block;
         font-size: 13px;
         color: #888; }
-    .wp-defender .wdf-scanning table tbody tr td:nth-child(3), .wp-defender .wdf-scanning table tbody tr td.item-issue, .wp-defender .wdf-scanning table tbody tr td.col_fixed_date, .wp-defender .scan-dialog table tbody tr td:nth-child(3), .wp-defender .scan-dialog table tbody tr td.item-issue, .wp-defender .scan-dialog table tbody tr td.col_fixed_date {	   			 	 		  		  	 	
+    .wp-defender .wdf-scanning table tbody tr td:nth-child(3), .wp-defender .wdf-scanning table tbody tr td.item-issue, .wp-defender .wdf-scanning table tbody tr td.col_fixed_date, .wp-defender .scan-dialog table tbody tr td:nth-child(3), .wp-defender .scan-dialog table tbody tr td.item-issue, .wp-defender .scan-dialog table tbody tr td.col_fixed_date {
       font-size: 13px;
       vertical-align: middle; }
     .wp-defender .wdf-scanning table tbody tr td:nth-child(4), .wp-defender .wdf-scanning table tbody tr td.item-action, .wp-defender .scan-dialog table tbody tr td:nth-child(4), .wp-defender .scan-dialog table tbody tr td.item-action {
@@ -2249,11 +2256,7 @@
     .wp-defender .iplockout .bulk-nav .bulk-action p {
       line-height: 42px; }
   .wp-defender .iplockout .well.schedule-box strong {
-    font-weight: bold;
-    color: #333;
-    font-family: "Roboto Condensed", sans-serif;
-    font-size: 13px;
-    text-transform: uppercase; }
+    color: #888; }
   .wp-defender .iplockout .well.schedule-box .columns {
     border-bottom: 0;
     margin-bottom: 0;
@@ -2287,6 +2290,29 @@
       font-family: Roboto, sans-serif; }
       .wp-defender .wpmudev-register div label span {
         font-weight: 400; }
+  .wp-defender .advanced-tools .row > .col-third {
+    width: 25%; }
+  .wp-defender .advanced-tools .row > .col-two-third {
+    width: 75%; }
+  .wp-defender .advanced-tools i.icon-warning:not(.fill-red) {
+    background: url("../img/wpmud-icon-warning-yellow.svg") no-repeat;
+    mask: none;
+    -webkit-mask: none; }
+  .wp-defender .advanced-tools .toggle .toggle-label:after {
+    left: 0; }
+  .wp-defender .advanced-tools .at-line {
+    margin-top: 15px; }
+    .wp-defender .advanced-tools .at-line strong {
+      color: #333333;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 30px; }
+    .wp-defender .advanced-tools .at-line span {
+      display: block;
+      color: #888888;
+      font-size: 13px;
+      line-height: 22px;
+      margin-bottom: 10px; }
   .wp-defender .toggle-row {
     display: none; }
   @media screen and (min-width: 769px) and (max-width: 979px) {
@@ -2373,4 +2399,4 @@
   margin: 0; }
 
 
-/* 87274-1500323597-au */
+/* 87274-1507064524-au */

@@ -1,9 +1,9 @@
 <div class="rule closed" id="change_admin">
     <div class="rule-title">
 		<?php if ( $controller->check() == false ): ?>
-            <i class="def-icon icon-warning"></i>
+            <i class="def-icon icon-warning" aria-hidden="true"></i>
 		<?php else: ?>
-            <i class="def-icon icon-tick"></i>
+            <i class="def-icon icon-tick" aria-hidden="true"></i>
 		<?php endif; ?>
 		<?php _e( "Change default admin user account", wp_defender()->domain ) ?>
     </div>
@@ -28,7 +28,7 @@
 					<?php $controller->createNonceField(); ?>
                     <input type="hidden" name="action" value="processHardener"/>
                     <input type="text" placeholder="<?php esc_attr_e( "Enter new username", wp_defender()->domain ) ?>"
-                           name="username" class="block">
+                           name="username" class="block" />
                     <input type="hidden" name="slug" value="<?php echo $controller::$slug ?>"/>
                     <button class="button float-r"
                             type="submit"><?php _e( "Update", wp_defender()->domain ) ?></button>

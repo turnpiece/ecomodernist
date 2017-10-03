@@ -140,6 +140,8 @@ class Scan_Api extends Component {
 		$files    = File_Helper::findFiles( WP_CONTENT_DIR, true, false, array(), array(
 			'ext' => array( 'php' )
 		), true, $settings->max_filesize );
+		//include wp-config.php here
+		$files[] = ABSPATH . 'wp-config.php';
 
 		$cache->set( self::CACHE_CONTENT, $files );
 
@@ -323,8 +325,16 @@ class Scan_Api extends Component {
 		if ( is_array( self::$ignoreList ) ) {
 			return self::$ignoreList;
 		}
-		$cache = Container::instance()->get( 'cache' );
-		$ids   = $cache->get( self::IGNORE_LIST, array() );
+
+		$ids = get_site_option( self::IGNORE_LIST );
+		if ( $ids == false ) {
+			$cache = Container::instance()->get( 'cache' );
+			$ids   = $cache->get( self::IGNORE_LIST, array() );
+			update_site_option( self::IGNORE_LIST, $ids );
+		} elseif ( ! is_array( $ids ) ) {
+			$ids = unserialize( $ids );
+		}
+
 		if ( empty( $ids ) ) {
 			self::$ignoreList = array();
 
@@ -336,6 +346,7 @@ class Scan_Api extends Component {
 		) );
 
 		self::$ignoreList = $ignoreList;
+
 
 		return $ignoreList;
 	}
@@ -364,10 +375,18 @@ class Scan_Api extends Component {
 	 * @param $id
 	 */
 	public static function indexIgnore( $id ) {
-		$cache = Container::instance()->get( 'cache' );
-		$ids   = $cache->get( self::IGNORE_LIST, array() );
+		$ids = get_site_option( self::IGNORE_LIST );
+		if ( $ids == false ) {
+			$cache = Container::instance()->get( 'cache' );
+			$ids   = $cache->get( self::IGNORE_LIST, array() );
+		} elseif ( ! is_array( $ids ) ) {
+			$ids = unserialize( $ids );
+		}
+		if ( ! is_array( $ids ) ) {
+			$ids = array();
+		}
 		$ids[] = $id;
-		$cache->set( self::IGNORE_LIST, $ids );
+		update_site_option( self::IGNORE_LIST, $ids );
 	}
 
 	/**
@@ -376,10 +395,18 @@ class Scan_Api extends Component {
 	 * @param $id
 	 */
 	public static function unIndexIgnore( $id ) {
-		$cache = Container::instance()->get( 'cache' );
-		$ids   = $cache->get( self::IGNORE_LIST, array() );
+		$ids = get_site_option( self::IGNORE_LIST );
+		if ( $ids == false ) {
+			$cache = Container::instance()->get( 'cache' );
+			$ids   = $cache->get( self::IGNORE_LIST, array() );
+		} elseif ( ! is_array( $ids ) ) {
+			$ids = unserialize( $ids );
+		}
+		if ( ! is_array( $ids ) ) {
+			$ids = array();
+		}
 		unset( $ids[ array_search( $id, $ids ) ] );
-		$cache->set( self::IGNORE_LIST, $ids );
+		update_site_option( self::IGNORE_LIST, $ids );
 	}
 
 	/**

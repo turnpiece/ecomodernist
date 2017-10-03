@@ -343,21 +343,6 @@ function swp_get_post_types() {
  }
 
 /**
- * A function to notify premium users about installing the pro addon
- *
- * @since  2.2.0
- * @return void
- */
-function swp_premium_update_notification() {
-	global $swp_user_options;
-
-    if(!empty($swp_user_options['premiumCode']) && !defined('SWPP_PLUGIN_DIR')):
-		echo '<div class="update-nag notice is-dismissable"><p>' . __( '<b>Important:</b> We’ve made <a href="https://warfareplugins.com/social-warfare-2-2/" target="_blank">some changes</a> to how your Social Warfare premium license is applied. In order to continue getting all the Pro features you love, please <a href="https://warfareplugins.com/updates/social-warfare-pro/social-warfare-pro.zip">download the Social Warfare - Pro</a> plugin. Once installed, all of your premium features will be immediately restored.', 'social-warfare' ) . '</p></div>';
-	endif;
- }
- add_action( 'admin_notices', 'swp_premium_update_notification' );
-
-/**
  * A function to remove the screen options tab from our admin page
  * @since 2.2.1
  */
@@ -368,6 +353,37 @@ function swp_remove_screen_options( $display_boolean, $wp_screen_object ){
  		$wp_screen_object->render_per_page_options();
  		return false;
      }
- 	return true;
+ 	return $display_boolean;
  }
  add_filter( 'screen_options_show_screen', 'swp_remove_screen_options', 10, 2 );
+
+
+function swp_get_license_key($key) {
+
+	if(is_swp_addon_registered($key)):
+
+		$options = get_option( 'socialWarfareOptions' );
+		$license = $options[$key.'_license_key'];
+		return $license;
+
+	else:
+
+		return false;
+
+	endif;
+}
+
+/**
+ * A function to return the URL of the website or network
+ *
+ * @since 2.3.3 | 25 SEP 2017 | Created
+ * @return String The URL of the site
+ *
+ */
+function swp_get_site_url() {
+	if( true == is_multisite() ) {
+		return network_site_url();
+	} else {
+		return get_site_url();
+	}
+}

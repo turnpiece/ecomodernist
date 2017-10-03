@@ -2,7 +2,7 @@
 Contributors: mikeyott
 Tags: facebook, thumb, fixer, default, thumbnail, thumbnails, thumbs, og:image, og:description, og:title, open, graph, open graph
 Requires at least: 4.0
-Tested up to: 4.8
+Tested up to: 4.8.1
 Stable tag: trunk
 
 Control how your thumbnails are viewed when a post is shared on Facebook, Twitter and Google+.
@@ -39,9 +39,9 @@ Specify your Facebook App ID Settings -> General and scroll down until you find 
 
 == How to set an object type ==
 
-<strong>Posts and Pages</strong>
+<strong>Posts and pages</strong>
 
-On each page or post you edit there is an 'Open Graph Object Type' meta box. Simply make a section from there to specify what Object Type the page or post is. Example: If the it's an article, then choose 'article'. If it's a product, choose 'product'. To help you decide what Object Type to choose, go <a href-"https://developers.facebook.com/docs/reference/opengraph" target="_blank">here</a> to learn the differences between them all.
+On each page or post you edit there is an 'Open Graph Object Type' meta box. Simply make a section from there to specify what Object Type the page or post is. Example: If the it's an article, then choose 'article'. If it's a product, choose 'product'. To help you decide what Object Type to choose, go <a href="https://developers.facebook.com/docs/reference/opengraph" target="_blank">here</a> to learn the differences between them all.
 
 Note: If no selection is made for posts or pages then the Object Type will be 'article', which in most cases is fine.
 
@@ -51,7 +51,19 @@ To specify what Object Type your homepage is, go to Settings -> General, scroll 
 
 Note: If no selection is made for the home page then the Object Type will default to 'webpage', which in most cases is probably what you want.
 
+<strong>Known issues</strong>
+
+Divi theme is not houring the WordPress strip_shortcodes() function, and so if you have a shortcode early on in a post you may see unexpected results when sharing on social media.
+
 == Changelog ==
+
+= 1.7.5 =
+
+Added new object types: business.business
+Added new object types: place
+Removed incorrect object type: object
+Fixed malformed anchor in readme
+Fixed typos
 
 = 1.7.4 =
 

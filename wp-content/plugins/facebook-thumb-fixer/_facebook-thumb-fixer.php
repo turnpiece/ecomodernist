@@ -4,7 +4,7 @@ Plugin Name: Facebook Thumb Fixer
 Plugin URI: https://wordpress.org/support/plugin/facebook-thumb-fixer
 Description: Control how your thumbnails are viewed when a post is shared on Facebook, Twitter and Google+.
 Author: Michael Ott
-Version: 1.7.4
+Version: 1.7.5
 Author URI: http://michaelott.id.au
 Text Domain: facebook-thumb-fixer
 Domain Path: /languages/
@@ -173,13 +173,14 @@ class general_setting_object_type {
             <option value="article"<?php if($hpot == "article") { echo " selected"; } ?>>article</option>
             <option value="book"<?php if($hpot == "book") { echo " selected"; } ?>>book</option>
             <option value="books.author"<?php if($hpot == "books.author") { echo " selected"; } ?>>books.author</option>
+			<option value="business.business"<?php if($hpot == "business.business") { echo " selected"; } ?>>business.business</option>
             <option value="fitness.course"<?php if($hpot == "fitness.course") { echo " selected"; } ?>>fitness.course</option>
             <option value="fitness.unit"<?php if($hpot == "fitness.unit") { echo " selected"; } ?>>fitness.unit</option>
             <option value="music.album"<?php if($hpot == "music.album") { echo " selected"; } ?>>music.album</option>
             <option value="music.playlist"<?php if($hpot == "music.playlist") { echo " selected"; } ?>>music.playlist</option>
             <option value="music.radio_station"<?php if($hpot == "music.radio_station") { echo " selected"; } ?>>music.radio_station</option>
             <option value="music.song"<?php if($hpot == "music.song") { echo " selected"; } ?>>music.song</option>
-            <option value="object"<?php if($hpot == "object") { echo " selected"; } ?>>object</option>
+            <option value="place"<?php if($hpot == "place") { echo " selected"; } ?>>place</option>
             <option value="product"<?php if($hpot == "product") { echo " selected"; } ?>>product</option>
             <option value="product.group"<?php if($hpot == "product.group") { echo " selected"; } ?>>product.group</option>
             <option value="profile"<?php if($hpot == "profile") { echo " selected"; } ?>>profile</option>
@@ -200,7 +201,7 @@ class general_setting_object_type {
 			if($fbt_value && ($width >= 600 || $height >= 315)) { ?>
 			<?php include(locate_template(plugin_basename( __FILE__ ))) . 'home-preview.php'; ?>
         <?php } else {  ?>
-			<p class="howto"><?php _e( '<strong>Note: </strong>If no selction is made, the Object Type for your home page will be "website".', 'facebook-thumb-fixer' ); ?></p>
+			<p class="howto"><?php _e( '<strong>Note: </strong>If no selection is made, the Object Type for your home page will be "website".', 'facebook-thumb-fixer' ); ?></p>
 		<?php } ?>
 
 <?php }
@@ -267,13 +268,14 @@ class ftf_otmeta {
             <option value="article"<?php if($ot == "article") { echo " selected"; } ?>>article</option>
             <option value="book"<?php if($ot == "book") { echo " selected"; } ?>>book</option>
             <option value="books.author"<?php if($ot == "books.author") { echo " selected"; } ?>>books.author</option>
+			<option value="business.business"<?php if($ot == "business.business") { echo " selected"; } ?>>business.business</option>
             <option value="fitness.course"<?php if($ot == "fitness.course") { echo " selected"; } ?>>fitness.course</option>
             <option value="fitness.unit"<?php if($ot == "fitness.unit") { echo " selected"; } ?>>fitness.unit</option>
             <option value="music.album"<?php if($ot == "music.album") { echo " selected"; } ?>>music.album</option>
             <option value="music.playlist"<?php if($ot == "music.playlist") { echo " selected"; } ?>>music.playlist</option>
             <option value="music.radio_station"<?php if($ot == "music.radio_station") { echo " selected"; } ?>>music.radio_station</option>
             <option value="music.song"<?php if($ot == "music.song") { echo " selected"; } ?>>music.song</option>
-            <option value="object"<?php if($ot == "object") { echo " selected"; } ?>>object</option>
+            <option value="place"<?php if($ot == "place") { echo " selected"; } ?>>place</option>
             <option value="product"<?php if($ot == "product") { echo " selected"; } ?>>product</option>
             <option value="product.group"<?php if($ot == "product.group") { echo " selected"; } ?>>product.group</option>
             <option value="profile"<?php if($ot == "profile") { echo " selected"; } ?>>profile</option>
@@ -286,7 +288,7 @@ class ftf_otmeta {
 		</select>
 
 		<?php $fb_object_types_URL = 'https://developers.facebook.com/docs/reference/opengraph/'; ?>
-		<p><?php echo sprintf( __( 'If no selction is made, the Object Type for this %1$s will be "article". Learn about Object Types <a href="%2$s" target="_blank">here</a>.', 'facebook-thumb-fixer' ), $post_type_label, $fb_object_types_URL); ?></p>
+		<p><?php echo sprintf( __( 'If no selection is made, the Object Type for this %1$s will be "article". Learn about Object Types <a href="%2$s" target="_blank">here</a>.', 'facebook-thumb-fixer' ), $post_type_label, $fb_object_types_URL); ?></p>
 	
 	
 		<div class="preview-container <?php if($dog == "1") { echo 'hide'; } ?>">

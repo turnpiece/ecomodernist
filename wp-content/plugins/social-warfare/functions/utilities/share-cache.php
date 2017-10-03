@@ -86,11 +86,15 @@ function swp_is_cache_fresh( $post_id, $output = false, $ajax = false ) {
 
 	// Bail if output isn't being forced and legacy caching isn't enabled.
 	if ( ! $output && 'legacy' !== $options['cacheMethod'] ) {
-		if ( empty( $_GET['swp_cache'] ) ) {
+		if ( empty( $_GET['swp_cache'] ) && empty( $_POST['swp_cache'] ) ) {
 			$fresh_cache = true;
 		}
 
 		return $fresh_cache;
+	}
+
+	if( isset( $_POST['swp_cache'] ) && 'rebuild' === $_POST['swp_cache'] ) {
+		return false;
 	}
 
 	// Always be TRUE if we're not on a single.php otherwise we could end up
@@ -140,16 +144,17 @@ function swp_cache_rebuild() {
 	 *  Bail if we already have fresh cache and this request is invalid.
 	 *
 	 */
-	if ( swp_is_cache_fresh( $post_id , true , true ) && !isset($_POST['force']) ) {
-		wp_send_json_error();
-		die();
-	}
+	//if ( swp_is_cache_fresh( $post_id , true , true ) && !isset($_POST['force']) ) {
+	//	wp_send_json_error();
+	//	die();
+	//}
 
 	/**
 	 *  Force the cache trigger on.
 	 *
 	 */
 	set_query_var( 'swp_cache', 'rebuild' );
+	$_POST['swp_cache'] = 'rebuild';
 
 	/**
 	 * Fetch new share counts via the various API's
@@ -223,6 +228,9 @@ add_action( 'publish_post', 'swp_clear_bitly_cache' );
  * @return null
  */
 function swp_clear_bitly_cache() {
+	$icons_array = array(
+		'type'		=> 'buttons'
+	);
 	$networks = apply_filters( 'swp_button_options' , $icons_array );
 	foreach($networks['content'] as $network=>$data):
 		delete_post_meta( get_the_ID() ,'bitly_link_' . $network );
@@ -238,10 +246,8 @@ function swp_clear_bitly_cache() {
  */
 function swp_cache_store_autoloads() {
 	$post_id = get_the_ID();
-	if( 'publish' === get_post_status( $post_id ) ):
-		swp_cache_rebuild_pin_image($post_id);
-		swp_cache_rebuild_og_image($post_id);
-	endif;
+	swp_cache_rebuild_pin_image($post_id);
+	swp_cache_rebuild_og_image($post_id);
 }
 /**
  * Open Graph Image
@@ -295,7 +301,7 @@ function swp_cache_rebuild_pin_image($post_id) {
 
 	// Check if a custom pinterest image has been declared
 	$pin_image_id = get_post_meta( $post_id , 'nc_pinterestImage' , true );
-	if ( $pin_image_id ) :
+	if ( false !== $pin_image_id ) :
 		$pin_image_url = wp_get_attachment_url( $pin_image_id );
 		$cur_image_url = get_post_meta( $post_id , 'swp_pinterest_image_url' , true );
 
@@ -304,6 +310,8 @@ function swp_cache_rebuild_pin_image($post_id) {
 			delete_post_meta( $post_id,'swp_pinterest_image_url' );
 			update_post_meta( $post_id,'swp_pinterest_image_url' , $pin_image_url );
 		endif;
+	else:
+		delete_post_meta( $post_id , 'swp_pinterest_image_url' );
 	endif;
 }
 
@@ -413,7 +421,7 @@ function swp_output_cache_trigger( $info ) {
 		                    browser_date = new Date().getTime();
 		                browser_date = Math.floor( browser_date / 1000 );
 		                console.log( "Browser Timestamp is " + browser_date );
-		                var elapsed_time = ( swp_cache_data.timestamp - browser_date );
+		                var elapsed_time = ( browser_date - swp_cache_data.timestamp );
 		                if( elapsed_time > 60 ){
 		                    console.log( "Elapsed time since server timestamp is greater than 60 seconds -- " + elapsed_time + "seconds" );
 		                    within_timelimit = false;
