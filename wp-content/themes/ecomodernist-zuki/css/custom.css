@@ -1,25 +1,5 @@
 /*--------------------------------------------------------------
-This is your custom stylesheet.
-
-Add your own styles here to make theme updates easier.
-To override any styles from other stylesheets, simply copy them into here and edit away.
-
-Make sure to respect the media queries! Otherwise you may
-accidentally add desktop styles to the mobile layout.
-
-You're the boss, so have fun editing!
-
---------------------------------------------------------------
->>> TABLE OF CONTENTS:
-----------------------------------------------------------------
-1.0 - Global Styles
-2.0 - Responsive media queries (mobile styles)
-	2.1 - MAXIMUM width of 480 pixels (phones and smaller)
-	2.2 - MINIMUM width of 481 pixels (phones and larger)
-	2.3 - MINIMUM width of 721 pixels (tablets and larger)
---------------------------------------------------------------*/
-/*--------------------------------------------------------------
-1.0 - Global Styles
+Global Styles
 --------------------------------------------------------------*/
 
 h1, h2, h3, h4, h5, h6,
@@ -31,59 +11,53 @@ h1, h2, h3, h4, h5, h6,
 	text-transform: uppercase;
 }
 
+.entry-content p,
+.entry-content p.standard-text,
+.entry-content ul,
+.entry-content ol,
+.entry-content .wide-content,
+.entry-summary p,
+h6,
+#comments .comment-author,
+#commentform p.comment-form-author,
+#commentform p.comment-form-email,
+#commentform p.comment-form-url,
+#commentform p.comment-form-comment,
+.widget_zuki_quote cite.quote-author,
+.rp-medium-one-content h3.entry-title,
+.rp-color h3.entry-title,
+.rp-big-one .entry-author,
+.front-fullwidth .rp-big-two .entry-author,
+.front-content .rp-big-two .entry-author,
+.widget_jetpack_display_posts_widget p,
+.site-content div.wpcf7 p {
+	font-size:  16px;
+	font-size:  1rem;
+}
+
 
 /*--------------------------------------------------------------
-2.0 - Responsive media queries (mobile styles)
+Responsive media queries (mobile styles)
 --------------------------------------------------------------*/
-/*--------------------------------------------------------------
-2.1 - MAXIMUM width of 480 pixels (phones and smaller)
---------------------------------------------------------------*/
-@media screen and (max-width: 480px) {
 
 
-	/*
-	.just_an_example {
-		color: black;
+/* Minimum width of 767 pixels (tablets portrait)
+------------------------------------------------------------------------------------ */
+@media screen and (min-width: 767px) {
+	
+	.authorbox p.author-description {
+		font-size:  16px;
+		font-size:  1rem;
 	}
-	*/
 
 
 }/* don't delete this closing bracket */
 
+/* Minimum width of 1260 pixels (laptops 13")
+------------------------------------------------------------------------------------ */
+@media screen and (min-width: 1260px) {
 
-
-
-
-/*--------------------------------------------------------------
-2.1 - MINIMUM width of 481 pixels (phones and larger)
---------------------------------------------------------------*/
-@media screen and (min-width: 481px)  {
-
-
-	/*
-	.just_an_example {
-		color: black;
+	.archive-menu-content ul.authors li {
+		font-size:  16px;
+		font-size:  1rem;		
 	}
-	*/
-
-
-}/* don't delete this closing bracket */
-
-
-
-
-
-/*--------------------------------------------------------------
-2.4 - MINIMUM width of 721 pixels (tablets and larger)
---------------------------------------------------------------*/
-@media screen and (min-width: 721px)  {
-
-
-	/*
-	.just_an_example {
-		color: black;
-	}
-	*/
-
-
-}/* don't delete this closing bracket */
