@@ -3,7 +3,7 @@
  * Author: Hoang Ngo
  */
 
-namespace WP_Defender\Module\Hardener\Component;
+namespace WP_Defender\Module\Hardener\Component;	   			 	 		  		  	 	
 
 use WP_Defender\Module\Hardener\IRule_Service;
 use WP_Defender\Module\Hardener\Rule_Service;
