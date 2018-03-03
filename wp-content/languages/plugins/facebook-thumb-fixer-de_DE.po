@@ -1,0 +1,168 @@
+# Translation of Plugins - Facebook Thumb Fixer - Development (trunk) in German
+# This file is distributed under the same license as the Plugins - Facebook Thumb Fixer - Development (trunk) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2018-02-18 10:59:22+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: GlotPress/2.4.0-alpha\n"
+"Language: de\n"
+"Project-Id-Version: Plugins - Facebook Thumb Fixer - Development (trunk)\n"
+
+#. Author URI of the plugin/theme
+msgid "http://michaelott.id.au"
+msgstr "http://michaelott.id.au"
+
+#. Author of the plugin/theme
+msgid "Michael Ott"
+msgstr "Michael Ott"
+
+#. Description of the plugin/theme
+msgid "Control how your thumbnails are viewed when a post is shared on Facebook, Twitter and Google+."
+msgstr "Kontrolliere das Aussehen deiner Vorschaubilder, wenn ein Beitrag auf Facebook, Twitter und Google+ geteilt wird."
+
+#. Plugin URI of the plugin/theme
+msgid "https://wordpress.org/support/plugin/facebook-thumb-fixer"
+msgstr "https://wordpress.org/support/plugin/facebook-thumb-fixer"
+
+#. Plugin Name of the plugin/theme
+msgid "Facebook Thumb Fixer"
+msgstr "Facebook Thumb Fixer"
+
+#: post-preview.php:24
+msgid "You can't preview until you set a featured image and update this post/page."
+msgstr "Die Vorschau ist erst nach Festlegen eines Beitragsbilds und Aktualisierung dieses/r Beitrags/Seite verfügbar."
+
+#: post-preview.php:23
+msgid "Preview Not Available"
+msgstr "Vorschau nicht verfügbar"
+
+#: post-preview.php:18
+msgid "<strong>Oops! </strong>Your featured image dimensions are %1$s x %2$s which is smaller than the minimum 600 x 315 <a href=\"%3$s\" target=\"_blank\">recommended</a> by Facebook."
+msgstr "<strong>Hoppla! </strong>Dein Beitragsbild misst %1$s x %2$s und ist damit kleiner als die von Facebook <a href=\"%3$s\" target=\"_blank\">empfohlene</a> Minimalgröße von 600 x 315."
+
+#: post-preview.php:14
+msgid "If in doubt, try forcing Facebook to fetch your page with their debugging tool."
+msgstr "Falls unsicher, veranlasse Facebook, deine Seite mit ihrem Debugging Tool aufzurufen."
+
+#: post-preview.php:9
+msgid "View an approximate preview of your post when shared on Facebook."
+msgstr "Sieh eine ungefähre Vorschau deines auf Facebook geteilten Beitrags an."
+
+#: home-preview.php:3
+msgid "View an approximate preview of your homepage when shared on Facebook."
+msgstr "Sieh eine ungefähre Vorschau deiner auf Facebook geteilten Homepage an."
+
+#: home-preview.php:2 post-preview.php:15
+msgid "Debug"
+msgstr "Fehlersuche"
+
+#: _facebook-thumb-fixer.php:448
+msgid "Reach for support at the <a href=\"%1$s\" target=\"_blank\">Wordpress plug-in repo</a>."
+msgstr "Fordere Unterstützung im <a href=\"%1$s\" target=\"_blank\">Wordpress Plugin-Verzeichnis</a> an."
+
+#: _facebook-thumb-fixer.php:446
+msgid "Where can I get support?"
+msgstr "Wo bekomme ich Unterstützung?"
+
+#: _facebook-thumb-fixer.php:424
+msgid "You currently do not have a Default Facebook Thumbnail set. Set one <a href=\"%1$s\">here</a>."
+msgstr "Du hast momentan kein Facebook-Standardvorschaubild festgelegt. Hole das <a href=\"%1$s\">hier</a> nach."
+
+#: _facebook-thumb-fixer.php:417
+msgid "<strong>Oops! </strong>Although you do have a default Facebook thumbnail, the dimensions are smaller than the minimum 600 x 315 <a href=\"%1$s\" target=\"_blank\">recommended</a> by Facebook."
+msgstr "<strong>Hoppla! </strong>Du hast zwar ein Facebook-Standardvorschaubild festgelegt, die Abmessungen sind aber kleiner als das von Facebook <a href=\"%1$s\" target=\"_blank\">empfohlene</a> Minimum von 600 x 315."
+
+#: _facebook-thumb-fixer.php:410
+msgid "Your image (shown here scaled down) appears to be good at %1$s x %2$s."
+msgstr "Dein Bild (hier herunterskaliert) sieht anscheinend gut aus mit %1$s x %2$s."
+
+#: _facebook-thumb-fixer.php:408
+msgid "<strong>Note: </strong>Facebook <a href=\"%1$s\" target=\"_blank\">recommends</a> your image be 1200 x 630 or 600 x 315."
+msgstr "<strong>Hinweis: </strong>Facebook <a href=\"%1$s\" target=\"_blank\">empfiehlt</a> eine Bildgröße von 1200 x 630 oder 600 x 315."
+
+#: _facebook-thumb-fixer.php:373
+msgid "This is an approximate preview of your homepage when shared on Facebook:"
+msgstr "Dies ist eine ungefähre Vorschau deiner auf Facebook geteilten Homepage:"
+
+#: _facebook-thumb-fixer.php:372 home-preview.php:2
+msgid "Homepage Preview"
+msgstr "Homepage Vorschau"
+
+#: _facebook-thumb-fixer.php:370
+msgid "Well done! You have a default Facebook thumbnail set. You can change it any time <a href=\"%1$s\">here</a>."
+msgstr "Gut gemacht! Du hast ein Facebook-Standardvorschaubild festgelegt. Du kannst es jederzeit <a href=\"%1$s\">hier</a> ändern."
+
+#: _facebook-thumb-fixer.php:357
+msgid "You do not have sufficient permissions to access this page."
+msgstr "Du hast keine ausreichenden Rechte, um diese Seite anzuzeigen."
+
+#: _facebook-thumb-fixer.php:353
+msgid "FB Thumb Fixer"
+msgstr "FB Thumb Fixer"
+
+#: _facebook-thumb-fixer.php:302
+msgid "Disable for this %s"
+msgstr "Für diese/n %s deaktivieren"
+
+#: _facebook-thumb-fixer.php:298
+msgid "Preview and debugging are not possible when open graph tags are disabled."
+msgstr "Vorschau und Debugging sind nicht möglich, wenn Open Graph Tags deaktiviert sind."
+
+#: _facebook-thumb-fixer.php:291
+msgid "If no selection is made, the Object Type for this %1$s will be \"article\". Learn about Object Types <a href=\"%2$s\" target=\"_blank\">here</a>."
+msgstr "Ohne Auswahl wird der Objekttyp für diese/n %1$s auf \"article\" gesetzt. Erfahre <a href=\"%2$s\" target=\"_blank\">hier</a> mehr über Objekttypen."
+
+#: _facebook-thumb-fixer.php:204
+msgid "<strong>Note: </strong>If no selection is made, the Object Type for your home page will be \"website\"."
+msgstr "<strong>Hinweis: </strong>Ohne Auswahl wird der Objekttyp für deine Homepage auf \"website\" gesetzt."
+
+#: _facebook-thumb-fixer.php:196
+msgid "Learn about Object Types <a href=\"%1$s\" target=\"_blank\">here</a>."
+msgstr "Erfahre <a href=\"%1$s\" target=\"_blank\">hier</a> mehr über Objekttypen."
+
+#: _facebook-thumb-fixer.php:164
+msgid "Homepage Object Type"
+msgstr "Objekttyp der Homepage"
+
+#: _facebook-thumb-fixer.php:150
+msgid "Find your Facebook App ID <a href=\"%1$s\" target=\"_blank\">here</a>."
+msgstr "Finde deine Facebook App ID <a href=\"%1$s\" target=\"_blank\">hier</a>."
+
+#: _facebook-thumb-fixer.php:143
+msgid "Facebook App ID"
+msgstr "Facebook App ID"
+
+#: _facebook-thumb-fixer.php:128
+msgid "Your default Facebook image has dimensions of at least 600 x 315 (actual dimensions are %1$s x %2$s)."
+msgstr "Dein Facebook-Standardbild hat eine Größe von mindestens 600 x 315 (tatsächliche Größe: %1$s x %2$s)."
+
+#: _facebook-thumb-fixer.php:124
+msgid "<strong>Oops! </strong>Your default Facebook image is smaller than the minimum 600 x 315 <a href=\"%1$s\" target=\"_blank\">recommended</a> by Facebook."
+msgstr "<strong>Hoppla! </strong>Dein Facebook-Standardbild ist kleiner als die von Facebook <a href=\"%1$s\" target=\"_blank\">empfohlene</a>  Minimalgröße von 600 x 315."
+
+#: _facebook-thumb-fixer.php:114
+msgid "Browse to the preferred Facebook image for your homepage. Facebook <a href=\"%1$s\" target=\"_blank\">recommends</a> your image be 1200 x 630 or 600 x 315."
+msgstr "Wähle das bevorzugte Facebookbild für deine Homepage aus. Facebook <a href=\"%1$s\" target=\"_blank\">empfiehlt</a> eine Bildgröße von 1200 x 630 oder 600 x 315."
+
+#: _facebook-thumb-fixer.php:82
+msgid "Browse"
+msgstr "Auswählen"
+
+#: _facebook-thumb-fixer.php:69
+msgid "Default Facebook Thumb"
+msgstr "Facebook-Standardvorschaubild"
+
+#: _facebook-thumb-fixer.php:53
+msgid "Awesome! Don't forget to set a default facebook thumbnail  <a href='%s'>here</a>."
+msgstr "Großartig! Vergiss nicht, <a href='%s'>hier</a> ein Facebook-Standardvorschaubild festzulegen."
+
+#: _facebook-thumb-fixer.php:22
+msgid "Help"
+msgstr "Hilfe"
+
+#: _facebook-thumb-fixer.php:22
+msgid "Settings"
+msgstr "Einstellungen"

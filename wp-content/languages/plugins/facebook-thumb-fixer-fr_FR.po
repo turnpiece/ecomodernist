@@ -1,0 +1,168 @@
+# Translation of Plugins - Facebook Thumb Fixer - Development (trunk) in French (France)
+# This file is distributed under the same license as the Plugins - Facebook Thumb Fixer - Development (trunk) package.
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2017-09-01 11:31:04+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: GlotPress/2.4.0-alpha\n"
+"Language: fr\n"
+"Project-Id-Version: Plugins - Facebook Thumb Fixer - Development (trunk)\n"
+
+#. Author URI of the plugin/theme
+msgid "http://michaelott.id.au"
+msgstr "http://michaelott.id.au"
+
+#. Author of the plugin/theme
+msgid "Michael Ott"
+msgstr "Michael Ott"
+
+#. Plugin Name of the plugin/theme
+msgid "Facebook Thumb Fixer"
+msgstr "Facebook Thumb Fixer"
+
+#. Plugin URI of the plugin/theme
+msgid "https://wordpress.org/support/plugin/facebook-thumb-fixer"
+msgstr "https://wordpress.org/support/plugin/facebook-thumb-fixer"
+
+#. Description of the plugin/theme
+msgid "Control how your thumbnails are viewed when a post is shared on Facebook, Twitter and Google+."
+msgstr "Contrôlez la façon dont vos miniatures sont vues lorsqu’un article est partagé sur Facebook, Twitter et Google+."
+
+#: post-preview.php:23
+msgid "Preview Not Available"
+msgstr "Prévisualisation non disponible"
+
+#: post-preview.php:14
+msgid "If in doubt, try forcing Facebook to fetch your page with their debugging tool."
+msgstr "En cas de doute, essayez de forcer Facebook à re-collecter votre page avec le programme de débogage du partage."
+
+#: post-preview.php:9
+msgid "View an approximate preview of your post when shared on Facebook."
+msgstr "Visualiser une prévisualisation approximative de votre article lorsqu’il est partagé sur Facebook."
+
+#: home-preview.php:2 post-preview.php:15
+msgid "Debug"
+msgstr "Débogage"
+
+#: _facebook-thumb-fixer.php:448
+msgid "Reach for support at the <a href=\"%1$s\" target=\"_blank\">Wordpress plug-in repo</a>."
+msgstr "Obtenez du support depuis le <a href=\"%1$s\" target=\"_blank\">répertoire d’extensions WordPress</a>."
+
+#: _facebook-thumb-fixer.php:446
+msgid "Where can I get support?"
+msgstr "Où puis-je obtenir du support ?"
+
+#: _facebook-thumb-fixer.php:424
+msgid "You currently do not have a Default Facebook Thumbnail set. Set one <a href=\"%1$s\">here</a>."
+msgstr "Vous n’avez pas encore défini de miniature par défaut pour Facebook. Définissez-en une <a href=\"%1$s\">ici</a>."
+
+#: _facebook-thumb-fixer.php:410
+msgid "Your image (shown here scaled down) appears to be good at %1$s x %2$s."
+msgstr "Votre image (ici redimensionnée) semble être de bonne qualité à %1$s x %2$s."
+
+#: _facebook-thumb-fixer.php:373
+msgid "This is an approximate preview of your homepage when shared on Facebook:"
+msgstr "Ceci est une prévisualisation approximative de votre page d’accueil lorsqu’elle est partagée sur Facebook. "
+
+#: home-preview.php:3
+msgid "View an approximate preview of your homepage when shared on Facebook."
+msgstr "Visualiser une prévisualisation approximative de votre page d’accueil lorsqu’elle est partagée sur Facebook."
+
+#: _facebook-thumb-fixer.php:372 home-preview.php:2
+msgid "Homepage Preview"
+msgstr "Prévisualisation de la page d’accueil"
+
+#: _facebook-thumb-fixer.php:370
+msgid "Well done! You have a default Facebook thumbnail set. You can change it any time <a href=\"%1$s\">here</a>."
+msgstr "Bien joué ! Vous avez défini une miniature par défaut pour Facebook. Vous pouvez en changer à tout moment <a href=\"%1$s\">ici</a>."
+
+#: _facebook-thumb-fixer.php:357
+msgid "You do not have sufficient permissions to access this page."
+msgstr "Vous n’avez pas les droits requis pour accéder à cette page."
+
+#: _facebook-thumb-fixer.php:353
+msgid "FB Thumb Fixer"
+msgstr "FB Thumb Fixer"
+
+#: _facebook-thumb-fixer.php:22
+msgid "Help"
+msgstr "Aide"
+
+#: _facebook-thumb-fixer.php:22
+msgid "Settings"
+msgstr "Réglages"
+
+#: _facebook-thumb-fixer.php:302
+msgid "Disable for this %s"
+msgstr "Désactiver pour ce·t·te %s"
+
+#: _facebook-thumb-fixer.php:298
+msgid "Preview and debugging are not possible when open graph tags are disabled."
+msgstr "La prévisualisation et le débogage ne sont pas possibles lorsque les balises open graph sont désactivées."
+
+#: _facebook-thumb-fixer.php:291
+msgid "If no selection is made, the Object Type for this %1$s will be \"article\". Learn about Object Types <a href=\"%2$s\" target=\"_blank\">here</a>."
+msgstr "En l’absence de choix, le type d’objet pour ce.t.te %1$s sera « article ». Apprenez-en plus sur les types d’objets <a href=\"%2$s\" target=\"_blank\">ici</a>."
+
+#: _facebook-thumb-fixer.php:204
+msgid "<strong>Note: </strong>If no selection is made, the Object Type for your home page will be \"website\"."
+msgstr "<strong>Note : </strong>En l’absence de choix, le type d’objet de votre page d’accueil sera « website »."
+
+#: _facebook-thumb-fixer.php:196
+msgid "Learn about Object Types <a href=\"%1$s\" target=\"_blank\">here</a>."
+msgstr "Apprenez-en plus sur les types d’objets <a href=\"%1$s\" target=\"_blank\">ici</a>. "
+
+#: _facebook-thumb-fixer.php:164
+msgid "Homepage Object Type"
+msgstr "Type d’objet de la page d’accueil"
+
+#: _facebook-thumb-fixer.php:150
+msgid "Find your Facebook App ID <a href=\"%1$s\" target=\"_blank\">here</a>."
+msgstr "Procurez-vous votre App ID Facebook <a href=\"%1$s\" target=\"_blank\">ici</a>."
+
+#: _facebook-thumb-fixer.php:143
+msgid "Facebook App ID"
+msgstr "App ID Facebook"
+
+#: _facebook-thumb-fixer.php:82
+msgid "Browse"
+msgstr "Parcourir"
+
+#: _facebook-thumb-fixer.php:69
+msgid "Default Facebook Thumb"
+msgstr "Miniature par défaut pour Facebook"
+
+#: _facebook-thumb-fixer.php:53
+msgid "Awesome! Don't forget to set a default facebook thumbnail  <a href='%s'>here</a>."
+msgstr "Génial ! N’oubliez pas de définir une miniature par défaut pour Facebook <a href='%s'>ici</a>."
+
+#: post-preview.php:24
+msgid "You can't preview until you set a featured image and update this post/page."
+msgstr "Vous ne pouvez prévisualiser avant d’avoir défini une image mise en avant et mis à jour l’article ou la page."
+
+#: _facebook-thumb-fixer.php:128
+msgid "Your default Facebook image has dimensions of at least 600 x 315 (actual dimensions are %1$s x %2$s)."
+msgstr "Votre miniature par défaut pour Facebook a une taille d’au moins 600 x 315 (la taille actuelle est %1$s x %2$s)."
+
+#: _facebook-thumb-fixer.php:114
+msgid "Browse to the preferred Facebook image for your homepage. Facebook <a href=\"%1$s\" target=\"_blank\">recommends</a> your image be 1200 x 630 or 600 x 315."
+msgstr "Sélectionnez l’image préférée pour Facebook pour votre page d’accueil. Facebook <a href=\"%1$s\" target=\"_blank\">recommande</a> que votre image fasse 1200 x 630 ou 600 x 315."
+
+#: _facebook-thumb-fixer.php:124
+msgid "<strong>Oops! </strong>Your default Facebook image is smaller than the minimum 600 x 315 <a href=\"%1$s\" target=\"_blank\">recommended</a> by Facebook."
+msgstr "<strong>Oups ! </strong>La taille de votre miniature par défaut pour Facebook est plus petite que le minimum 600 x 315 <a href=\"%1$s\" target=\"_blank\">recommandé</a> par Facebook."
+
+#: post-preview.php:18
+msgid "<strong>Oops! </strong>Your featured image dimensions are %1$s x %2$s which is smaller than the minimum 600 x 315 <a href=\"%3$s\" target=\"_blank\">recommended</a> by Facebook."
+msgstr "<strong>Oups !</strong> La taille de votre image mise en avant est de %1$s x %2$s, ce qui est plus petit que le minimum 600 x 315 <a href=\"%3$s\" target=\"_blank\">recommandé</a> par Facebook."
+
+#: _facebook-thumb-fixer.php:417
+msgid "<strong>Oops! </strong>Although you do have a default Facebook thumbnail, the dimensions are smaller than the minimum 600 x 315 <a href=\"%1$s\" target=\"_blank\">recommended</a> by Facebook."
+msgstr "<strong>Oups !</strong> Bien que vous ayez une miniature par défaut pour Facebook, sa taille est plus petite que le minimum 600 x 315 <a href=\"%1$s\" target=\"_blank\">recommandé</a> par Facebook."
+
+#: _facebook-thumb-fixer.php:408
+msgid "<strong>Note: </strong>Facebook <a href=\"%1$s\" target=\"_blank\">recommends</a> your image be 1200 x 630 or 600 x 315."
+msgstr "<strong>Note : </strong>Facebook <a href=\"%1$s\" target=\"_blank\">recommande</a> une image aux dimmensions 1200 x 630 ou 600 x 315."
