@@ -60,7 +60,7 @@ function ecomodernist_theme_scripts_styles()
   /*
    * Styles
    */
-  wp_enqueue_style( 'ecomodernist-custom', get_stylesheet_directory_uri().'/css/custom.css' );
+  wp_enqueue_style( 'ecomodernist-custom', get_stylesheet_directory_uri().'/css/custom.min.css' );
 }
 add_action( 'wp_enqueue_scripts', 'ecomodernist_theme_scripts_styles', 9999 );
 

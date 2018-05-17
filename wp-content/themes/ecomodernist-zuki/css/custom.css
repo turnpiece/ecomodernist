@@ -2,6 +2,38 @@
 Global Styles
 --------------------------------------------------------------*/
 
+#container {
+	max-width: 100%;
+}
+
+#masthead {
+	background-color: #000;
+	padding:  0 50px;
+}
+
+#site-nav ul li a,
+#mobile-menu-toggle:after,
+#masthead > #site-title {
+	color:  #fff;
+	margin-top:  50px;
+}
+
+#mobile-menu-toggle:after {
+	font-size: 25px;
+	top: 5px;
+}
+
+#mobile-menu-toggle {
+	width:  auto;
+	height:  auto;
+}
+
+#main-wrap {
+	max-width:  1200px;
+	margin-left:  auto;
+	margin-right:  auto;
+}
+
 h1, h2, h3, h4, h5, h6,
 .entry-header h2.entry-title,
 .entry-header h1.entry-title,
@@ -60,4 +92,9 @@ Responsive media queries (mobile styles)
 	.archive-menu-content ul.authors li {
 		font-size:  16px;
 		font-size:  1rem;		
+	}
+
+	#mobile-menu-toggle:after {
+		font-size: 50px;
+		top: 25px;
 	}
