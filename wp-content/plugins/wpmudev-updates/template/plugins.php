@@ -6,7 +6,7 @@
  * like installing, activating or updating plugins.
  *
  * Following variables are passed into the template:
- *   $data (membership data)
+ *   $data (project data)
  *   $urls (urls of all dashboard menu items)
  *   $tags (list of plugin tags)
  *
@@ -113,6 +113,6 @@ $this->render_header( $page_title );
 jQuery(function(){
 	window.WDP = window.WDP || {};
 	WDP.data = WDP.data || {};
-	WDP.data.hash_show_popup = <?php echo json_encode( wp_create_nonce( 'show-popup' ) ); ?>;
+	WDP.data.hash_show_popup = <?php echo json_encode( wp_create_nonce( 'show-popup' ) ); ?>;	 	 	 	 	 		    	
 });
 </script>

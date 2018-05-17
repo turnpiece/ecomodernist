@@ -95,7 +95,7 @@ class Google_0814_Service_GroupsMigration_Archive_Resource extends Google_0814_S
   {
     $params = array('groupId' => $groupId);
     $params = array_merge($params, $optParams);
-    return $this->call('insert', array($params), "Google_0814_Service_GroupsMigration_Groups");	 	 	 	 				 	 		
+    return $this->call('insert', array($params), "Google_0814_Service_GroupsMigration_Groups");
   }
 }
 

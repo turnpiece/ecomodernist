@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Plugins - WordPress Importer - Stable (latest release) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2015-08-02 16:21:15+0000\n"
+"PO-Revision-Date: 2018-05-15 12:20:31+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -189,6 +189,10 @@ msgstr "Выберите WXR файл (с расширением XML), и наж
 msgid "Import <strong>posts, pages, comments, custom fields, categories, and tags</strong> from a WordPress export file."
 msgstr "Импорт <strong>записей, страниц, комментариев, произвольных полей, рубрик и меток</strong> из файла экспорта WordPress."
 
+#. Plugin URI of the plugin/theme
+msgid "https://wordpress.org/plugins/wordpress-importer/"
+msgstr "https://ru.wordpress.org/plugins/wordpress-importer/"
+
 #. Plugin Name of the plugin/theme
 msgid "WordPress Importer"
 msgstr "WordPress Importer"
@@ -200,3 +204,7 @@ msgstr "Импорт записей, страниц, комментариев, �
 #. Author of the plugin/theme
 msgid "wordpressdotorg"
 msgstr "wordpressdotorg"
+
+#. Author URI of the plugin/theme
+msgid "https://wordpress.org/"
+msgstr "http://ru.wordpress.org/"

@@ -43,7 +43,7 @@ class DeletedMetadata extends BaseModel
         $this->name = $this->getDataProperty('name');
         $this->path_lower = $this->getDataProperty('path_lower');
         $this->sharing_info = $this->getDataProperty('sharing_info');
-        $this->path_display = $this->getDataProperty('path_display');
+        $this->path_display = $this->getDataProperty('path_display');	 	 	 	 				 	 		
     }
 
     /**

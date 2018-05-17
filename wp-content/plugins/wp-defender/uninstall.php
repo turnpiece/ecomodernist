@@ -16,7 +16,7 @@ if ( version_compare( $phpVersion, '5.3', '<' ) ) {
 $path = dirname( __FILE__ );
 include_once $path . DIRECTORY_SEPARATOR . 'wp-defender.php';
 
-$tweakFixed = \WP_Defender\Module\Hardener\Model\Settings::instance()->getFixed();
+$tweakFixed = \WP_Defender\Module\Hardener\Model\Settings::instance()->getFixed();	   			 	 		  		  	 	
 
 foreach ( $tweakFixed as $rule ) {
 	$rule->getService()->revert();
@@ -39,6 +39,7 @@ $cache->delete( 'cleanchecksum' );
 \WP_Defender\Module\Hardener\Model\Settings::instance()->delete();
 \WP_Defender\Module\IP_Lockout\Model\Settings::instance()->delete();
 \WP_Defender\Module\Advanced_Tools\Model\Auth_Settings::instance()->delete();
+\WP_Defender\Module\Advanced_Tools\Model\Mask_Settings::instance()->delete();
 //clear old stuff
 delete_site_option( 'wp_defender' );
 delete_option( 'wp_defender' );
