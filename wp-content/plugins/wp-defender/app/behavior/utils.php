@@ -8,7 +8,9 @@ namespace WP_Defender\Behavior;
 use Hammer\Base\Behavior;
 use Hammer\Helper\Log_Helper;
 use Hammer\Helper\WP_Helper;
+use WP_Defender\Module\Advanced_Tools\Component\Mask_Api;
 use WP_Defender\Module\Advanced_Tools\Model\Auth_Settings;
+use WP_Defender\Module\Advanced_Tools\Model\Mask_Settings;
 use WP_Defender\Module\Hardener\Model\Settings;
 use WP_Defender\Module\IP_Lockout\Component\Login_Protection_Api;
 use WP_Defender\Module\Scan\Component\Scan_Api;
@@ -43,14 +45,11 @@ class Utils extends Behavior {
 			$post_vars['timeout']        = 30;
 			$post_vars['httpversion']    = '1.1';
 
-			$headers = isset( $post_vars['headers'] ) ? $post_vars['headers'] : array();
-
+			$post_vars            = array_merge( $post_vars, $requestArgs );
+			$headers              = isset( $post_vars['headers'] ) ? $post_vars['headers'] : array();
 			$post_vars['headers'] = array_merge( $headers, array(
 				'Authorization' => 'Basic ' . $api_key
 			) );
-
-			$post_vars = array_merge( $post_vars, $requestArgs );
-
 			$response = wp_remote_request( $endPoint,
 				apply_filters( 'wd_wpmudev_call_request_args',
 					$post_vars ) );
@@ -155,7 +154,7 @@ class Utils extends Behavior {
 		if ( strlen( $timestring ) == 0 ) {
 			return null;
 		}
-		if ( ! is_int( $timestring ) ) {
+		if ( ! filter_var( $timestring, FILTER_VALIDATE_INT ) ) {
 			$timestring = strtotime( $timestring );
 		}
 		$format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
@@ -339,6 +338,7 @@ class Utils extends Behavior {
 			$timezone[1] = '00';
 		}
 		$offset = implode( ':', $timezone );
+
 		list( $hours, $minutes ) = explode( ':', $offset );
 		$seconds = $hours * 60 * 60 + $minutes * 60;
 		$lc      = localtime( time(), true );
@@ -459,6 +459,9 @@ class Utils extends Behavior {
 	 * @return bool
 	 */
 	function isCloudflare() {
+		if ( php_sapi_name() == 'cli' ) {
+			return false;
+		}
 		if ( isset( $_SERVER['HTTP_CLIENT_IP'] ) ) {
 			$ip = $_SERVER['HTTP_CLIENT_IP'];
 		} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
@@ -498,6 +501,7 @@ class Utils extends Behavior {
 		}
 		$client_real = isset( $_SERVER['HTTP_X_REAL_IP'] ) ? $_SERVER['HTTP_X_REAL_IP'] : null;
 		$ret         = $remote;
+
 		if ( filter_var( $client, FILTER_VALIDATE_IP ) ) {
 			$ret = $client;
 		} elseif ( filter_var( $client_real, FILTER_VALIDATE_IP ) ) {
@@ -816,6 +820,10 @@ class Utils extends Behavior {
 							'active'  => Auth_Settings::instance()->enabled,
 							'enabled' => ! empty( Auth_Settings::instance()->userRoles ),
 						),
+						'mask_login'         => array(
+							'activate'   => Mask_Settings::instance()->isEnabled(),
+							'masked_url' => Mask_Api::getNewLoginUrl()
+						)
 					),
 					'reports'               => array(
 						'file_scanning' => array(

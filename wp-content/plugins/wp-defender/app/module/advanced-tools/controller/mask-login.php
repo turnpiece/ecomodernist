@@ -41,7 +41,14 @@ class Mask_Login extends Controller {
 				$this->add_filter( 'wp_redirect', 'filterWPRedirect', 10, 2 );
 				$this->add_filter( 'site_url', 'filterSiteUrl', 9999, 4 );
 				$this->add_filter( 'network_site_url', 'filterNetworkSiteUrl', 9999, 3 );
+//				$this->add_filter( 'network_admin_url', 'filterAdminUrl', 9999, 2 );
+//				$this->add_filter( 'admin_url', 'filterAdminUrl', 9999, 2 );
 				remove_action( 'template_redirect', 'wp_redirect_admin_locations' );
+				//if prosite is activate and useremail is not defined, we need to update the
+				//email to match the new login URL
+				if ( is_plugin_active_for_network( 'pro-sites/pro-sites.php' ) ) {
+					$this->add_filter( 'update_welcome_email', 'updateWelcomeEmailPrositeCase', 10, 6 );
+				}
 			} else {
 				if ( $isJetpackSSO ) {
 					wp_defender()->global['compatibility'][] = __( "We’ve detected a conflict with Jetpack’s Wordpress.com Log In feature. Please disable it and return to this page to continue setup.", wp_defender()->domain );
@@ -65,24 +72,68 @@ class Mask_Login extends Controller {
 		} elseif ( substr( $requestPath, 0, 9 ) == '/wp-admin' ) {
 			//this one try to login to wp-admin, redirect or lock it
 			$this->_handleRequestToAdmin();
-		} elseif ( $requestPath == '/wp-login.php' ) {
+		} elseif ( $requestPath == '/wp-login.php' || $requestPath == '/login' ) {
 			//this one want to login, redirect or lock
 			$this->_handleRequestToLoginPage();
 		}
 	}
 
+	/**
+	 * @param $welcome_email
+	 * @param $blog_id
+	 * @param $user_id
+	 * @param $password
+	 * @param $title
+	 * @param $meta
+	 *
+	 * @return mixed
+	 */
+	public function updateWelcomeEmailPrositeCase( $welcome_email, $blog_id, $user_id, $password, $title, $meta ) {
+		$url           = get_blogaddress_by_id( $blog_id );
+		$welcome_email = str_replace( $url . 'wp-login.php', Mask_Api::getNewLoginUrl( rtrim( '/', $url ) ), $welcome_email );
+
+		return $welcome_email;
+	}
+
+	/**
+	 * @param $url
+	 * @param $path
+	 * @param $scheme
+	 *
+	 * @return string
+	 */
 	public function filterNetworkSiteUrl( $url, $path, $scheme ) {
 		return $this->alterLoginUrl( $url, $scheme );
 	}
 
+	/**
+	 * @param $url
+	 * @param $path
+	 * @param $scheme
+	 * @param $blog_id
+	 *
+	 * @return string
+	 */
 	public function filterSiteUrl( $url, $path, $scheme, $blog_id ) {
 		return $this->alterLoginUrl( $url, $scheme );
 	}
 
+	/**
+	 * @param $location
+	 * @param $status
+	 *
+	 * @return string
+	 */
 	public function filterWPRedirect( $location, $status ) {
 		return $this->alterLoginUrl( $location );
 	}
 
+	/**
+	 * @param $currentUrl
+	 * @param null $scheme
+	 *
+	 * @return string
+	 */
 	private function alterLoginUrl( $currentUrl, $scheme = null ) {
 		if ( strpos( $currentUrl, 'wp-login.php' ) !== false ) {
 			//this is URL go to old wp-login.php
@@ -94,7 +145,48 @@ class Mask_Login extends Controller {
 			} else {
 				return Mask_Api::getNewLoginUrl();
 			}
+		} else {
+			//this case when admin map a domain into subsite, we need to update the new domain/masked-login into the list
+			if ( ! function_exists( 'get_current_screen' ) ) {
+				require_once( ABSPATH . 'wp-admin/includes/screen.php' );
+			}
+			$screen = get_current_screen();
+			if ( ! is_object( $screen ) ) {
+				return $currentUrl;
+			}
+			if ( $screen->id == 'sites-network' ) {
+				//case URLs inside sites list, need to check those with custom domain cause when redirect, it will require re-loggin
+				$requestPath = Mask_Api::getRequestPath( $currentUrl );
+				if ( $requestPath == '/wp-admin' ) {
+					$currentDomain = $_SERVER['HTTP_HOST'];
+					$subDomain     = parse_url( $currentUrl, PHP_URL_HOST );
+					if ( stristr( $subDomain, $currentDomain ) === false ) {
+						return Mask_Api::getNewLoginUrl( $subDomain );
+					}
+				}
+			} elseif ( $screen->id == 'my-sites' ) {
+				//case inside my sites page, sometime the login session does not share between sites and we get block
+				//we will add an OTP key for redirect to wp-admin without get block
+				$otp = Mask_Api::createOTPKey();
+
+				return add_query_arg( array(
+					'otp' => $otp
+				), $currentUrl );
+			}
 		}
+
+		return $currentUrl;
+	}
+
+	/**
+	 * Filter admin URL when sync with HUB
+	 *
+	 * @param $currentUrl
+	 * @param null $scheme
+	 *
+	 * @return mixed
+	 */
+	public function filterAdminUrl( $currentUrl, $scheme = null ) {
 
 		return $currentUrl;
 	}
@@ -109,14 +201,17 @@ class Mask_Login extends Controller {
 			//we need to allow ajax access for other tasks
 			return;
 		}
-
 		if ( is_user_logged_in() ) {
+			return;
+		}
+
+		if ( ( $key = HTTP_Helper::retrieve_get( 'otp', false ) ) !== false
+		     && Mask_Api::verifyOTP( $key ) ) {
 			return;
 		}
 
 		$this->_maybeLock();
 	}
-
 
 	private function _handleRequestToLoginPage() {
 		$this->_maybeLock();
@@ -166,19 +261,19 @@ class Mask_Login extends Controller {
 		     && is_wp_error( $error = Mask_Api::isValidMaskSlug( $data['maskUrl'] ) ) ) {
 			//validate
 			$res = array(
-				'message' => __( "The Login URL is invalid.", wp_defender()->domain )
+				'message' => $error->get_error_message()
 			);
 			wp_send_json_error( $res );
 		}
 		if ( isset( $data['redirectTrafficUrl'] ) && $setting->redirectTrafficUrl != $data['redirectTrafficUrl']
-		     && is_wp_error( $error = Mask_Api::isValidMaskSlug( $data['redirectTrafficUrl'] ) ) ) {
+		     && is_wp_error( $error = Mask_Api::isValidMaskSlug( $data['redirectTrafficUrl'], 'redirect' ) ) ) {
 			//validate
 			$res = array(
-				'message' => __( "The Redirection URL is invalid.", wp_defender()->domain )
+				'message' => $error->get_error_message()
 			);
 			wp_send_json_error( $res );
 		}
-		if ( $data['redirectTrafficUrl'] == $data['maskUrl'] && strlen( $data['maskUrl'] ) > 0 ) {
+		if ( ! empty( $data['redirectTrafficUrl'] ) && ! empty( $data['maskUrl'] ) && $data['redirectTrafficUrl'] === $data['maskUrl'] && strlen( $data['maskUrl'] ) > 0 ) {
 			$res = array(
 				'message' => __( "Login and 404 redirect URLs can't be the same. Please use different URLs.", wp_defender()->domain )
 			);
@@ -186,7 +281,6 @@ class Mask_Login extends Controller {
 		}
 		$setting->import( $data );
 		$setting->save();
-
 		$res           = array(
 			'message' => __( "Your settings have been updated.", wp_defender()->domain )
 		);

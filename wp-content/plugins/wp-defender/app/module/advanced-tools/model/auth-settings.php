@@ -15,9 +15,13 @@ class Auth_Settings extends \Hammer\WP\Settings {
 	public $forceAuth = false;
 	public $forceAuthMess = "You are required to setup two-factor authentication to use this site.";
 	public $userRoles = array();
+	public $forceAuthRoles = array();
 	public $customGraphic = 0;
 	public $customGraphicURL = '';
 	public $isConflict = array();
+	public $email_subject = '';
+	public $email_sender = '';
+	public $email_body = '';
 
 	public function __construct( $id, $is_multi ) {
 		//fetch the userRoles
@@ -95,5 +99,21 @@ class Auth_Settings extends \Hammer\WP\Settings {
 				)
 			)
 		);
+	}
+
+	/**
+	 * Email default body.
+	 */
+	public function two_factor_opt_email_default_body() {
+		$content = 'Hi {{display_name}},
+
+Your temporary login passcode is <strong>{{passcode}}</strong>.
+
+Copy and paste the passcode into the input field on the login screen to complete logging in.
+
+Regards,
+Administrator';
+
+		return $content;
 	}
 }

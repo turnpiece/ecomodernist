@@ -28,7 +28,7 @@ class Settings extends \Hammer\WP\Settings {
 	 * @var string
 	 */
 
-	public $time = '0:00';
+	public $time = '0:0';
 	/**
 	 * Toggle notification on or off
 	 * @var bool
@@ -58,8 +58,15 @@ class Settings extends \Hammer\WP\Settings {
 	public function __construct( $id, $isMulti ) {
 		if ( is_admin() || is_network_admin() && current_user_can( 'manage_options' ) ) {
 			$this->receipts[] = get_current_user_id();
+			$this->day        = date( 'l' );
+			$hour             = date( 'H', current_time( 'timestamp' ) );
+			if ( $hour == '00' ) {
+				$hour = 0;
+			} else {
+				$hour = ltrim( $hour, '0' );
+			}
+			$this->time = $hour . ':0';
 		}
-
 		parent::__construct( $id, $isMulti );
 	}
 

@@ -16,7 +16,7 @@ if ( version_compare( $phpVersion, '5.3', '<' ) ) {
 $path = dirname( __FILE__ );
 include_once $path . DIRECTORY_SEPARATOR . 'wp-defender.php';
 
-$tweakFixed = \WP_Defender\Module\Hardener\Model\Settings::instance()->getFixed();	   			 	 		  		  	 	
+$tweakFixed = \WP_Defender\Module\Hardener\Model\Settings::instance()->getFixed();
 
 foreach ( $tweakFixed as $rule ) {
 	$rule->getService()->revert();

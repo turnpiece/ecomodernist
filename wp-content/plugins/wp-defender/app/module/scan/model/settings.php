@@ -43,7 +43,7 @@ class Settings extends \Hammer\WP\Settings {
 	 * Toggle notification on or off
 	 * @var bool
 	 */
-	public $notification = false;
+	public $notification = true;
 
 	/**
 	 * Toggle only sending error email or all email
@@ -127,7 +127,17 @@ Official WPMU DEV Superhero', wp_defender()->domain );
 		//call parent to load stored
 		if ( is_admin() || is_network_admin() && current_user_can( 'manage_options' ) ) {
 			$this->receipts[] = get_current_user_id();
+			//default is weekly
+			$this->day = date( 'l' );
+			$hour      = date( 'H', current_time( 'timestamp' ) );
+			if ( $hour == '00' ) {
+				$hour = 0;
+			} else {
+				$hour = ltrim( $hour, '0' );
+			}
+			$this->time = $hour . ':0';
 		}
+
 		parent::__construct( $id, $is_multi );
 	}
 

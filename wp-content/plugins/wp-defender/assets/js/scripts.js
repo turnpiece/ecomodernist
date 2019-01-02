@@ -1,4 +1,12 @@
 jQuery(function ($) {
+    $('body').on('change', '.toggle-checkbox', function (e) {
+        if ($(this).prop('checked') == true) {
+            $('label[for="'+$(this).attr('id')+'"]').attr('aria-checked',true);
+        } else {
+            $('label[for="'+$(this).attr('id')+'"]').attr('aria-checked',false);
+        }
+    });
+
     //blacklist helper
     if ($('.blacklist-widget').size() > 0) {
         $('.blacklist-widget').submit(function () {
@@ -55,6 +63,13 @@ jQuery(function ($) {
             class: 'no-close wp-defender wd-activator'
         });
     }
+
+    $('.change-one-time-pass-email').click(function(){
+      WDP.showOverlay("#edit-one-time-password-email", {
+          title: defender_adtools.edit_email_title,
+          class: 'wd-one-time-pass-email'
+      });
+    });
 
     if ($('#requirement').size() > 0) {
         WDP.showOverlay("#requirement", {

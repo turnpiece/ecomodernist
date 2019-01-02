@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Snapshot Pro
-Version: 3.1.7
+Version: 3.1.9.2
 Description: This plugin allows you to take quick on-demand backup snapshots of your working WordPress database. You can select from the default WordPress tables as well as custom plugin tables within the database structure. All snapshots are logged, and you can restore the snapshot as needed.
 Author: WPMU DEV
 Author URI: https://premium.wpmudev.org/
@@ -38,7 +38,7 @@ WDP ID: 257
  *
  */
 
-define('SNAPSHOT_VERSION', '3.1.7');
+define('SNAPSHOT_VERSION', '3.1.9.2');
 
 if ( ! defined( 'SNAPSHOT_I18N_DOMAIN' ) ) {
 	define( 'SNAPSHOT_I18N_DOMAIN', 'snapshot' );
@@ -166,6 +166,8 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			add_action( 'admin_head', array( $this, 'enqueue_shared_ui' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_icon_admin_style' ) );
 
+			add_action( 'admin_enqueue_scripts', array( 'Snapshot_Helper_UI', 'activation_pointers' ) );
+
 			/* Setup the tetdomain for i18n language handling see http://codex.wordpress.org/Function_Reference/load_plugin_textdomain */
 			load_plugin_textdomain( SNAPSHOT_I18N_DOMAIN, false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
@@ -224,17 +226,20 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			add_filter( 'admin_body_class', array( $this, 'snapshot_maybe_add_body_classes' ) );
 
+			require_once dirname( __FILE__ ) . '/lib/Snapshot/Helper/Privacy.php';
+			Snapshot_Gdpr::serve();
+
 		}
 
-		function snapshot_check_home_path( $path ) {
-			if ( '/' == $path || 2 > strlen( $path ) ) {
+		public function snapshot_check_home_path( $path ) {
+			if ( '/' === $path || 2 > strlen( $path ) ) {
 				$path = ABSPATH;
 			}
 
 			return $path;
 		}
 
-		function snapshot_check_current_domain( $path ) {
+		public function snapshot_check_current_domain( $path ) {
 			if ( empty( $path ) ) {
 				$path = preg_replace( '/(http|https):\/\/|\/$/', '', network_home_url() );
 			}
@@ -242,7 +247,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			return $path;
 		}
 
-		function snapshot_check_current_path( $path ) {
+		public function snapshot_check_current_path( $path ) {
 			if ( ! defined( $path ) ) {
 				$blog_details = get_blog_details();
 				$path = $blog_details->path;
@@ -251,7 +256,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			return $path;
 		}
 
-		function snapshot_init_proc() {
+		public function snapshot_init_proc() {
 
 			if ( ! is_multisite() ) {
 				$role = get_role( 'administrator' );
@@ -273,7 +278,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			} else {
 				global $current_site, $current_blog;
-				if ( $current_site->blog_id == $current_blog->blog_id ) {
+				if ( $current_site->blog_id === $current_blog->blog_id ) {
 
 					$this->load_config();
 					$this->set_backup_folder();
@@ -296,7 +301,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 **
 		 * @return void
 		 */
-		function snapshot_admin_init_proc() {
+		public function snapshot_admin_init_proc() {
 
 			if ( is_multisite() || ! current_user_can( 'manage_snapshots_items' ) ) {
 				return;
@@ -304,37 +309,6 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			/* Hook into the Plugin listing display logic. This will call the function which adds the 'Settings' link on the row for our plugin. */
 			add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'snapshot_plugin_settings_link_proc' ) );
-
-			/* Hook into the admin bar display logic. So we can add our plugin to the admin bar menu */
-			add_action( 'wp_before_admin_bar_render', array( $this, 'snapshot_admin_bar_proc' ) );
-		}
-
-		/**
-		 * Hook to add the Snapshots menu option to the new WordPress admin
-		 * bar. This function will our a menu option to the admin menu
-		 * named 'Snapshots' which will link to the Tools > Snapshots page.
-		 *
-		 * @since 1.0.0
-		 * @uses $wp_admin_bar
-		 * @uses $this->_settings
-		 *
-		 * @param none
-		 *
-		 * @return void
-		 */
-		function snapshot_admin_bar_proc() {
-
-			global $wp_admin_bar;
-
-			$wp_admin_bar->add_menu(
-				array(
-					'parent' => 'new-content',
-					'id' => 'snapshot-admin-menubar',
-					'title' => $this->_settings['admin_menu_label'],
-					'href' => 'admin.php?page=snapshot_pro_new_snapshot',
-					'meta' => false,
-				)
-			);
 		}
 
 		/**
@@ -349,7 +323,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function snapshot_plugin_activation_proc() {
+		public function snapshot_plugin_activation_proc() {
 			if ( ! is_main_site() ) {
 				return;
 			}
@@ -361,7 +335,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			$this->snapshot_scheduler();
 		}
 
-		function snapshot_plugin_deactivation_proc() {
+		public function snapshot_plugin_deactivation_proc() {
 
 			$this->load_config();
 			$this->set_backup_folder();
@@ -371,7 +345,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			if ( $crons ) {
 				foreach ( $crons as $cron_time => $cron_set ) {
 					foreach ( $cron_set as $cron_callback_function => $cron_item ) {
-						if ( $cron_callback_function == "snapshot_backup_cron" ) {
+						if ( "snapshot_backup_cron" === $cron_callback_function ) {
 							foreach ( $cron_item as $cron_key => $cron_details ) {
 								if ( isset( $cron_details['args'][0] ) ) {
 									$item_key = intval( $cron_details['args'][0] );
@@ -379,7 +353,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 									wp_unschedule_event( $timestamp, $this->_settings['backup_cron_hook'], array( intval( $item_key ) ) );
 								}
 							}
-						} else if ( $cron_callback_function == $this->_settings['remote_file_cron_hook'] ) {
+						} else if ( $this->_settings['remote_file_cron_hook'] === $cron_callback_function ) {
 							$timestamp = wp_next_scheduled( $this->_settings['remote_file_cron_hook'] );
 							wp_unschedule_event( $timestamp, $this->_settings['remote_file_cron_hook'] );
 						}
@@ -401,21 +375,23 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function snapshot_admin_notices_proc( $local_type = '', $local_message = '' ) {
+		public function snapshot_admin_notices_proc( $local_type = '', $local_message = '' ) {
 			$message_types = array( 'success', 'warning', 'error' );
 
 			$message_type = 'success';
 			$message_text = '';
 
+			// phpcs:ignore
 			if ( isset( $_REQUEST['message'], $this->_messages[ $_REQUEST['message'] ] ) ) {
 				$message_type = 'success';
+				// phpcs:ignore
 				$message_text = $this->_messages[ $_REQUEST['message'] ];
 
 			} elseif ( ! empty( $this->_admin_header_error ) ) {
 				$message_type = 'error';
 				$message_text = $this->_admin_header_error;
 
-			} elseif ( ! empty( $local_message ) && in_array( $local_type, $message_types ) ) {
+			} elseif ( ! empty( $local_message ) && in_array( $local_type, $message_types, true ) ) {
 				$message_type = $local_type;
 				$message_text = $local_message;
 			}
@@ -428,11 +404,11 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			);
 
 			if ( $message_text && $message_type ) {
-				printf( $message_format, 'show', esc_attr( $message_type ), $message_text );
+				echo wp_kses_post( sprintf( $message_format, 'show', esc_attr( $message_type ), $message_text ) );
 			}
 
 			foreach ( $message_types as $message_type ) {
-				printf( $message_format, 'hide', esc_attr( $message_type ), '' );
+				echo wp_kses_post( sprintf( $message_format, 'hide', esc_attr( $message_type ), '' ) );
 			}
 		}
 
@@ -446,9 +422,10 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return array the same links array as was passed into function but with possible changes.
 		 */
-		function snapshot_plugin_settings_link_proc( $links ) {
-			$settings_link = sprintf( '<a href="%s">%s</a>',
-				esc_url( $this->snapshot_get_pagehook_url( 'snapshots-newui-new-snapshot' ) ),
+		public function snapshot_plugin_settings_link_proc( $links ) {
+			$settings_link = sprintf(
+                 '<a href="%s">%s</a>',
+				esc_url( $this->snapshot_get_pagehook_url( 'snapshots-newui-new-snapshot' ) . '&snapshot-noonce-field=' . esc_attr( wp_create_nonce  ( 'snapshot-nonce' ) ) ),
 				esc_html__( 'Settings', SNAPSHOT_I18N_DOMAIN )
 			);
 			array_unshift( $links, $settings_link );
@@ -467,7 +444,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function snapshot_admin_menu_proc() {
+		public function snapshot_admin_menu_proc() {
 
 			add_menu_page(
 				_x( 'Snapshot Pro', 'page label', SNAPSHOT_I18N_DOMAIN ),
@@ -528,7 +505,10 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			// Hook into the WordPress load page action for our new nav items. This is better then checking page query_str values.
 			$panels = array( 'dashboard', 'snapshots', 'destinations', 'managed-backups', 'import', 'settings' );
-			$extra_actions = array( 'destinations' => 'on_load_destination_panels', 'managed-backups' => 'on_load_managed_backups_panels' );
+			$extra_actions = array(
+				'destinations' => 'on_load_destination_panels',
+				'managed-backups' => 'on_load_managed_backups_panels'
+			);
 
 			foreach ( $panels as $panel ) {
 				add_action( 'load-' . $this->_pagehooks[ 'snapshots-newui-' . $panel ], array( $this, 'snapshot_on_load_panels' ) );
@@ -542,7 +522,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		/**
 		 * Redirect old menu slugs to the new menus
 		 */
-		function redirect_old_admin_menus() {
+		public function redirect_old_admin_menus() {
 
 			if ( ! isset( $GLOBALS['pagenow'], $_GET['page'] ) || 'admin.php' !== $GLOBALS['pagenow'] ) {
 				return;
@@ -559,6 +539,12 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			);
 
 			if ( isset( $page_map[ $_GET['page'] ] ) ) {
+				if ( ! isset( $_REQUEST['snapshot-noonce-field']  ) ) {
+					return;
+				}
+				if ( ! wp_verify_nonce( $_REQUEST['snapshot-noonce-field'], 'snapshot-nonce' ) ) {
+					return;
+				}
 				wp_redirect( esc_url_raw( $this->snapshot_get_pagehook_url( $page_map[ $_GET['page'] ] ) ) );
 			}
 		}
@@ -570,7 +556,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function snapshot_on_load_panels() {
+		public function snapshot_on_load_panels() {
 
 			/* These messages are displayed as part of the admin header message see 'admin_notices' WordPress action */
 			$this->_messages['success-update'] = __( 'The Snapshot has been updated.', SNAPSHOT_I18N_DOMAIN );
@@ -582,15 +568,8 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			$this->_messages['success-runonce'] = __( 'Item scheduled to run.', SNAPSHOT_I18N_DOMAIN );
 			$this->_messages['success-snapshot-key'] = __( 'Your Snapshot Key has been successfully added.', SNAPSHOT_I18N_DOMAIN );
 
-			if ( isset( $_GET['snapshot-action'] ) && 'item-archives' === $_GET['snapshot-action'] ) {
-				$this->archives_data_items_table = new Snapshot_View_Table_Archives();
-			} else if ( isset( $_GET['page'] ) && 'snapshots_edit_panel' === $_GET['page'] ) {
-				$this->items_table = new Snapshot_View_Table_Items();
-			}
-
 			$this->snapshot_scheduler();
 			$this->snapshot_process_actions();
-			$this->snapshot_admin_plugin_help();
 
 			add_thickbox();
 
@@ -603,7 +582,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		/**
 		 * Set up for the Managed Backups pages
 		 */
-		function on_load_managed_backups_panels() {
+		public function on_load_managed_backups_panels() {
 
 			$this->_messages['success-update'] = __( 'The Backup has been updated.', SNAPSHOT_I18N_DOMAIN );
 			$this->_messages['success-add'] = __( 'The Backup has been created.', SNAPSHOT_I18N_DOMAIN );
@@ -622,7 +601,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function on_load_destination_panels() {
+		public function on_load_destination_panels() {
 
 			// These messages are displayed as part of the admin header message see 'admin_notices' WordPress action
 			$this->_messages['success-update'] = __( "The Destination has been updated.", SNAPSHOT_I18N_DOMAIN );
@@ -632,7 +611,6 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			$this->_messages['success-settings'] = __( "Settings have been updated.", SNAPSHOT_I18N_DOMAIN );
 
 			$this->process_snapshot_destination_actions();
-			$this->snapshot_admin_plugin_help();
 
 			add_action( 'admin_notices', array( $this, 'snapshot_admin_notices_proc' ) );
 			add_action( 'network_admin_notices', array( $this, 'snapshot_admin_notices_proc' ) );
@@ -644,7 +622,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		/**
 		 * Enqueue the CSS for the menu icon
 		 */
-		function enqueue_icon_admin_style() {
+		public function enqueue_icon_admin_style() {
 
 			wp_enqueue_style(
 				'snapshot-menu-icon',
@@ -656,15 +634,20 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		/**
 		 * Enqueue scripts and styles for the plugin admin
 		 */
-		function enqueue_admin_scripts() {
+		public function enqueue_admin_scripts() {
 
-			wp_enqueue_style( 'snapshots-admin-stylesheet', plugins_url( '/css/snapshots-admin-styles.css', __FILE__ ),
-				false, $this->_settings['SNAPSHOT_VERSION'] );
+			wp_enqueue_style(
+                 'snapshots-admin-stylesheet', plugins_url( '/css/snapshots-admin-styles.css', __FILE__ ),
+				false, $this->_settings['SNAPSHOT_VERSION']
+                );
 
-			wp_enqueue_script( 'snapshot-admin', plugins_url( '/js/snapshot-admin.js', __FILE__ ),
-				array( 'jquery' ), $this->_settings['SNAPSHOT_VERSION'] );
+			wp_enqueue_script(
+                 'snapshot-admin', plugins_url( '/js/snapshot-admin.js', __FILE__ ),
+				array( 'jquery' ), $this->_settings['SNAPSHOT_VERSION']
+                );
 
-			wp_localize_script( 'snapshot-admin', 'snapshot_admin_messages', array(
+			wp_localize_script(
+                 'snapshot-admin', 'snapshot_admin_messages', array(
 				'log_viewer_title' => esc_html__( 'Snapshot Log Viewer', SNAPSHOT_I18N_DOMAIN ),
 				'select_all' => esc_html__( 'Select all', SNAPSHOT_I18N_DOMAIN ),
 				'unselect_all' => esc_html__( 'Unselect all', SNAPSHOT_I18N_DOMAIN ),
@@ -686,16 +669,22 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				'no_tables_selected' => esc_html__( 'You must select at least one table', SNAPSHOT_I18N_DOMAIN ),
 				'no_files_tables_selected' => esc_html__( 'You must select which Files and/or Tables to backup in this Snapshot', SNAPSHOT_I18N_DOMAIN ),
 				'missing_snapshot_timekey' => esc_html__( 'ERROR: The Snapshot timekey is not set. Try reloading the page', SNAPSHOT_I18N_DOMAIN ),
-			) );
+			)
+                );
 
 			/* new_ui styles and js */
-			wp_enqueue_style( 'snapshot-pro-admin-stylesheet', plugins_url( '/assets/css/admin.css', __FILE__ ),
-				array( 'wdev-plugin-ui' ), $this->_settings['SNAPSHOT_VERSION'] );
+			wp_enqueue_style(
+                 'snapshot-pro-admin-stylesheet', plugins_url( '/assets/css/admin.css', __FILE__ ),
+				array( 'wdev-plugin-ui' ), $this->_settings['SNAPSHOT_VERSION']
+                );
 
-			wp_enqueue_script( 'snapshot-pro-admin', plugins_url( '/assets/js/admin.min.js', __FILE__ ),
-				array( 'jquery' ), $this->_settings['SNAPSHOT_VERSION'] );
+			wp_enqueue_script(
+                 'snapshot-pro-admin', plugins_url( '/assets/js/admin.min.js', __FILE__ ),
+				array( 'jquery' ), $this->_settings['SNAPSHOT_VERSION']
+                );
 
-			wp_localize_script( 'snapshot-pro-admin', 'snapshot_messages', array(
+			wp_localize_script(
+                 'snapshot-pro-admin', 'snapshot_messages', array(
 				'snapshot_key' => esc_html__( 'Snapshot Key', SNAPSHOT_I18N_DOMAIN ),
 				'snapshot_failed' => esc_html__( 'An unknown response returned from Snapshot backup attempt. Aborting. Double check Snapshot settings.', SNAPSHOT_I18N_DOMAIN ),
 				'no_files_selected' => esc_html__( 'You must select at least one Files backup option.', SNAPSHOT_I18N_DOMAIN ),
@@ -706,13 +695,14 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				'snapshot_aborted' => esc_html__( 'Snapshot backup aborted', SNAPSHOT_I18N_DOMAIN ),
 				'restore_aborted' => esc_html__( 'Snapshot restore aborted', SNAPSHOT_I18N_DOMAIN ),
 				'missing_timekey' => esc_html__( 'ERROR: The Snapshot timekey is not set. Try reloading the page', SNAPSHOT_I18N_DOMAIN ),
-			) );
+				)
+			);
 		}
 
 		/**
 		 * Retrieve the ID of the current admin screen, sans the -network suffix
 		 */
-		function get_current_screen_id() {
+		public function get_current_screen_id() {
 			$screen = get_current_screen();
 
 			if ( ! $screen ) {
@@ -731,20 +721,21 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		/**
 		 * Enqueue the shared-ui if within our plugin screens
 		 */
-		function enqueue_shared_ui() {
+		public function enqueue_shared_ui() {
 
-			if ( ! in_array( $this->get_current_screen_id(), $this->_pagehooks ) ) {
+			if ( ! in_array( $this->get_current_screen_id(), $this->_pagehooks, true ) ) {
 				return;
 			}
 
 			WDEV_Plugin_Ui::load( plugin_dir_url( plugin_basename( __FILE__ ) ) . 'assets/shared-ui', 'wpmud' );
 		}
 
-		function snapshot_admin_panels_footer() {
+		public function snapshot_admin_panels_footer() {
 			?>
 			<div style="display: none;" id="snapshot-log-view-container">
 				<div id="snapshot-log-viewer"></div>
-				<br /><br /></div><?php
+				<br /><br /></div>
+                <?php
 		}
 
 		/**
@@ -758,7 +749,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function snapshot_process_actions() {
+		public function snapshot_process_actions() {
 
 			if ( is_multisite() ) {
 				if ( ! is_super_admin() ) {
@@ -778,7 +769,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				switch ( $snapshot_action ) {
 
 					case 'add':
-						if ( empty( $_POST ) || ( isset( $_POST['snapshot-noonce-field'] ) && ! wp_verify_nonce( $_POST['snapshot-noonce-field'], 'snapshot-add' ) ) ) {
+						if ( empty( $_POST ) || ( isset( $_POST['snapshot-noonce-field'] ) && ! wp_verify_nonce( $_POST['snapshot-noonce-field'], 'snapshot-nonce' ) ) ) {
 							return;
 						} else {
 							$this->snapshot_add_update_action_proc( $_POST );
@@ -801,13 +792,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						if ( ! isset( $_GET['page'] ) ) {
 							$_GET['page'] = 'snapshots_edit_panel';
 						}
-						if ( $_GET['page'] == 'snapshots_edit_panel' ) {
+						if ( 'snapshots_edit_panel' === $_GET['page'] ) {
 							$return_url = remove_query_arg( array( 'item' ), $return_url );
 						}
-						$return_url = remove_query_arg( array(
-							'snapshot-action',
-							'snapshot-noonce-field',
-						), $return_url );
+						$return_url = remove_query_arg(
+							array(
+								'snapshot-action',
+								'snapshot-noonce-field',
+							), $return_url
+						);
 
 						$return_url = add_query_arg( 'page', sanitize_text_field( $_GET['page'] ), $return_url );
 						$return_url = add_query_arg( 'message', 'success-delete-bulk', $return_url );
@@ -816,8 +809,6 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							wp_redirect( $return_url );
 						}
 						die();
-
-						break;
 
 					case 'delete-item':
 						if ( empty( $_GET ) || ( isset( $_POST['snapshot-noonce-field'] ) && ! wp_verify_nonce( $_GET['snapshot-noonce-field'], 'snapshot-delete-item' ) ) ) {
@@ -830,13 +821,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							if ( ! isset( $_GET['page'] ) ) {
 								$_GET['page'] = 'snapshots_edit_panel';
 							}
-							if ( $_GET['page'] == 'snapshots_edit_panel' ) {
+							if ( 'snapshots_edit_panel' === $_GET['page'] ) {
 								$return_url = remove_query_arg( array( 'item' ), $return_url );
 							}
-							$return_url = remove_query_arg( array(
-								'snapshot-action',
-								'snapshot-noonce-field',
-							), $return_url );
+							$return_url = remove_query_arg(
+								array(
+									'snapshot-action',
+									'snapshot-noonce-field',
+								), $return_url
+							);
 
 							$return_url = add_query_arg( 'page', sanitize_text_field( $_GET['page'] ), $return_url );
 							$return_url = add_query_arg( 'message', 'success-delete', $return_url );
@@ -850,7 +843,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						break;
 
 					case 'update':
-						if ( empty( $_POST ) || ( isset( $_POST['snapshot-noonce-field'] ) && ! wp_verify_nonce( $_POST['snapshot-noonce-field'], 'snapshot-update' ) ) ) {
+						if ( empty( $_POST ) || ( isset( $_POST['snapshot-noonce-field'] ) && ! wp_verify_nonce( $_POST['snapshot-noonce-field'], 'snapshot-nonce' ) ) ) {
 							return;
 						} else {
 							$this->snapshot_add_update_action_proc( $_POST );
@@ -873,13 +866,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							if ( ! isset( $_GET['page'] ) ) {
 								$_GET['page'] = 'snapshots_edit_panel';
 							}
-							if ( $_GET['page'] == 'snapshots_edit_panel' ) {
+							if ( 'snapshots_edit_panel' === $_GET['page'] ) {
 								$return_url = remove_query_arg( array( 'item' ), $return_url );
 							}
-							$return_url = remove_query_arg( array(
-								'snapshot-action',
-								'snapshot-noonce-field',
-							), $return_url );
+							$return_url = remove_query_arg(
+								array(
+									'snapshot-action',
+									'snapshot-noonce-field',
+								), $return_url
+							);
 
 							$return_url = add_query_arg( 'page', sanitize_text_field( $_GET['page'] ), $return_url );
 							$return_url = add_query_arg( 'message', 'success-runonce', $return_url );
@@ -952,11 +947,11 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 									$data_item = $item['data'][ $data_item_key ];
 
-									if ( $snapshot_action == 'download-archive' ) {
+									if ( 'download-archive' === $snapshot_action ) {
 
 										if ( isset( $data_item['filename'] ) ) {
 
-											if ( ( empty( $data_item['destination'] ) ) || ( $data_item['destination'] == "local" ) ) {
+											if ( ( empty( $data_item['destination'] ) ) || ( "local" === $data_item['destination'] ) ) {
 
 												$current_backupFolder = $this->snapshot_get_item_destination_path( $item, $data_item );
 
@@ -984,7 +979,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 												die();
 											}
 										}
-									} else if ( $snapshot_action == 'download-log' ) {
+									} else if ( 'download-log' === $snapshot_action ) {
 
 										$backupLogFileFull = trailingslashit( $this->get_setting( 'backupLogFolderFull' ) )
 										                     . $item['timestamp'] . "_" . $data_item['timestamp'] . ".log";
@@ -1022,9 +1017,9 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							$item = $this->config_data['items'][ $item_key ];
 
 							$action = '';
-							if ( ( isset( $_GET['action'] ) ) && ( $_GET['action'] != "-1" ) ) {
+							if ( ( isset( $_GET['action'] ) ) && ( "-1" !== $_GET['action'] ) ) {
 								$action = sanitize_text_field( $_GET['action'] );
-							} else if ( ( isset( $_GET['action2'] ) ) && ( $_GET['action2'] != "-1" ) ) {
+							} else if ( ( isset( $_GET['action2'] ) ) && ( "-1" !== $_GET['action2'] ) ) {
 								$action = sanitize_text_field( $_GET['action2'] );
 							}
 
@@ -1032,7 +1027,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							switch ( $action ) {
 								case 'resend':
 
-									if ( $item['destination-sync'] == "mirror" ) {
+									if ( "mirror" === $item['destination-sync'] ) {
 										$snapshot_sync_files_option = 'wpmudev_snapshot_sync_files_' . $item['timestamp'];
 										delete_option( $snapshot_sync_files_option );
 
@@ -1102,14 +1097,14 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 									break;
 							}
 						}
-						if ( $CONFIG_CHANGED == true ) {
+						if ( true === $CONFIG_CHANGED ) {
 							$this->save_config();
 						}
 
 						$per_page = 20;
 
 						if ( ( isset( $_POST['wp_screen_options']['option'] ) )
-						     && ( $_POST['wp_screen_options']['option'] == "toplevel_page_snapshots_edit_panel_network_per_page" )
+						     && ( "toplevel_page_snapshots_edit_panel_network_per_page" === $_POST['wp_screen_options']['option'] )
 						) {
 
 							if ( isset( $_POST['wp_screen_options']['value'] ) ) {
@@ -1121,10 +1116,12 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							}
 						}
 						//$this->archives_data_items_table = new Snapshot_Archives_Data_Items_Table( $this );
-						add_screen_option( 'per_page', array(
-							'label' => __( 'per Page', SNAPSHOT_I18N_DOMAIN ),
-							'default' => $per_page,
-						) );
+						add_screen_option(
+							'per_page', array(
+								'label' => __( 'per Page', SNAPSHOT_I18N_DOMAIN ),
+								'default' => $per_page,
+							)
+						);
 
 						$ACTION_FOUND = true;
 
@@ -1142,7 +1139,6 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 											break;
 					*/
 					default:
-
 						break;
 				}
 			}
@@ -1151,7 +1147,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				$per_page = 20;
 
 				if ( ( isset( $_POST['wp_screen_options']['option'] ) )
-				     && ( $_POST['wp_screen_options']['option'] == "toplevel_page_snapshots_edit_panel_network_per_page" )
+				     && ( "toplevel_page_snapshots_edit_panel_network_per_page" === $_POST['wp_screen_options']['option'] )
 				) {
 
 					if ( isset( $_POST['wp_screen_options']['value'] ) ) {
@@ -1163,10 +1159,12 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					}
 				}
 
-				add_screen_option( 'per_page', array(
-					'label' => __( 'per Page', SNAPSHOT_I18N_DOMAIN ),
-					'default' => $per_page,
-				) );
+				add_screen_option(
+					'per_page', array(
+						'label' => __( 'per Page', SNAPSHOT_I18N_DOMAIN ),
+						'default' => $per_page,
+					)
+				);
 
 			}
 		}
@@ -1183,7 +1181,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 * @return void
 		 */
 
-		function process_snapshot_destination_actions() {
+		public function process_snapshot_destination_actions() {
 
 			//if (!is_super_admin()) return;
 			if ( is_multisite() ) {
@@ -1197,6 +1195,13 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			}
 
 			if ( isset( $_REQUEST['snapshot-action'] ) ) {
+
+				if ( ! isset( $_REQUEST['destination-noonce-field']  ) ) {
+					return;
+				}
+				if ( ! wp_verify_nonce( $_REQUEST['destination-noonce-field'], 'snapshot-destination' ) ) {
+					return;
+				}
 
 				switch ( sanitize_text_field( $_REQUEST['snapshot-action'] ) ) {
 
@@ -1218,7 +1223,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						break;
 
 					case 'delete':
-						if ( empty( $_GET ) || ! wp_verify_nonce( $_GET['snapshot-noonce-field'], 'snapshot-delete-destination' ) ) {
+						if ( empty( $_GET ) || ! wp_verify_nonce( $_GET['destination-noonce-field'], 'snapshot-destination' ) ) {
 							return;
 						} else {
 							$this->snapshot_delete_destination_proc();
@@ -1274,7 +1279,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						if ( empty( $_POST ) || ! wp_verify_nonce( $_POST['snapshot-noonce-field'], 'snapshot-update-destination' ) ) {
 							return;
 						} else {
-							if ( isset( $_POST['snapshot-destination']['type'] ) && $_POST['snapshot-destination']['type'] == 'local' ) {
+							if ( isset( $_POST['snapshot-destination']['type'] ) && 'local' === $_POST['snapshot-destination']['type'] ) {
 								$this->snapshot_settings_config_update();
 							} else {
 								$this->snapshot_update_destination_proc();
@@ -1299,152 +1304,6 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		}
 
 		/**
-		 * Setup the context help instances for the user
-		 *
-		 * @since 1.0.0
-		 * @uses $screen global screen instance
-		 * @uses $screen->add_help_tab function to add the help sections
-		 * @see  $this->on_load_main_page where this function is referenced
-		 *
-		 * @param none
-		 *
-		 * @return void
-		 */
-		function snapshot_admin_plugin_help() {
-
-			global $wp_version;
-
-			$screen = get_current_screen();
-
-			$screen_help_text = array();
-			$screen_help_text['snapshot-help-overview'] = '<p>' . __( 'The Snapshot plugin provides the ability to create quick on-demand snapshot of your WordPress site database and files. You can create as many snapshots as needed. The Snapshot plugin also provides the ability to restore a snapshot backup.', SNAPSHOT_I18N_DOMAIN ) . '</p>';
-
-			$screen_help_text['snapshots_new_panel'] = '<p>' . __( '<strong>Name</strong> - Provide a custom name for this snapshot. Default name is "snapshot".', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>Notes</strong> - Add some optional notes about the snapshot. Maybe some details on what plugins or theme were active. Or some note before you activate some new plugin.', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>What to Backup</strong> - This section lists all tables for your site. Select the table you want to include in the backup. The tables are grouped by WordPress Core and Other tables. These Other tables could have been created and used by some of the plugins you installed.', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>When to Archive</strong> - This section shows a dropdown where you can select how often to create a backup of the selected tables. The default is "Manual". If selected will create a one time on demand backup. You can also select to schedule the backup by selecting one of the many options available. If the backup is scheduled you will also be able to set the number of archives to keep.', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>Where to save the Archive</strong> - The only available option at this time is local. This means the files will be stored on the local server. Future options will be remote systems like Dropbox, Amazon S3, FTP, etc.', SNAPSHOT_I18N_DOMAIN ) . '</p>';
-
-			$screen_help_text['snapshots_edit_panel']['edit'] = '<p>' . __( 'On the Edit Snapshot panel you can rename or add notes to the snapshot item. Also provided is a link to the snapshot file which you can download and archive to your local system.', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>Name</strong> - Provide a custom name for this snapshot. Default name is "snapshot".', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>Notes</strong> - Add some optional notes about the snapshot. Maybe some details on what plugins or theme were active. Or some note before you activate some new plugin.', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>When to Archive</strong> - This section shows a dropdown where you can select how often to create a backup of the selected tables. The default is "Manual". If selected will create a one time on demand backup. You can also select to schedule the backup by selecting one of the many options available.', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>Tables in Archive</strong> - This sections lists the tables included in the snapshot archives. The table selection is set when you create a new snapshot configuration.', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>Where to save the Archive</strong> - The only available option at this time is local. This means the files will be stored on the local server. Future options will be remote systems like Dropbox, Amazon S3, FTP, etc.', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>All Archives</strong> - This section lists the various archive files creates from this snapshot configuration. Here you can click the archive filename to download. On the same row you will also see a link to view the log entries related to the creation of this archive instance. At the bottom is a link to download the full snapshot log file.', SNAPSHOT_I18N_DOMAIN ) . '</p>';
-
-			$screen_help_text['snapshots_edit_panel']['restore-panel'] = '<p>' . __( 'From this screen you can restore a snapshot. The restore will reload the database export into you current live site. Each table selected during the snapshot creation will be emptied before the snapshot information is loaded. It is important to understand this restore will be removing and new information added since the snapshot.', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( 'On the restore screen you will see a section for "Restore Option". The details for each option are discussed below', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>Turn off all plugins</strong> - As part of the restore process you can automatically deactivate all plugins. This is helpful if you had trouble with a plugin and are trying to return your site back to some stable state.', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>Set a theme to active</strong> - Similar to the Plugins option you can select to have a specific theme set to active as part of the restore process. Again, this is helpful if you installed a new theme that broke your site and you want to return your site back to a stable state.', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>All Archives</strong> - This section lists the various archive files creates from this snapshot configuration. From the listing select the archive to be used for the restore.', SNAPSHOT_I18N_DOMAIN ) . '</p>';
-
-			$screen_help_text['snapshots_edit_panel']['default'] = '<p>' . __( 'All of your snapshots are listed here. Within the listing there are a number of options you can take.', SNAPSHOT_I18N_DOMAIN ) . '</p><p>' . __( '<strong>Delete</strong> - On each row you will see a checkbox. To delete one or more existing Snapshots click checkbox then click the "Delete Snapshots" button below the listing.', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>Edit/Restore/Delete</strong> - Hover over the Name to reveal options for Edit, Restore, Delete. The Edit option will show the Snapshot detail form where you can change many of the configuration options. The Restore option will show a form where you can select from the various restore options. The Delete option will delete this snapshot only', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>Notes</strong> - The Notes columns shows the description you assigned to the Snapshot. Also in this column are the tabls included in this snapshot.', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>Interval</strong> - The Interval column shows how often the snapshot will be generated. When you created the snapshot instance you had the option to create a manual snapshot or schedule the snapshot to be created on certain interval (once an hour, once a day, etc.). If the interval is scheduled this column will show the estimated time for the next backup.', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>Destination</strong> - The Destinations column shows where the archive is stored. This can be local, Amazon S3, Dropbox, or any custom destination.', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( '<strong>Archive</strong> - The Archives column shows the last snapshot archive created.', SNAPSHOT_I18N_DOMAIN ) . '</p>';
-
-			$screen_help_text['snapshots_settings_panel'] = '<p>' . __( 'The Settings panel provides access to a number of configuration settings you can customize Snapshot to meet you site needs.', SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( "<strong>Folder Location</strong> - By default the snapshot files are stored under your site's /wp-content/uploads/ directory in a new folder named 'snapshots'. If for some reason you already use a folder of this name you can set a different folder name to be used. If you change the folder name after some snapshots have been generated these files will be moved to the new folder. Note you cannot move the folder outside the /wp-content/uploads/ directory.", SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( "<strong>Database Segment Size</strong> - The Segment Size can be defined as the number of rows to backup per table per request. The Segment Size controls the backup processing when you create a new snapshot. During the backup processing Snapshot will make a request to the server to backup each table. You can see this in the progress meters when you create a new snapshot. In most situations this backup process will attempt to backup the table in one step. But on some server configurations the timeout is set very low or the table size is very large and prevents the backup process from finishing. To control this the Snapshot backup process will breakup the requests into smaller 'chunks of work' requested to the server. ", SNAPSHOT_I18N_DOMAIN ) . '</p>
-			<p>' . __( "<strong>Server Info</strong> - This section provides useful details about your site configuration and should be used when contacting support.", SNAPSHOT_I18N_DOMAIN ) . "</p><p>" . __( "<strong>Memory Limit</strong> - This section can control the amount of memory used/needed by Snapshot when created/restoring an archive.", SNAPSHOT_I18N_DOMAIN ) . "</p>
-			<p>" . __( "<strong>Archive Import</strong> - Do you have some snapshot zip file from an older version that somehow became disconnected with the settings. You can now import the zip file and snapshot will add it to the listing.", SNAPSHOT_I18N_DOMAIN ) . "</p>";
-
-			if ( version_compare( $wp_version, '3.3.0', '>' ) ) {
-
-				$screen->add_help_tab( array(
-						'id' => 'snapshot-help-overview',
-						'title' => __( 'Overview', SNAPSHOT_I18N_DOMAIN ),
-						'content' => $screen_help_text['snapshot-help-overview'],
-					)
-				);
-
-				if ( ( isset( $_REQUEST['page'] ) ) && ( $_REQUEST['page'] == "snapshots_new_panel" ) ) {
-
-					$screen->add_help_tab( array(
-							'id' => 'snapshot-help-new',
-							'title' => __( 'New Snapshot', SNAPSHOT_I18N_DOMAIN ),
-							'content' => $screen_help_text['snapshots_new_panel'],
-						)
-					);
-				} else if ( ( isset( $_REQUEST['page'] ) ) && ( $_REQUEST['page'] == "snapshots_edit_panel" ) ) {
-
-					// Are we showing the edit form?
-					if ( ( isset( $_REQUEST['action'] ) ) && ( $_REQUEST['action'] == 'edit' ) ) {
-						$screen->add_help_tab( array(
-								'id' => 'snapshot-help-edit',
-								'title' => __( 'Edit Snapshot', SNAPSHOT_I18N_DOMAIN ),
-								'content' => $screen_help_text['snapshots_edit_panel']['edit'],
-							)
-						);
-					} else if ( ( isset( $_REQUEST['action'] ) ) && ( $_REQUEST['action'] == "restore-panel" ) ) {
-
-						$screen->add_help_tab( array(
-								'id' => 'snapshot-help-edit',
-								'title' => __( 'Restore Snapshot', SNAPSHOT_I18N_DOMAIN ),
-								'content' => $screen_help_text['snapshots_edit_panel']['restore-panel'],
-							)
-						);
-
-					} else {
-						$screen->add_help_tab( array(
-								'id' => 'snapshot-help-listing',
-								'title' => __( 'All Snapshots', SNAPSHOT_I18N_DOMAIN ),
-								'content' => $screen_help_text['snapshots_edit_panel']['default'],
-							)
-						);
-					}
-				} else if ( ( isset( $_REQUEST['page'] ) ) && ( $_REQUEST['page'] == "snapshots_activity_panel" ) ) {
-
-					$screen->add_help_tab( array(
-							'id' => 'snapshot-help-activity',
-							'title' => __( 'Activity Log', SNAPSHOT_I18N_DOMAIN ),
-							'content' => $screen_help_text['snapshots_activity_panel'],
-						)
-					);
-				} else if ( ( isset( $_REQUEST['page'] ) ) && ( $_REQUEST['page'] == "snapshots_settings_panel" ) ) {
-
-					$screen->add_help_tab( array(
-							'id' => 'snapshot-help-settings',
-							'title' => __( 'Settings', SNAPSHOT_I18N_DOMAIN ),
-							'content' => $screen_help_text['snapshots_settings_panel'],
-						)
-					);
-				}
-			} else {
-
-				if ( ( isset( $_REQUEST['page'] ) ) && ( $_REQUEST['page'] == "snapshots_new_panel" ) ) {
-
-					add_contextual_help( $screen, $screen_help_text['snapshot-help-overview'] . $screen_help_text['snapshots_new_panel'] );
-				} else if ( ( isset( $_REQUEST['page'] ) ) && ( $_REQUEST['page'] == "snapshots_edit_panel" ) ) {
-
-					// Are we showing the edit form?
-					if ( ( isset( $_REQUEST['action'] ) ) && ( $_REQUEST['action'] == 'edit' ) ) {
-						add_contextual_help( $screen, $screen_help_text['snapshot-help-overview'] . $screen_help_text['snapshots_edit_panel']['edit'] );
-
-					} else if ( ( isset( $_REQUEST['action'] ) ) && ( $_REQUEST['action'] == "restore-panel" ) ) {
-
-						add_contextual_help( $screen, $screen_help_text['snapshot-help-overview'] . $screen_help_text['snapshots_edit_panel']['restore-panel'] );
-
-					} else {
-						add_contextual_help( $screen, $screen_help_text['snapshot-help-overview'] . $screen_help_text['snapshots_edit_panel']['default']
-						);
-					}
-				} else if ( ( isset( $_REQUEST['page'] ) ) && ( $_REQUEST['page'] == "snapshots_activity_panel" ) ) {
-
-					add_contextual_help( $screen, $screen_help_text['snapshot-help-overview'] . $screen_help_text['snapshots_activity_panel'] );
-
-				} else if ( ( isset( $_REQUEST['page'] ) ) && ( $_REQUEST['page'] == "snapshots_settings_panel" ) ) {
-
-					add_contextual_help( $screen, $screen_help_text['snapshot-help-overview'] . $screen_help_text['snapshots_settings_panel'] );
-				}
-
-			}
-		}
-
-		/**
 		 * Processing 'delete' action from form post to delete a select Snapshot.
 		 * Called from $this->snapshot_process_actions()
 		 *
@@ -1456,13 +1315,16 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function snapshot_delete_bulk_action_proc() {
-			if ( ! isset( $_POST['action'] ) || ( isset( $_POST['action'] ) && $_POST['action'] != 'delete' ) ) {
+		public function snapshot_delete_bulk_action_proc() {
+			// We have checked nonces coming into the function.
+			// phpcs:ignore
+			if ( ! isset( $_POST['action'] ) || ( isset( $_POST['action'] ) && 'delete' !== $_POST['action'] ) ) {
 				return;
 			}
 			$ref = getenv( "HTTP_REFERER" );
-			$parts = parse_url( $ref );
+			$parts = wp_parse_url( $ref );
 			parse_str( $parts['query'], $query );
+			// phpcs:ignore
 			if ( ! isset( $_REQUEST['delete-bulk'] ) ) {
 				wp_redirect( $ref );
 				die();
@@ -1472,8 +1334,8 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			$CONFIG_CHANGED = false;
 
-			if ( $page == 'snapshot_pro_managed_backups' ) {
-				$model = new Snapshot_Model_Full_Backup;
+			if ( 'snapshot_pro_managed_backups' === $page ) {
+				$model = new Snapshot_Model_Full_Backup();
 
 				if ( ! current_user_can( Snapshot_View_Full_Backup::get()->get_page_role() ) ) {
 					die;
@@ -1481,6 +1343,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				// Only some users can restore
 				$status = false;
 
+				// phpcs:ignore
 				foreach ( $_REQUEST['delete-bulk'] as $snapshot_key ) {
 					if ( $model->delete_backup( $snapshot_key ) ) {
 						$CONFIG_CHANGED = true;
@@ -1493,6 +1356,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				}
 
 			} else {
+				// phpcs:ignore
 				foreach ( $_REQUEST['delete-bulk'] as $snapshot_key ) {
 					if ( $this->snapshot_delete_item_action_proc( $snapshot_key, true ) ) {
 						$CONFIG_CHANGED = true;
@@ -1526,13 +1390,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function snapshot_delete_item_action_proc( $snapshot_item_key = 0, $DEFER_LOG_UPDATE = false ) {
+		public function snapshot_delete_item_action_proc( $snapshot_item_key = 0, $DEFER_LOG_UPDATE = false ) {
 
 			$CONFIG_CHANGED = false;
 			$ref = getenv( "HTTP_REFERER" );
-			$parts = parse_url( $ref );
+			$parts = wp_parse_url( $ref );
 			parse_str( $parts['query'], $query );
 			if ( ! $snapshot_item_key ) {
+				// We have checked nonces coming into the function.
+				// phpcs:ignore
 				if ( isset( $_REQUEST['item'] ) ) {
 					$snapshot_item_key = intval( $_REQUEST['item'] );
 				}
@@ -1547,33 +1413,33 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						if ( isset( $item_data['filename'] ) ) {
 							$backupFile = trailingslashit( $this->_settings['backupBaseFolderFull'] ) . $item_data['filename'];
 
-							if ( file_exists( $backupFile ) ) {
-								@unlink( $backupFile );
+							if ( is_writable( $backupFile ) ) {
+								unlink( $backupFile );
 							}
 						}
 
 						if ( isset( $item_data['timestamp'] ) ) {
 							$backupLogFileFull = trailingslashit( $this->_settings['backupLogFolderFull'] ) . $snapshot_item_key . "_" . $item_data['timestamp'] . ".log";
-							if ( file_exists( $backupLogFileFull ) ) {
-								@unlink( $backupLogFileFull );
+							if ( is_writable( $backupLogFileFull ) ) {
+								unlink( $backupLogFileFull );
 							}
 						}
 					}
 				}
 
 				$backupLogFileFull = trailingslashit( $this->_settings['backupLogFolderFull'] ) . $snapshot_item_key . "_backup.log";
-				if ( file_exists( $backupLogFileFull ) ) {
-					@unlink( $backupLogFileFull );
+				if ( is_writable( $backupLogFileFull ) ) {
+					unlink( $backupLogFileFull );
 				}
 
 				$backupLogFileFull = trailingslashit( $this->_settings['backupLogFolderFull'] ) . $snapshot_item_key . "_restore.log";
-				if ( file_exists( $backupLogFileFull ) ) {
-					@unlink( $backupLogFileFull );
+				if ( is_writable( $backupLogFileFull ) ) {
+					unlink( $backupLogFileFull );
 				}
 
 				$backupLockFileFull = trailingslashit( $this->_settings['backupLockFolderFull'] ) . $snapshot_item_key . ".lock";
-				if ( file_exists( $backupLockFileFull ) ) {
-					@unlink( $backupLockFileFull );
+				if ( is_writable( $backupLockFileFull ) ) {
+					unlink( $backupLockFileFull );
 				}
 
 				// Note we don't check the interval because we shouldn't need to. Just unschdule the event.
@@ -1608,8 +1474,9 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			}
 		}
 
-		function snapshot_item_run_immediate( $item_key ) {
-			wp_remote_post( get_option( 'siteurl' ) . '/wp-cron.php',
+		public function snapshot_item_run_immediate( $item_key ) {
+			wp_remote_post(
+                 get_option( 'siteurl' ) . '/wp-cron.php',
 				array(
 					'timeout' => 3,
 					'blocking' => false,
@@ -1633,7 +1500,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function snapshot_add_update_action_proc( $_post_array ) {
+		public function snapshot_add_update_action_proc( $_post_array ) {
 			$CONFIG_CHANGED = false;
 
 			if ( 'add' === $_post_array['snapshot-action'] ) {
@@ -1642,7 +1509,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				$item['timestamp'] = isset( $_post_array['snapshot-item'] ) ? intval( $_post_array['snapshot-item'] ) : time();
 				$item['blog-id'] = isset( $_post_array['snapshot-blog-id'] ) ? intval( $_post_array['snapshot-blog-id'] ) : 0;
 
-			} else if ( $_post_array['snapshot-action'] == "update" ) {
+			} else if ( "update" === $_post_array['snapshot-action'] ) {
 				$item_key = intval( $_post_array['snapshot-item'] );
 				if ( ! isset( $this->config_data['items'][ $item_key ] ) ) {
 					die;
@@ -1682,11 +1549,11 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			if ( isset( $_post_array['snapshot-tables-option'] ) ) {
 
 				$item['tables-option'] = $_post_array['snapshot-tables-option'];
-				if ( $item['tables-option'] == "none" ) {
-					// Nothing to see here.
-				} else if ( $item['tables-option'] == "all" ) {
-					// Nothing to see here.
-				} else if ( $item['tables-option'] == "selected" ) {
+				if ( "none" === $item['tables-option'] ) {
+					assert(true); // Nothing to see here.
+				} else if ( "all" === $item['tables-option'] ) {
+					assert(true); // Nothing to see here.
+				} else if ( "selected" === $item['tables-option'] ) {
 
 					// The form submit when not immediate will be this form element.
 					if ( isset( $_post_array['snapshot-tables'] ) ) {
@@ -1729,9 +1596,9 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			if ( isset( $_post_array['snapshot-files-option'] ) ) {
 
 				$item['files-option'] = $_post_array['snapshot-files-option'];
-				if ( $item['files-option'] == 'none' ) {
-					// Nothing to see here.
-				} else if ( $item['files-option'] == 'all' ) {
+				if ( 'none' === $item['files-option'] ) {
+					assert(true); // Nothing to see here.
+				} else if ( 'all' === $item['files-option'] ) {
 					if ( is_main_site( $item['blog-id'] ) ) {
 						$item['files-sections'] = array( 'themes', 'plugins', 'media' );
 						if ( is_multisite() ) {
@@ -1740,7 +1607,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					} else {
 						$item['files-sections'] = array( 'media' );
 					}
-				} else if ( $item['files-option'] == 'selected' ) {
+				} else if ( 'selected' === $item['files-option'] ) {
 
 					if ( is_main_site( $item['blog-id'] ) ) {
 						if ( isset( $_post_array['snapshot-files-sections'] ) ) {
@@ -1819,7 +1686,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			// If the form destination is empty then we are storing locally. So check the destination-directory
 			// value and move the local file to that location
-			if ( $_post_array['snapshot-destination'] == "local" ) {
+			if ( "local" === $_post_array['snapshot-destination'] ) {
 
 				$item_tmp = array();
 				$item_tmp['destination'] = sanitize_text_field( $_post_array['snapshot-destination'] );
@@ -1837,7 +1704,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 					foreach ( $item['data'] as $data_item_idx => $data_item ) {
 
-						if ( ( ! isset( $data_item['destination'] ) ) || ( $data_item['destination'] != $item_tmp['destination'] ) ) {
+						if ( ( ! isset( $data_item['destination'] ) ) || ( $item_tmp['destination'] !== $data_item['destination'] ) ) {
 							continue;
 						}
 
@@ -1858,7 +1725,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 								if ( ( file_exists( $currentFile ) ) && ( ! file_exists( $newFile ) ) ) {
 									$rename_ret = rename( $currentFile, $newFile );
-									if ( $rename_ret === true ) {
+									if ( true === $rename_ret ) {
 										$item['data'][ $data_item_idx ]['destination-directory'] = $item_tmp['destination-directory'];
 									}
 								}
@@ -1907,13 +1774,13 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							}
 
 							// If destination is empty then this is a local file.
-							if ( ( $item['destination'] ) || ( $item['destination'] == "local" ) ) {
+							if ( ( $item['destination'] ) || ( "local" === $item['destination'] ) ) {
 								$currentFile = trailingslashit( $current_backupFolder ) . $data_item['filename'];
 								$newFile = trailingslashit( $new_backupFolder ) . $data_item['filename'];
 
 								if ( ( file_exists( $currentFile ) ) && ( ! file_exists( $newFile ) ) ) {
 									$rename_ret = rename( $currentFile, $newFile );
-									if ( $rename_ret === true ) {
+									if ( true === $rename_ret ) {
 										$item['data'][ $data_item_idx ]['destination-directory'] = $item_tmp['destination-directory'];
 									}
 								}
@@ -1932,18 +1799,21 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				$item['destination-sync'] = 'archive';
 				if ( isset( $this->config_data['destinations'][ $item['destination'] ] ) ) {
 					$destination = $this->config_data['destinations'][ $item['destination'] ];
-					if ( ( isset( $destination['type'] ) ) && ( $destination['type'] == "dropbox" ) ) {
+					if ( ( isset( $destination['type'] ) ) && ( "dropbox" === $destination['type'] ) ) {
 						$item['destination-sync'] = sanitize_text_field( $_post_array['snapshot-destination-sync'] );
 					}
 				}
 			}
 
+			// We have checked for nonces coming into the function.
+			// phpcs:ignore
 			if ( isset( $_POST['snapshot-archive-count'] ) ) {
 				$item['archive-count'] = intval( $_post_array['snapshot-archive-count'] );
 			} else {
 				$item['archive-count'] = 0;
 			}
 
+			// phpcs:ignore
 			if (!empty($_POST)) {
 				$item['clean-remote'] = !empty($_post_array['snapshot-clean-remote']);
 			} else {
@@ -1969,11 +1839,14 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			} else {
 				$redirect_url = $this->_settings['SNAPSHOT_MENU_URL'] . 'snapshot_pro_snapshots';
 
-				$redirect_url = add_query_arg( array(
-					'snapshot-action' => 'view',
-					'item' => $item['timestamp'],
-					'message' => 'success-' . ( 'update' === $_post_array['snapshot-action'] ? 'update' : 'add' ),
-				), $redirect_url );
+				$redirect_url = add_query_arg(
+					array(
+						'snapshot-action' => 'view',
+						'item' => $item['timestamp'],
+						'message' => 'success-' . ( 'update' === $_post_array['snapshot-action'] ? 'update' : 'add' ),
+						'snapshot-noonce-field' => wp_create_nonce( 'snapshot-nonce' ),
+					), $redirect_url
+				);
 
 				wp_redirect( esc_url_raw( $redirect_url ) );
 			}
@@ -1991,11 +1864,13 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function snapshot_settings_config_update() {
+		public function snapshot_settings_config_update() {
 			$CONFIG_CHANGED = false;
 
-			$model = new Snapshot_Model_Full_Backup;
+			$model = new Snapshot_Model_Full_Backup();
 
+			// We have checked nonces coming into the function.
+			// phpcs:ignore
 			if ( isset( $_REQUEST['files'] ) ) {
 
 				$files = intval( $_REQUEST['files'] );
@@ -2005,6 +1880,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				}
 			}
 
+			// phpcs:ignore
 			if ( isset( $_REQUEST['secret-key'] ) ) {
 				$key = sanitize_text_field( $_REQUEST['secret-key'] );
 
@@ -2033,7 +1909,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			//Testing secret-key
 			$token = Snapshot_Model_Full_Remote_Api::get()->get_token();
 
-			if ( false == $token ) {
+			if ( false === $token ) {
 				$this->config_data['config']['secret-key'] = '';
 				$model->set_config( 'secret-key', '' );
 				$model->remote()->remove_token();
@@ -2045,8 +1921,10 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			}
 
+			// phpcs:ignore
 			$backupFolderRequest = isset( $_REQUEST['backupFolder'] ) ? $_REQUEST['backupFolder'] : 'snapshot';
-			if ( isset( $_REQUEST['files'] ) && 1 == $files ) {
+			// phpcs:ignore
+			if ( isset( $_REQUEST['files'] ) && 1 === $files ) {
 				$backupFolderRequest = 'snapshot';
 			}
 			if ( isset( $backupFolderRequest ) ) {
@@ -2056,8 +1934,8 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				// Because this needs to be universal we convert Windows paths entered be the user into proper PHP forward slash '/'
 				$backupFolderRequest = str_replace( '\\', '/', stripslashes( sanitize_text_field( $backupFolderRequest ) ) );
 
-				if ( ( substr( $backupFolderRequest, 0, 1 ) == "/" )
-				     || ( substr( $backupFolderRequest, 1, 2 ) == ":/" )
+				if ( '/' === ( substr( $backupFolderRequest, 0, 1 ) )
+				     || ':/' === ( substr( $backupFolderRequest, 1, 2 ) )
 				) {
 					// Setting Absolute path!
 
@@ -2082,13 +1960,13 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				}
 
 				if ( ( isset( $backupFolder ) ) && ( strlen( $backupFolder ) ) ) {
-					if ( $_oldbackupFolderFull != $_newbackupFolderFull ) {
+					if ( $_oldbackupFolderFull !== $_newbackupFolderFull ) {
 						// Start with the assumption we failed moving dirs by default
 						$rename_ret = false;
-						if ( file_exists( $_oldbackupFolderFull ) ) {
+						if ( is_writable( $_oldbackupFolderFull ) ) {
 							// If we can reach the old folder, we might still
 							// be able to simply rename it
-							$rename_ret = @rename( $_oldbackupFolderFull, $_newbackupFolderFull );
+							$rename_ret = rename( $_oldbackupFolderFull, $_newbackupFolderFull );
 						} else {
 							// Okay, so no old backup folder. Let's just create
 							// what we got and inform the user
@@ -2100,7 +1978,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						}
 
 						// Alright now... so, are we good to go?
-						if ( $rename_ret === true ) {
+						if ( true === $rename_ret ) {
 							$CONFIG_CHANGED = true;
 
 							// Now that the physical files have been changed update our settings.
@@ -2112,6 +1990,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				}
 			}
 
+			// phpcs:ignore
 			if ( isset( $_REQUEST['segmentSize'] ) ) {
 
 				$segmentSize = intval( $_REQUEST['segmentSize'] );
@@ -2121,8 +2000,10 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				}
 			}
 
-			if ( ( isset( $_REQUEST['snapshot-sub-action'] ) ) && ( $_REQUEST['snapshot-sub-action'] == "memoryLimit" ) ) {
+			// phpcs:ignore
+			if ( ( isset( $_REQUEST['snapshot-sub-action'] ) ) && ( "memoryLimit" === $_REQUEST['snapshot-sub-action'] ) ) {
 
+				// phpcs:ignore
 				if ( isset( $_REQUEST['memoryLimit'] ) ) {
 
 					$this->config_data['config']['memoryLimit'] = sanitize_text_field( $_REQUEST['memoryLimit'] );
@@ -2130,8 +2011,10 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				}
 			}
 
+			// phpcs:ignore
 			if ( isset( $_REQUEST['filesIgnore'] ) ) {
 
+				// phpcs:ignore
 				$files_ignore = explode( "\n", $_REQUEST['filesIgnore'] );
 				if ( ( is_array( $files_ignore ) ) && ( count( $files_ignore ) ) ) {
 					foreach ( $files_ignore as $idx => $file_ignore ) {
@@ -2146,19 +2029,17 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				}
 			}
 
-			if ( isset( $_REQUEST['migration'] ) ) {
-				global $wpdb;
-
-				$CONFIG_CHANGED = $this->snapshot_migrate_config_proc( $wpdb->blogid );
-			}
-
+			// phpcs:ignore
 			if ( ( isset( $_REQUEST['errorReporting'] ) ) && ( count( $_REQUEST['errorReporting'] ) ) ) {
+				// phpcs:ignore
 				$this->config_data['config']['errorReporting'] = $_REQUEST['errorReporting'];
 				$CONFIG_CHANGED = true;
 			}
 
-			if ( ( isset( $_REQUEST['zipLibrary'] ) ) && ( $_REQUEST['snapshot-sub-action'] == "zipLibrary" ) ) {
+			// phpcs:ignore
+			if ( ( isset( $_REQUEST['zipLibrary'] ) ) && ( "zipLibrary" === $_REQUEST['snapshot-sub-action'] ) ) {
 
+				// phpcs:ignore
 				if ( isset( $_REQUEST['zipLibrary'] ) ) {
 					$this->config_data['config']['zipLibrary'] = sanitize_text_field( $_REQUEST['zipLibrary'] );
 					$CONFIG_CHANGED = true;
@@ -2170,16 +2051,22 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			}
 
 			$location = esc_url_raw( add_query_arg( 'message', 'success-settings', $this->_settings['SNAPSHOT_MENU_URL'] . 'snapshot_pro_settings' ) );
-			if ( isset( $_POST['snapshot-destination']['type'] ) && $_POST['snapshot-destination']['type'] == 'local' ) {
+			// phpcs:ignore
+			if ( isset( $_POST['snapshot-destination']['type'] ) && 'local' === $_POST['snapshot-destination']['type'] ) {
 				$message = 'success-update';
 				if ( ! isset( $this->_admin_header_error ) || empty( $this->_admin_header_error ) ) {
 					$location = esc_url_raw( add_query_arg( 'message', 'success-update', $this->_settings['SNAPSHOT_MENU_URL'] . 'snapshot_pro_destinations' ) );
 				} else {
-					$location = esc_url_raw( add_query_arg( array(
-						'snapshot-action' => 'edit',
-						'type' => urlencode( $_REQUEST['snapshot-destination']['type'] ),
-						'item' => urlencode( $_REQUEST['item'] ),
-					), WPMUDEVSnapshot::instance()->snapshot_get_pagehook_url( 'snapshots-newui-destinations' ) ) );
+					$location = esc_url_raw(
+						add_query_arg(
+							array(
+								'snapshot-action' => 'edit',
+								'type' => rawurlencode( $_REQUEST['snapshot-destination']['type'] ), // phpcs:ignore
+								'item' => rawurlencode( $_REQUEST['item'] ), // phpcs:ignore
+								'destination-noonce-field' => wp_create_nonce( 'snapshot-destination' ),
+							), self::instance()->snapshot_get_pagehook_url( 'snapshots-newui-destinations' )
+						)
+					);
 				}
 
 			}
@@ -2200,25 +2087,35 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function load_config() {
+		public function load_config() {
 
 			global $wpdb;
 
 			if ( is_multisite() ) {
 				//$this->config_data = get_blog_option($wpdb->blogid, $this->_settings['options_key']);
 				$blog_prefix = $wpdb->get_blog_prefix( $wpdb->blogid );
-				$row = $wpdb->get_col( $wpdb->prepare( "SELECT option_value FROM {$blog_prefix}options
-						WHERE option_name = %s", $this->_settings['options_key'] ) );
+				// We are using placeholder for non-dynamic data here.
+				$row = $wpdb->get_col(
+					$wpdb->prepare(
+						// phpcs:ignore
+						"SELECT option_value FROM {$blog_prefix}options
+						WHERE option_name = %s", $this->_settings['options_key']
+					)
+				);
 				if ( $row ) {
-					$this->config_data = unserialize( $row[0] );
+					$this->config_data = maybe_unserialize( $row[0] );
 				}
 
 			} else {
 				//$this->config_data = get_option($this->_settings['options_key']);
-				$row = $wpdb->get_col( $wpdb->prepare( "SELECT option_value FROM $wpdb->options
-					WHERE option_name = %s LIMIT 1", $this->_settings['options_key'] ) );
+				$row = $wpdb->get_col(
+					$wpdb->prepare(
+						"SELECT option_value FROM $wpdb->options
+						WHERE option_name = %s LIMIT 1", $this->_settings['options_key']
+					)
+				);
 				if ( $row ) {
-					$this->config_data = unserialize( $row[0] );
+					$this->config_data = maybe_unserialize( $row[0] );
 				}
 			}
 
@@ -2302,7 +2199,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					$this->config_data['config']['zipLibrary'] = 'ZipArchive';
 				}
 			}
-			if ( ( $this->config_data['config']['zipLibrary'] == 'ZipArchive' ) && ( ! class_exists( 'ZipArchive' ) ) ) {
+			if ( ( 'ZipArchive' === $this->config_data['config']['zipLibrary'] ) && ( ! class_exists( 'ZipArchive' ) ) ) {
 				$this->config_data['config']['zipLibrary'] = 'PclZip';
 			}
 
@@ -2606,7 +2503,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			 *
 			 * @since 3.0.2-beta-1
 			 */
-			do_action( 'snapshot-config-loaded' );
+			do_action( 'snapshot_config_loaded' );
 		}
 
 		/**
@@ -2626,7 +2523,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return bool whether the config was saved successfully
 		 */
-		function save_config( $force_save = false ) {
+		public function save_config( $force_save = false ) {
 			global $wpdb;
 
 			// Note below for multisite we hard code the blog id to '1'. This is because the plugin should only ever
@@ -2648,7 +2545,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			return $result;
 		}
 
-		function add_update_config_item( $item_key, $item ) {
+		public function add_update_config_item( $item_key, $item ) {
 			$this->load_config();
 			$this->config_data['items'][ $item_key ] = $item;
 			$this->save_config();
@@ -2665,7 +2562,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function snapshot_get_edit_item( $item_key ) {
+		public function snapshot_get_edit_item( $item_key ) {
 			//		if (!isset($_REQUEST['item']))
 			//			return;
 
@@ -2693,7 +2590,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function set_backup_folder( $is_moving = false ) {
+		public function set_backup_folder( $is_moving = false ) {
 
 			global $current_site;
 
@@ -2707,8 +2604,8 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			$this->config_data['config']['backupFolder'] = str_replace( '\\', '/', $this->config_data['config']['backupFolder'] );
 
 			// Are we dealing with Abolute or relative path?
-			if ( ( substr( $this->config_data['config']['backupFolder'], 0, 1 ) == "/" )
-			     || ( substr( $this->config_data['config']['backupFolder'], 1, 2 ) == ":/" )
+			if ( '/' === ( substr( $this->config_data['config']['backupFolder'], 0, 1 ) )
+			     || ':/' === ( substr( $this->config_data['config']['backupFolder'], 1, 2 ) )
 			) {
 
 				// If absolute set a flag so we don't need to keep checking the substr();
@@ -2742,7 +2639,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			if ( ! is_writable( $_backupFolderFull ) ) {
 
 				/* Try updating the folder perms */
-				@chmod( $_backupFolderFull, 0775 );
+				chmod( $_backupFolderFull, 0775 );
 				if ( ! is_writable( $_backupFolderFull ) ) {
 
 					/* Appears it is still not writeable then report this via the admin heder message and return */
@@ -2752,7 +2649,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			}
 
 			$this->_settings['backupBaseFolderFull'] = $_backupFolderFull;
-			if ( $this->config_data['config']['absoluteFolder'] != true ) {
+			if ( true !== $this->config_data['config']['absoluteFolder'] ) {
 
 				$this->_settings['backupURLFull'] = trailingslashit( $wp_upload_dir['baseurl'] ) . $this->config_data['config']['backupFolder'];
 
@@ -2765,7 +2662,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			}
 		}
 
-		function set_log_folders() {
+		public function set_log_folders() {
 
 			if ( empty( $this->_settings['backupBaseFolderFull'] ) ) {
 				return;
@@ -2779,8 +2676,10 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				if ( wp_mkdir_p( $_backupBackupFolderFull, 0775 ) === false ) {
 
 					/* If here we cannot create the folder. So report this via the admin header message and return */
-					$this->_admin_header_error .= __( "ERROR: Cannot create snapshot Log folder. Check that the parent folder is writeable",
-							SNAPSHOT_I18N_DOMAIN ) . " " . $_backupBackupFolderFull;
+					$this->_admin_header_error .= __(
+                         "ERROR: Cannot create snapshot Log folder. Check that the parent folder is writeable",
+							SNAPSHOT_I18N_DOMAIN
+                        ) . " " . $_backupBackupFolderFull;
 
 					return;
 				}
@@ -2790,7 +2689,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			if ( ! is_writable( $_backupBackupFolderFull ) ) {
 
 				/* Try updating the folder perms */
-				@chmod( $_backupBackupFolderFull, 0775 );
+				chmod( $_backupBackupFolderFull, 0775 );
 				if ( ! is_writable( $_backupBackupFolderFull ) ) {
 
 					/* Appears it is still not writeable then report this via the admin heder message and return */
@@ -2817,7 +2716,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			if ( ! is_writable( $_backupRestoreFolderFull ) ) {
 
 				/* Try updating the folder perms */
-				@chmod( $_backupRestoreFolderFull, 0775 );
+				chmod( $_backupRestoreFolderFull, 0775 );
 				if ( ! is_writable( $_backupRestoreFolderFull ) ) {
 
 					/* Appears it is still not writeable then report this via the admin heder message and return */
@@ -2844,7 +2743,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			if ( ! is_writable( $_backupLogFolderFull ) ) {
 
 				/* Try updating the folder perms */
-				@chmod( $_backupLogFolderFull, 0775 );
+				chmod( $_backupLogFolderFull, 0775 );
 				if ( ! is_writable( $_backupLogFolderFull ) ) {
 
 					/* Appears it is still not writeable then report this via the admin heder message and return */
@@ -2873,7 +2772,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			if ( ! is_writable( $_backupSessionsFolderFull ) ) {
 
 				/* Try updating the folder perms */
-				@chmod( $_backupSessionsFolderFull, 0775 );
+				chmod( $_backupSessionsFolderFull, 0775 );
 				if ( ! is_writable( $_backupSessionsFolderFull ) ) {
 
 					/* Appears it is still not writeable then report this via the admin heder message and return */
@@ -2884,7 +2783,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			Snapshot_Helper_Utility::secure_folder( $_backupSessionsFolderFull );
 			$this->_settings['backupSessionFolderFull'] = $_backupSessionsFolderFull;
 
-			if ( $this->config_data['config']['absoluteFolder'] != true ) {
+			if ( true !== $this->config_data['config']['absoluteFolder'] ) {
 
 				//$relative_path = substr($_backupLogFolderFull, strlen(ABSPATH));
 				//$this->_settings['backupLogURLFull']		= site_url($relative_path);
@@ -2902,8 +2801,10 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				if ( wp_mkdir_p( $_backupLockFolderFull, 0775 ) === false ) {
 
 					/* If here we cannot create the folder. So report this via the admin header message and return */
-					$this->_admin_header_error .= __( "ERROR: Cannot create snapshot Lock folder. Check that the parent folder is writeable",
-							SNAPSHOT_I18N_DOMAIN ) . " " . $_backupLockFolderFull;
+					$this->_admin_header_error .= __(
+                         "ERROR: Cannot create snapshot Lock folder. Check that the parent folder is writeable",
+							SNAPSHOT_I18N_DOMAIN
+                        ) . " " . $_backupLockFolderFull;
 
 					return;
 				}
@@ -2913,7 +2814,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			if ( ! is_writable( $_backupLockFolderFull ) ) {
 
 				/* Try updating the folder perms */
-				@chmod( $_backupLockFolderFull, 0775 );
+				chmod( $_backupLockFolderFull, 0775 );
 				if ( ! is_writable( $_backupLockFolderFull ) ) {
 
 					/* Appears it is still not writeable then report this via the admin heder message and return */
@@ -2942,7 +2843,8 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 * @return void
 		 */
 
-		function snapshot_ajax_backup_proc() {
+		public function snapshot_ajax_backup_proc() {
+			check_ajax_referer( 'snapshot-ajax-nonce', 'security' );
 			global $wpdb;
 
 			// When zlib compression is turned on we get errors from this shutdown action setup by WordPress. So we disabled.
@@ -2951,14 +2853,16 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				remove_action( 'shutdown', 'wp_ob_end_flush_all', 1 );
 			}
 
-			@ini_set( 'html_errors', 'Off' );
-			@ini_set( 'zlib.output_compression', 'Off' );
-			@set_time_limit( 0 );
+			@ini_set( 'html_errors', 'Off' ); // phpcs:ignore
+			@ini_set( 'zlib.output_compression', 'Off' ); // phpcs:ignore
+			@set_time_limit( 0 ); // phpcs:ignore
 
+			// We use set_error_handler() as logging code and not debug code.
+			// phpcs:ignore
 			$old_error_handler = set_error_handler( array( $this, 'snapshot_ErrorHandler' ) );
 
 			if ( ( isset( $this->config_data['config']['memoryLimit'] ) ) && ( ! empty( $this->config_data['config']['memoryLimit'] ) ) ) {
-				@ini_set( 'memory_limit', $this->config_data['config']['memoryLimit'] );
+				@ini_set( 'memory_limit', $this->config_data['config']['memoryLimit'] ); // phpcs:ignore
 			}
 
 			// Need the item_key and data_item_key before init of the Logger
@@ -2974,7 +2878,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			Snapshot_Helper_Debug::set_error_reporting( $this->config_data['config']['errorReporting'] );
 
 			/* Needed to create the archvie zip file */
-			if ( $this->config_data['config']['zipLibrary'] == "PclZip" ) {
+			if ( "PclZip" === $this->config_data['config']['zipLibrary'] ) {
 				if ( ! defined( 'PCLZIP_TEMPORARY_DIR' ) ) {
 					define( 'PCLZIP_TEMPORARY_DIR', trailingslashit( $this->_settings['backupBackupFolderFull'] ) . $item_key . "/" );
 				}
@@ -2992,9 +2896,9 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					$this->_session = new Snapshot_Helper_Session( trailingslashit( $this->_settings['backupSessionFolderFull'] ), $item_key, true );
 
 					if ( isset( $_POST['snapshot-action'] ) ) {
-						if ( $_POST['snapshot-action'] == "add" ) {
+						if ( "add" === $_POST['snapshot-action'] ) {
 							$this->snapshot_logger->log_message( "adding new snapshot: " . $item_key );
-						} else if ( $_POST['snapshot-action'] == "update" ) {
+						} else if ( "update" === $_POST['snapshot-action'] ) {
 							$this->snapshot_logger->log_message( "updating snapshot: " . $item_key );
 						}
 						$this->snapshot_add_update_action_proc( $_POST );
@@ -3011,11 +2915,11 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						? $this->config_data['destinations'][ $destination_key ]
 						: array();
 
-					if ( ! empty( $destmeta['protocol'] ) && ( $destmeta['protocol'] == 'sftp' ) && ( version_compare( phpversion(), "5.3.8", "<" ) ) ) {
+					if ( ! empty( $destmeta['protocol'] ) && ( 'sftp' === $destmeta['protocol'] ) && ( version_compare( phpversion(), "5.3.8", "<" ) ) ) {
 						$this->snapshot_logger->log_message( "Error: For SFTP destinations, a PHP version greater or equal to 5.3.8 is required." );
 						$error_array['errorStatus'] = true;
 
-						echo json_encode( $error_array );
+						echo wp_json_encode( $error_array );
 
 						die();
 					}
@@ -3024,7 +2928,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					if ( is_multisite() ) {
 						if ( isset( $item['blog-id'] ) ) {
 							$blog_id = intval( $item['blog-id'] );
-							if ( $blog_id != $wpdb->blogid ) {
+							if ( $blog_id !== $wpdb->blogid ) {
 								$original_blog_id = $wpdb->blogid;
 								switch_to_blog( $blog_id );
 							}
@@ -3040,17 +2944,20 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						switch_to_blog( $original_blog_id );
 					}
 
-					if ( ( isset( $error_array['errorStatus'] ) ) && ( $error_array['errorStatus'] == true ) ) {
+					if ( ( isset( $error_array['errorStatus'] ) ) && ( true === $error_array['errorStatus'] ) ) {
 						// We have a problem.
 
-						$this->snapshot_logger->log_message( "init: _POST" . print_r( $_POST, true ) );
-						$this->snapshot_logger->log_message( "init: error_array" . print_r( $error_array, true ) );
-						$this->snapshot_logger->log_message( "init: _SESSION" . print_r( $this->_session->data, true ) );
+						// Not debug code. We use print_r() for logging purposes.
+						$this->snapshot_logger->log_message( "init: _POST" . print_r( $_POST, true ) ); // phpcs:ignore
+						$this->snapshot_logger->log_message( "init: error_array" . print_r( $error_array, true ) ); // phpcs:ignore
+						$this->snapshot_logger->log_message( "init: _SESSION" . print_r( $this->_session->data, true ) ); // phpcs:ignore
 						$this->snapshot_logger->log_message( "init: output:" . $function_output );
 
-						$this->snapshot_logger->log_message( "memory limit: " . ini_get( 'memory_limit' ) .
+						$this->snapshot_logger->log_message(
+                             "memory limit: " . ini_get( 'memory_limit' ) .
 						                                     ": memory usage current: " . Snapshot_Helper_Utility::size_format( memory_get_usage( true ) ) .
-						                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) ) );
+						                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) )
+                            );
 
 						$this->config_data['items'][ $item_key ]['data'][ $data_item_key ]['archive-status'][ time() ] = $error_array;
 						$this->add_update_config_item( $item_key, $this->config_data['items'][ $item_key ] );
@@ -3060,7 +2967,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						$error_array['MEMORY']['memory_usage_current'] = Snapshot_Helper_Utility::size_format( memory_get_usage( true ) );
 						$error_array['MEMORY']['memory_usage_peak'] = Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) );
 
-						echo json_encode( $error_array );
+						echo wp_json_encode( $error_array );
 
 						die();
 					}
@@ -3080,7 +2987,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					if ( is_multisite() ) {
 						if ( isset( $_POST['snapshot-blog-id'] ) ) {
 							$blog_id = intval( $_POST['snapshot-blog-id'] );
-							if ( $blog_id != $wpdb->blogid ) {
+							if ( $blog_id !== $wpdb->blogid ) {
 								$original_blog_id = $wpdb->blogid;
 								switch_to_blog( $blog_id );
 							}
@@ -3096,17 +3003,20 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						switch_to_blog( $original_blog_id );
 					}
 
-					if ( ( isset( $error_array['errorStatus'] ) ) && ( $error_array['errorStatus'] == true ) ) {
+					if ( ( isset( $error_array['errorStatus'] ) ) && ( true === $error_array['errorStatus'] ) ) {
 						// We have a problem.
 
-						$this->snapshot_logger->log_message( "table: _POST" . print_r( $_POST, true ) );
-						$this->snapshot_logger->log_message( "table: error_array" . print_r( $error_array, true ) );
-						$this->snapshot_logger->log_message( "table: _SESSION" . print_r( $this->_session->data, true ) );
+						// Not debug code. We use print_r() for logging purposes.
+						$this->snapshot_logger->log_message( "table: _POST" . print_r( $_POST, true ) ); // phpcs:ignore
+						$this->snapshot_logger->log_message( "table: error_array" . print_r( $error_array, true ) ); // phpcs:ignore
+						$this->snapshot_logger->log_message( "table: _SESSION" . print_r( $this->_session->data, true ) ); // phpcs:ignore
 						$this->snapshot_logger->log_message( "table: output:" . $function_output );
 
-						$this->snapshot_logger->log_message( "memory limit: " . ini_get( 'memory_limit' ) .
+						$this->snapshot_logger->log_message(
+                             "memory limit: " . ini_get( 'memory_limit' ) .
 						                                     ": memory usage current: " . Snapshot_Helper_Utility::size_format( memory_get_usage( true ) ) .
-						                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) ) );
+						                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) )
+                            );
 
 						$this->config_data['items'][ $item_key ]['data'][ $data_item_key ]['archive-status'][ time() ] = $error_array;
 						$this->add_update_config_item( $item_key, $this->config_data['items'][ $item_key ] );
@@ -3116,7 +3026,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						$error_array['MEMORY']['memory_usage_current'] = Snapshot_Helper_Utility::size_format( memory_get_usage( true ) );
 						$error_array['MEMORY']['memory_usage_peak'] = Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) );
 
-						echo json_encode( $error_array );
+						echo wp_json_encode( $error_array );
 
 						die();
 					}
@@ -3146,17 +3056,20 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							$function_output = ob_get_contents();
 							ob_end_clean();
 
-							if ( ( isset( $error_array['errorStatus'] ) ) && ( $error_array['errorStatus'] == true ) ) {
+							if ( ( isset( $error_array['errorStatus'] ) ) && ( true === $error_array['errorStatus'] ) ) {
 								// We have a problem.
 
-								$this->snapshot_logger->log_message( "file: _POST" . print_r( $_POST, true ) );
-								$this->snapshot_logger->log_message( "file: error_array" . print_r( $error_array, true ) );
-								$this->snapshot_logger->log_message( "file: _SESSION" . print_r( $this->_session->data, true ) );
+								// Not debug code. We use print_r() for logging purposes.
+								$this->snapshot_logger->log_message( "file: _POST" . print_r( $_POST, true ) ); // phpcs:ignore
+								$this->snapshot_logger->log_message( "file: error_array" . print_r( $error_array, true ) ); // phpcs:ignore
+								$this->snapshot_logger->log_message( "file: _SESSION" . print_r( $this->_session->data, true ) ); // phpcs:ignore
 								$this->snapshot_logger->log_message( "file: output:" . $function_output );
 
-								$this->snapshot_logger->log_message( "memory limit: " . ini_get( 'memory_limit' ) .
+								$this->snapshot_logger->log_message(
+                                     "memory limit: " . ini_get( 'memory_limit' ) .
 								                                     ": memory usage current: " . Snapshot_Helper_Utility::size_format( memory_get_usage( true ) ) .
-								                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) ) );
+								                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) )
+                                    );
 
 								$this->config_data['items'][ $item_key ]['data'][ $data_item_key ]['archive-status'][ time() ] = $error_array;
 								$this->add_update_config_item( $item_key, $this->config_data['items'][ $item_key ] );
@@ -3166,7 +3079,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 								$error_array['MEMORY']['memory_usage_current'] = Snapshot_Helper_Utility::size_format( memory_get_usage( true ) );
 								$error_array['MEMORY']['memory_usage_peak'] = Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) );
 
-								echo json_encode( $error_array );
+								echo wp_json_encode( $error_array );
 
 								die();
 							}
@@ -3190,17 +3103,20 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					$function_output = ob_get_contents();
 					ob_end_clean();
 
-					if ( ( isset( $error_array['errorStatus'] ) ) && ( $error_array['errorStatus'] == true ) ) {
+					if ( ( isset( $error_array['errorStatus'] ) ) && ( true === $error_array['errorStatus'] ) ) {
 						// We have a problem.
 
-						$this->snapshot_logger->log_message( "finish: error_array:" . print_r( $error_array, true ) );
-						$this->snapshot_logger->log_message( "finish: _SESSION:" . print_r( $this->_session->data, true ) );
-						$this->snapshot_logger->log_message( "finish: item:" . print_r( $item, true ) );
+						// Not debug code. We use print_r() for logging purposes.
+						$this->snapshot_logger->log_message( "finish: error_array:" . print_r( $error_array, true ) ); // phpcs:ignore
+						$this->snapshot_logger->log_message( "finish: _SESSION:" . print_r( $this->_session->data, true ) ); // phpcs:ignore
+						$this->snapshot_logger->log_message( "finish: item:" . print_r( $item, true ) ); // phpcs:ignore
 						$this->snapshot_logger->log_message( "finish: output:" . $function_output );
 
-						$this->snapshot_logger->log_message( "memory limit: " . ini_get( 'memory_limit' ) .
+						$this->snapshot_logger->log_message(
+                             "memory limit: " . ini_get( 'memory_limit' ) .
 						                                     ": memory usage current: " . Snapshot_Helper_Utility::size_format( memory_get_usage( true ) ) .
-						                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) ) );
+						                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) )
+                            );
 
 						$this->config_data['items'][ $item_key ]['data'][ $data_item_key ]['archive-status'][ time() ] = $error_array;
 						$this->add_update_config_item( $item_key, $this->config_data['items'][ $item_key ] );
@@ -3210,7 +3126,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						$error_array['MEMORY']['memory_usage_current'] = Snapshot_Helper_Utility::size_format( memory_get_usage( true ) );
 						$error_array['MEMORY']['memory_usage_peak'] = Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) );
 
-						echo json_encode( $error_array );
+						echo wp_json_encode( $error_array );
 
 						die();
 					} else {
@@ -3221,17 +3137,18 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 					$this->snapshot_logger->log_message( "finish: " . basename( $error_array['responseFile'] ) );
 					$this->purge_archive_limit( $item_key );
-					wp_remote_post( get_option( 'siteurl' ) . '/wp-cron.php',
-						array(
-							'timeout' => 3,
-							'blocking' => false,
-							'sslverify' => false,
-							'body' => array(
-								'nonce' => wp_create_nonce( 'WPMUDEVSnapshot' ),
-								'type' => 'start',
-							),
-							'user-agent' => 'WPMUDEVSnapshot',
-						)
+					wp_remote_post(
+						get_option( 'siteurl' ) . '/wp-cron.php',
+							array(
+								'timeout' => 3,
+								'blocking' => false,
+								'sslverify' => false,
+								'body' => array(
+									'nonce' => wp_create_nonce( 'WPMUDEVSnapshot' ),
+									'type' => 'start',
+								),
+								'user-agent' => 'WPMUDEVSnapshot',
+							)
 					);
 
 					break;
@@ -3249,7 +3166,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			$error_array['MEMORY']['memory_usage_current'] = Snapshot_Helper_Utility::size_format( memory_get_usage( true ) );
 			$error_array['MEMORY']['memory_usage_peak'] = Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) );
 
-			echo json_encode( $error_array );
+			echo wp_json_encode( $error_array );
 			die();
 		}
 
@@ -3264,7 +3181,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 * @return void
 		 */
 
-		function snapshot_ajax_backup_init( $item, $_post_array ) {
+		public function snapshot_ajax_backup_init( $item, $_post_array ) {
 			global $wpdb;
 
 			$home_path = apply_filters( 'snapshot_home_path', get_home_path() );
@@ -3289,20 +3206,28 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			if ( ! is_writable( $sessionItemBackupFolder ) ) {
 				$error_status['errorStatus'] = true;
-				$error_status['errorText'] = "<p>" . __( "ERROR: Snapshot backup aborted.<br />The Snapshot folder is not writeable. Check the settings.",
-						SNAPSHOT_I18N_DOMAIN ) . " " . $sessionItemBackupFolder . "</p>";
+				$error_status['errorText'] = "<p>" . __(
+                     "ERROR: Snapshot backup aborted.<br />The Snapshot folder is not writeable. Check the settings.",
+						SNAPSHOT_I18N_DOMAIN
+                    ) . " " . $sessionItemBackupFolder . "</p>";
 
 				return $error_status;
 			}
 
 			// Cleanup any files from a previous backup attempt
-			if ( $dh = opendir( $sessionItemBackupFolder ) ) {
-				while ( ( $file = readdir( $dh ) ) !== false ) {
-					if ( ( $file == '.' ) || ( $file == '..' ) ) {
+			$dh = opendir( $sessionItemBackupFolder );
+			if ( $dh ) {
+				$file = readdir( $dh );
+				while ( false !== $file ) {
+					if ( ( '.' === $file ) || ( '..' === $file ) ) {
+						$file = readdir( $dh );
 						continue;
 					}
 
-					@unlink( trailingslashit( $sessionItemBackupFolder ) . $file );
+					if ( is_writable( trailingslashit( $sessionItemBackupFolder ) . $file ) )
+						unlink( trailingslashit( $sessionItemBackupFolder ) . $file );
+
+					$file = readdir( $dh );
 				}
 				closedir( $dh );
 			}
@@ -3314,11 +3239,11 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			if ( isset( $item['tables-option'] ) ) {
 
-				if ( $item['tables-option'] == "none" ) {
-
-				} else if ( $item['tables-option'] == "all" ) {
+				if ( "none" === $item['tables-option'] ) {
+					assert(true); // No-op.
+				} else if ( "all" === $item['tables-option'] ) {
 					$tables_sections = Snapshot_Helper_Utility::get_database_tables( $item['blog-id'] );
-				} else if ( $item['tables-option'] == "selected" ) {
+				} else if ( "selected" === $item['tables-option'] ) {
 					// This should already be set from the Add/Update form post
 					$tables_sections = $item['tables-sections'];
 				}
@@ -3332,15 +3257,13 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					foreach ( $tables_set as $table_name ) {
 						$_set = array();
 
-						if ( $section == "global" ) {
+						if ( "global" === $section ) {
 							//echo "table_name[". $table_name ."]<br />";
-							if ( ( $table_name == $wpdb->base_prefix . "users" ) || ( $table_name == $wpdb->base_prefix . "usermeta" ) ) {
+							if ( ( $wpdb->base_prefix . "users" === $table_name ) || ( $wpdb->base_prefix . "usermeta" === $table_name ) ) {
 
 								if ( ! isset( $this->_session->data['global_user_ids'] ) ) {
 									$this->_session->data['global_user_ids'] = array();
-									$sql_str = "SELECT user_id FROM " . $wpdb->base_prefix . "usermeta WHERE meta_key='primary_blog' AND meta_value='" . $item['blog-id'] . "'";
-									//echo "sql_str=[". $sql_str ."]<br />";
-									$user_ids = $wpdb->get_col( $sql_str );
+									$user_ids = $wpdb->get_col( $wpdb->prepare( "SELECT user_id FROM {$wpdb->base_prefix}usermeta WHERE meta_key='primary_blog' AND meta_value=%s", $item['blog-id'] ) );
 									if ( $user_ids ) {
 										$this->_session->data['global_user_ids'] = $user_ids;
 									}
@@ -3350,16 +3273,20 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 								     && ( is_array( $this->_session->data['global_user_ids'] ) )
 								     && ( count( $this->_session->data['global_user_ids'] ) )
 								) {
-									if ( $table_name == $wpdb->base_prefix . "users" ) {
+									if ( $wpdb->base_prefix . "users" === $table_name ) {
 
-										$tables_segment = Snapshot_Helper_Utility::get_table_segments( $table_name,
-											intval( $this->config_data['config']['segmentSize'] ),
-											'WHERE ID IN (' . implode( ',', $this->_session->data['global_user_ids'] ) . ');' );
+										$tables_segment = Snapshot_Helper_Utility::get_table_segments(
+												$table_name,
+												intval( $this->config_data['config']['segmentSize'] ),
+												'WHERE ID IN (' . implode( ',', $this->_session->data['global_user_ids'] ) . ');'
+											);
 
-									} else if ( $table_name == $wpdb->base_prefix . "usermeta" ) {
-										$tables_segment = Snapshot_Helper_Utility::get_table_segments( $table_name,
-											intval( $this->config_data['config']['segmentSize'] ),
-											'WHERE user_id IN (' . implode( ',', $this->_session->data['global_user_ids'] ) . ');' );
+									} else if ( $wpdb->base_prefix . "usermeta" === $table_name ) {
+										$tables_segment = Snapshot_Helper_Utility::get_table_segments(
+												$table_name,
+												intval( $this->config_data['config']['segmentSize'] ),
+												'WHERE user_id IN (' . implode( ',', $this->_session->data['global_user_ids'] ) . ');'
+											);
 									}
 									//echo "tables_segment<pre>"; print_r($tables_segment); echo "</pre>";
 									if ( ( $tables_segment['segments'] ) && ( count( $tables_segment['segments'] ) ) ) {
@@ -3420,7 +3347,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				$item['destination-sync'] = "archive";
 			}
 
-			if ( $item['destination-sync'] == "archive" ) {
+			if ( "archive" === $item['destination-sync'] ) {
 				//echo "_post_array<pre>"; print_r($_post_array); echo "</pre>";
 				//echo "item<pre>"; print_r($item); echo "</pre>";
 
@@ -3450,7 +3377,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							case 'media':
 								$_path = trailingslashit( $home_path ) . Snapshot_Helper_Utility::get_blog_upload_path( $item['blog-id'] ) . "/";
 								//$_path = snapshot_utility_get_blog_upload_path($item['blog-id']) ."/";
-								if ( ( $_post_array['snapshot-action'] ) && ( $_post_array['snapshot-action'] == "cron" ) ) {
+								if ( ( $_post_array['snapshot-action'] ) && ( "cron" === $_post_array['snapshot-action'] ) ) {
 									$_max_depth = 0;
 								} else {
 									$_max_depth = 2;
@@ -3461,7 +3388,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 								/* case 'mu-plugins': */
 								$_path = trailingslashit( $this->plugins_dir );
 								//$_max_depth=0;
-								if ( ( $_post_array['snapshot-action'] ) && ( $_post_array['snapshot-action'] == "cron" ) ) {
+								if ( ( $_post_array['snapshot-action'] ) && ( "cron" === $_post_array['snapshot-action'] ) ) {
 									$_max_depth = 0;
 								} else {
 									$_max_depth = 0;
@@ -3471,7 +3398,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							case 'mu-plugins':
 								$_path = trailingslashit( WP_CONTENT_DIR ) . 'mu-plugins/';
 								//$_max_depth=0;
-								if ( ( $_post_array['snapshot-action'] ) && ( $_post_array['snapshot-action'] == "cron" ) ) {
+								if ( ( $_post_array['snapshot-action'] ) && ( "cron" === $_post_array['snapshot-action'] ) ) {
 									$_max_depth = 0;
 								} else {
 									$_max_depth = 0;
@@ -3480,7 +3407,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 							case 'themes':
 								$_path = trailingslashit( WP_CONTENT_DIR ) . 'themes/';
-								if ( ( $_post_array['snapshot-action'] ) && ( $_post_array['snapshot-action'] == "cron" ) ) {
+								if ( ( $_post_array['snapshot-action'] ) && ( "cron" === $_post_array['snapshot-action'] ) ) {
 									$_max_depth = 0;
 								} else {
 									$_max_depth = 0;
@@ -3533,7 +3460,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					}
 					ksort( $error_status['files_data']['included'] );
 
-					if ( ( $_post_array['snapshot-action'] ) && ( $_post_array['snapshot-action'] == "cron" ) ) {
+					if ( ( $_post_array['snapshot-action'] ) && ( "cron" === $_post_array['snapshot-action'] ) ) {
 						$all_files = array(
 							'all_files' => array(),
 						);
@@ -3574,7 +3501,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 * @return void
 		 */
 
-		function snapshot_ajax_backup_table( $item, $_post_array ) {
+		public function snapshot_ajax_backup_table( $item, $_post_array ) {
 			$error_status = array();
 			$error_status['errorStatus'] = false;
 			$error_status['errorText'] = "";
@@ -3608,22 +3535,25 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				return $error_status;
 			}
 
-			$this->snapshot_logger->log_message( "table: " . $table_data['table_name'] .
-			                                     " segment: " . $table_data['segment_idx'] . "/" . $table_data['segment_total'] );
+			$this->snapshot_logger->log_message(
+					"table: " . $table_data['table_name'] .
+					" segment: " . $table_data['segment_idx'] . "/" . $table_data['segment_total']
+                );
 
 			if ( isset( $this->_session->data['backupItemFolder'] ) ) {
 				$backupTable = sanitize_text_field( $table_data['table_name'] );
 				$backupFile = trailingslashit( $this->_session->data['backupItemFolder'] ) . $backupTable . ".sql";
 
-				$fp = @fopen( $backupFile, 'a' );
+				$fp = fopen( $backupFile, 'a' ); // phpcs:ignore
 				if ( $fp ) {
-
 					fseek( $fp, 0, SEEK_END );
 					$table_data['ftell_before'] = ftell( $fp );
 					$backup_db = new Snapshot_Model_Database_Backup();
 					$backup_db->set_fp( $fp ); // Set our file point so the object can write to out output file.
 
-					if ( intval( $table_data['segment_idx'] ) == intval( $table_data['segment_total'] ) ) {
+					// $backup_db->set_file( $backupFile );
+
+					if ( intval( $table_data['segment_idx'] ) === intval( $table_data['segment_total'] ) ) {
 						if ( isset( $table_data['sql'] ) ) {
 							$sql = $table_data['sql'];
 						} else {
@@ -3632,12 +3562,16 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 						// If we are at the end ot the table's segments we now just pass a large number for the table end.
 						// This will force MySQL to use the table_start as the offset then we read the rest of the rows in the table.
-						$number_rows_segment = $backup_db->backup_table( $backupTable, $table_data['rows_start'],
-							$table_data['rows_total'] * 3, $table_data['rows_total'] * 3, $sql );
+						$number_rows_segment = $backup_db->backup_table(
+								$backupTable, $table_data['rows_start'],
+								$table_data['rows_total'] * 3, $table_data['rows_total'] * 3, $sql
+							);
 					} else {
 						// Else we just ready the table segment of rows.
-						$number_rows_segment = $backup_db->backup_table( $backupTable, $table_data['rows_start'],
-							$table_data['rows_end'], $table_data['rows_total'] );
+						$number_rows_segment = $backup_db->backup_table(
+								$backupTable, $table_data['rows_start'],
+								$table_data['rows_end'], $table_data['rows_total']
+							);
 					}
 
 					if ( count( $backup_db->errors ) ) {
@@ -3648,27 +3582,30 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						return $error_status;
 					}
 
+					// $table_data['ftell_after'] = $backup_db->get_temp_ftell_after();
 					unset( $backup_db );
 					$table_data['ftell_after'] = ftell( $fp );
-					fclose( $fp );
+					fclose( $fp ); // phpcs:ignore
 
 					$error_status['table_data'] = $table_data;
 					$this->_session->data['table_data'][ $table_data_idx ] = $table_data;
 
 					//if (($table_data['rows_start'] + $table_data['rows_end']) == $table_data['rows_total']) {
-					if ( intval( $table_data['segment_idx'] ) == intval( $table_data['segment_total'] ) ) {
+					if ( intval( $table_data['segment_idx'] ) === intval( $table_data['segment_total'] ) ) {
 
 						$archiveFiles[] = $backupFile;
 
 						$backupZipFile = trailingslashit( $this->_session->data['backupItemFolder'] ) . 'snapshot-backup.zip';
 
-						if ( $this->config_data['config']['zipLibrary'] == "PclZip" ) {
+						if ( "PclZip" === $this->config_data['config']['zipLibrary'] ) {
 							$zipArchive = new PclZip( $backupZipFile );
 							try {
-								$zip_add_ret = $zipArchive->add( $archiveFiles,
-									PCLZIP_OPT_REMOVE_PATH, $this->_session->data['backupItemFolder'],
-									PCLZIP_OPT_TEMP_FILE_THRESHOLD, 10,
-									PCLZIP_OPT_ADD_TEMP_FILE_ON );
+								$zip_add_ret = $zipArchive->add(
+										$archiveFiles,
+										PCLZIP_OPT_REMOVE_PATH, $this->_session->data['backupItemFolder'],
+										PCLZIP_OPT_TEMP_FILE_THRESHOLD, 10,
+										PCLZIP_OPT_ADD_TEMP_FILE_ON
+									);
 								if ( ! $zip_add_ret ) {
 									$error_status['errorStatus'] = true;
 									$error_status['errorText'] = "ERROR: PclZIP table: " . $table_data . ": add failed : " .
@@ -3688,7 +3625,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 								return $error_status;
 							}
-						} else if ( $this->config_data['config']['zipLibrary'] == "ZipArchive" ) {
+						} else if ( "ZipArchive" === $this->config_data['config']['zipLibrary'] ) {
 							$zipArchive = new ZipArchive();
 							if ( $zipArchive ) {
 								if ( ! file_exists( $backupZipFile ) ) {
@@ -3697,7 +3634,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 									$zip_flags = null;
 								}
 								$zip_hdl = $zipArchive->open( $backupZipFile, $zip_flags );
-								if ( $zip_hdl !== true ) {
+								if ( true !== $zip_hdl ) {
 									$error_status['errorStatus'] = true;
 									$error_status['errorText'] = "ERROR: ZipArchive table:" . $table_data['table_name'] . " : add failed: " .
 									                             ZipArchiveStatusString( $zip_hdl );
@@ -3717,13 +3654,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						}
 
 						foreach ( $archiveFiles as $archiveFile ) {
-							@unlink( $archiveFile );
+							if ( is_writable( $archiveFile ) )
+								unlink( $archiveFile );
 						}
 					}
 
 					//$error_status['archiveFile'] = $archiveFile;
 					return $error_status;
 				}
+
 			} else {
 
 				if ( ! isset( $this->_session->data['backupItemFolder'] ) ) {
@@ -3753,7 +3692,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function snapshot_ajax_backup_file( $item, $_post_array ) {
+		public function snapshot_ajax_backup_file( $item, $_post_array ) {
 
 			$error_status = array();
 			$error_status['errorStatus'] = false;
@@ -3766,19 +3705,21 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				$file_data_key = sanitize_text_field( $_post_array['snapshot-file-data-key'] );
 				if ( isset( $this->_session->data['files_data']['included'][ $file_data_key ] ) ) {
 
-					@set_time_limit( 0 );
+					@set_time_limit( 0 ); // phpcs:ignore
 
 					$backupZipFile = trailingslashit( $this->_session->data['backupItemFolder'] ) . 'snapshot-backup.zip';
 
-					if ( $this->config_data['config']['zipLibrary'] == "PclZip" ) {
+					if ( "PclZip" === $this->config_data['config']['zipLibrary'] ) {
 
 						$zipArchive = new PclZip( $backupZipFile );
 						try {
-							$zip_add_ret = $zipArchive->add( $this->_session->data['files_data']['included'][ $file_data_key ],
-								PCLZIP_OPT_REMOVE_PATH, $home_path,
-								PCLZIP_OPT_ADD_PATH, 'www',
-								PCLZIP_OPT_TEMP_FILE_THRESHOLD, 10,
-								PCLZIP_OPT_ADD_TEMP_FILE_ON );
+							$zip_add_ret = $zipArchive->add(
+									$this->_session->data['files_data']['included'][ $file_data_key ],
+									PCLZIP_OPT_REMOVE_PATH, $home_path,
+									PCLZIP_OPT_ADD_PATH, 'www',
+									PCLZIP_OPT_TEMP_FILE_THRESHOLD, 10,
+									PCLZIP_OPT_ADD_TEMP_FILE_ON
+								);
 							if ( ! $zip_add_ret ) {
 								$error_status['errorStatus'] = true;
 								$error_status['errorText'] = "ERROR: PcLZIP file:" . $file_data_key . " add failed " .
@@ -3794,7 +3735,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							return $error_status;
 						}
 
-					} else if ( $this->config_data['config']['zipLibrary'] == "ZipArchive" ) {
+					} else if ( "ZipArchive" === $this->config_data['config']['zipLibrary'] ) {
 						$zipArchive = new ZipArchive();
 						if ( $zipArchive ) {
 							if ( ! file_exists( $backupZipFile ) ) {
@@ -3803,7 +3744,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 								$zip_flags = null;
 							}
 							$zip_hdl = $zipArchive->open( $backupZipFile, $zip_flags );
-							if ( $zip_hdl !== true ) {
+							if ( true !== $zip_hdl ) {
 								$error_status['errorStatus'] = true;
 								$error_status['errorText'] = "ERROR: ZipArchive file:" . $file_data_key . " : add failed: " .
 								                             ZipArchiveStatusString( $zip_hdl );
@@ -3824,7 +3765,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 									files that can be added at once. So we are setting a limit of 200 files per add session (by default).
 									Then we close the archive and re-open.
 								*/
-								$fileCount += 1;
+								$fileCount++;
 								if ( $limit_files_per_session > 0 && $fileCount >= $limit_files_per_session ) {
 									$zipArchive->close();
 									$zip_hdl = $zipArchive->open( $backupZipFile, $zip_flags );
@@ -3861,7 +3802,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 * @return void
 		 */
 
-		function snapshot_ajax_backup_finish( $item, $_post_array ) {
+		public function snapshot_ajax_backup_finish( $item, $_post_array ) {
 
 			global $wpdb;
 
@@ -3899,7 +3840,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					$data_item['files-option'] = $item['files-option'];
 				}
 
-				if ( $data_item['files-option'] == "all" ) {
+				if ( "all" === $data_item['files-option'] ) {
 
 					if ( is_main_site( $item['blog-id'] ) ) {
 						$data_item['files-sections'] = array( 'themes', 'plugins', 'media' );
@@ -3910,7 +3851,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						$data_item['files-sections'] = array( 'media' );
 					}
 
-				} else if ( $data_item['files-option'] == "selected" ) {
+				} else if ( "selected" === $data_item['files-option'] ) {
 
 					if ( is_main_site( $item['blog-id'] ) ) {
 						if ( isset( $item['files-sections'] ) ) {
@@ -3926,17 +3867,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					$session_files_data = array();
 					foreach ( $this->_session->data['files_data']['included'] as $files_section => $files_set ) {
 
-						if ( $files_section == "plugins" ) {
+						if ( "plugins" === $files_section ) {
 							if ( ! function_exists( 'get_plugins' ) ) {
 								require_once ABSPATH . 'wp-admin/includes/plugin.php';
 							}
 
 							$manifest_array['FILES-DATA-THEMES-PLUGINS'] = get_plugins();
-						} else if ( $files_section == "themes" ) {
+						} else if ( "themes" === $files_section ) {
 							$themes = wp_get_themes();
 							$manifest_array['FILES-DATA-THEMES'] = get_plugins();
-						} else {
-							// Nothing
 						}
 
 						$session_files_data = array_merge( $session_files_data, $files_set );
@@ -3950,7 +3889,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				}
 
 				// If the master item destination is not empty, means we are connected to some external system (FTP, S3, Dropbox)
-				if ( ( empty( $item['destination'] ) ) || ( $item['destination'] == "local" ) ) {
+				if ( ( empty( $item['destination'] ) ) || ( "local" === $item['destination'] ) ) {
 					// Else if the master item destination is empty..
 					$data_item['destination'] = 'local';
 
@@ -4022,7 +3961,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					$manifest_array['WP_HOME'] = get_option( 'home' );
 					$manifest_array['WP_BLOG_NAME'] = get_option( 'blogname' );
 
-					$home_url_parts = parse_url( $manifest_array['WP_HOME'] );
+					$home_url_parts = wp_parse_url( $manifest_array['WP_HOME'] );
 					if ( isset( $home_url_parts['host'] ) ) {
 						$manifest_array['WP_BLOG_DOMAIN'] = $home_url_parts['host'];
 					}
@@ -4093,16 +4032,18 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					// Let's actually create the zip file from the files_array. We strip off the leading path (3rd param)
 					$backup_zip_file = trailingslashit( $this->_session->data['backupItemFolder'] ) . 'snapshot-backup.zip';
 
-					if ( $this->config_data['config']['zipLibrary'] == "PclZip" ) {
+					if ( "PclZip" === $this->config_data['config']['zipLibrary'] ) {
 
 						$zipArchive = new PclZip( $backup_zip_file );
-						$zipArchive->add( $archiveFiles,
-							PCLZIP_OPT_REMOVE_PATH, $this->_session->data['backupItemFolder'],
-							PCLZIP_OPT_TEMP_FILE_THRESHOLD, 10,
-							PCLZIP_OPT_ADD_TEMP_FILE_ON );
+						$zipArchive->add(
+								$archiveFiles,
+								PCLZIP_OPT_REMOVE_PATH, $this->_session->data['backupItemFolder'],
+								PCLZIP_OPT_TEMP_FILE_THRESHOLD, 10,
+								PCLZIP_OPT_ADD_TEMP_FILE_ON
+							);
 						unset( $zipArchive );
 
-					} else if ( $this->config_data['config']['zipLibrary'] == "ZipArchive" ) {
+					} else if ( "ZipArchive" === $this->config_data['config']['zipLibrary'] ) {
 						$zipArchive = new ZipArchive();
 						if ( $zipArchive ) {
 							if ( ! file_exists( $backup_zip_file ) ) {
@@ -4111,7 +4052,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 								$zip_flags = null;
 							}
 							$zip_hdl = $zipArchive->open( $backup_zip_file, $zip_flags );
-							if ( $zip_hdl !== true ) {
+							if ( true !== $zip_hdl ) {
 								$error_status['errorStatus'] = true;
 
 								$error_status['errorText'] = "ERROR: ZipArchive file:" . baename( $manifestFile ) . " : add failed: " .
@@ -4129,7 +4070,8 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					}
 
 					foreach ( $archiveFiles as $archiveFile ) {
-						@unlink( $archiveFile );
+						if ( is_writable( $archiveFile ) )
+							unlink( $archiveFile );
 					}
 				}
 
@@ -4148,7 +4090,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 				//$backupZipFolder = $this->snapshot_get_item_destination_path($item, $data_item, true);
 
-				if ( ( empty( $data_item['destination'] ) ) || ( $data_item['destination'] == "local" ) ) {
+				if ( ( empty( $data_item['destination'] ) ) || ( "local" === $data_item['destination'] ) ) {
 					$backup_zip_folder = $this->snapshot_get_item_destination_path( $item, $data_item, true );
 					$this->snapshot_logger->log_message( 'backupZipFolder[' . $backup_zip_folder . ']' );
 
@@ -4160,30 +4102,30 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				}
 
 				$backupZipFileFinal = trailingslashit( $backup_zip_folder ) . $backup_zip_filename;
-				if ( file_exists( $backupZipFileFinal ) ) {
-					@unlink( $backupZipFileFinal );
+				if ( is_writable( $backupZipFileFinal ) ) {
+					unlink( $backupZipFileFinal );
 				}
 
 				$this->snapshot_logger->log_message( 'rename: backupZipFile[' . $backup_zip_file . '] backupZipFileFinal[' . $backupZipFileFinal . ']' );
 
 				// Remove the destination file if it exists. If should not but just in case.
-				if ( file_exists( $backupZipFileFinal ) ) {
-					@unlink( $backupZipFileFinal );
+				if ( is_writable( $backupZipFileFinal ) ) {
+					unlink( $backupZipFileFinal );
 				}
 
 				//$rename_ret = @rename($backupZipFile, $backupZipFileFinal);
 				$rename_ret = rename( $backup_zip_file, $backupZipFileFinal );
-				if ( $rename_ret === false ) {
+				if ( false === $rename_ret ) {
 					//$this->snapshot_logger->log_message('rename: failed: error:'. print_r(error_get_last(), true) .'');
 
 					// IF for some reason the destination path is not our default snapshot backups folder AND we could not not rename to that
 					// alternate path. We then try the default snapshot destination.
-					if ( trailingslashit( $this->_settings['backupBaseFolderFull'] ) != trailingslashit( dirname( $backupZipFileFinal ) ) ) {
+					if ( trailingslashit( $this->_settings['backupBaseFolderFull'] ) !== trailingslashit( dirname( $backupZipFileFinal ) ) ) {
 
 						$backupZipFileTMP = trailingslashit( $this->_settings['backupBaseFolderFull'] ) . basename( $backupZipFileFinal );
 						$this->snapshot_logger->log_message( 'rename: backupZipFile[' . $backup_zip_file . '] backupZipFileFinal[' . $backupZipFileTMP . ']' );
 						$rename_ret = rename( $backup_zip_file, $backupZipFileTMP );
-						if ( $rename_ret !== false ) {
+						if ( false !== $rename_ret ) {
 							$this->snapshot_logger->log_message( 'rename: success' );
 							$error_status['responseFile'] = basename( $backupZipFileFinal );
 
@@ -4198,7 +4140,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 				// echo out the finished message so the user knows we are done.
 				$snapshot_url = $this->_settings['SNAPSHOT_MENU_URL'] . 'snapshot_pro_snapshots';
-				$error_status['responseText'] = __( "Your snapshot has been successfully created and stored!", SNAPSHOT_I18N_DOMAIN ) . "<br />" . '<a href="' . $snapshot_url . '&amp;snapshot-action=view&amp;item=' . $item_key . '">' . __( "View Snapshot", SNAPSHOT_I18N_DOMAIN ) . '</a>';
+				$error_status['responseText'] = __( "Your snapshot has been successfully created and stored!", SNAPSHOT_I18N_DOMAIN ) . "<br />" . '<a href="' . $snapshot_url . '&amp;snapshot-action=view&amp;item=' . $item_key . '&amp;snapshot-noonce-field=' . wp_create_nonce  ( 'snapshot-nonce' ) . '">' . __( "View Snapshot", SNAPSHOT_I18N_DOMAIN ) . '</a>';
 
 				//}
 
@@ -4239,7 +4181,8 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 * @return JSON formatted array of tables. This is a multi-dimensional array containing groups for 'wp' - WordPress core, 'other' - Non core tables
 		 */
 
-		function snapshot_ajax_show_blog_tables() {
+		public function snapshot_ajax_show_blog_tables() {
+			check_ajax_referer( 'snapshot-ajax-nonce', 'security' );
 			global $wpdb;
 
 			//echo "POST<pre>"; print_r($_POST); echo "</pre>";
@@ -4248,7 +4191,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			if ( isset( $_POST['snapshot_blog_id_search'] ) ) {
 				$snapshot_blog_id_search = esc_attr( $_POST['snapshot_blog_id_search'] );
-				$PHP_URL_SCHEME = parse_url( $snapshot_blog_id_search, PHP_URL_SCHEME );
+				$PHP_URL_SCHEME = wp_parse_url( $snapshot_blog_id_search, PHP_URL_SCHEME );
 
 				if ( ! empty( $PHP_URL_SCHEME ) ) {
 					$snapshot_blog_id_search = str_replace( $PHP_URL_SCHEME . "://", '', $snapshot_blog_id_search );
@@ -4279,23 +4222,31 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						$sql_str = $wpdb->prepare( "SELECT blog_id FROM $wpdb->blogs WHERE domain = %s LIMIT 1", $full_domain );
 					} else {
 						$snapshot_blog_id_search_path = trailingslashit( $snapshot_blog_id_search );
-						if ( '/' == $snapshot_blog_id_search_path ) {
+						if ( '/' === $snapshot_blog_id_search_path ) {
 							$snapshot_blog_id_search_path = '';
 						}
 
-						$sql_str = $wpdb->prepare( "SELECT blog_id FROM $wpdb->blogs WHERE domain = %s AND path = %s LIMIT 1",
-							$current_domain, $current_path . $snapshot_blog_id_search_path );
+						$sql_str = $wpdb->prepare(
+								"SELECT blog_id FROM $wpdb->blogs WHERE domain = %s AND path = %s LIMIT 1",
+								$current_domain, $current_path . $snapshot_blog_id_search_path
+							);
 					}
 
 					//echo "sql_str=[". $sql_str ."]<br />";
+					// We are using placeholders and $wpdb->prepare() inside the variable.
+					// phpcs:ignore
 					$blog = $wpdb->get_row( $sql_str );
 					if ( ( isset( $blog->blog_id ) ) && ( intval( $blog->blog_id ) > 0 ) ) {
 						$blog_id = intval( $blog->blog_id );
 					} else if ( ! $blog ) {
 						if ( ( function_exists( 'is_plugin_active' ) ) && ( is_plugin_active( 'domain-mapping/domain-mapping.php' ) ) ) {
-							$sql_str = $wpdb->prepare( "SELECT blog_id FROM " . $wpdb->prefix . "domain_mapping WHERE domain = %s LIMIT 1",
-								$snapshot_blog_id_search );
+							$sql_str = $wpdb->prepare(
+									"SELECT blog_id FROM " . $wpdb->prefix . "domain_mapping WHERE domain = %s LIMIT 1",
+									$snapshot_blog_id_search
+								);
 							//echo "sql_str=[". $sql_str ."]<br />";
+							// We are using placeholders and $wpdb->prepare() inside the variable.
+							// phpcs:ignore
 							$blog = $wpdb->get_row( $sql_str );
 							if ( ( isset( $blog->blog_id ) ) && ( intval( $blog->blog_id ) > 0 ) ) {
 								$blog_id = intval( $blog->blog_id );
@@ -4309,9 +4260,14 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				$json_data['blog'] = get_blog_details( $blog_id );
 
 				if ( ( function_exists( 'is_plugin_active' ) ) && ( is_plugin_active( 'domain-mapping/domain-mapping.php' ) ) ) {
-					$sql_str = $wpdb->prepare( "SELECT domain FROM " . $wpdb->prefix . "domain_mapping WHERE blog_id = %d AND active=1 LIMIT 1",
-						$blog_id );
+					$sql_str = $wpdb->prepare(
+							"SELECT domain FROM " . $wpdb->prefix . "domain_mapping WHERE blog_id = %d AND active=1 LIMIT 1",
+							$blog_id
+						);
 					//echo "sql_str=[". $sql_str ."]<br />";
+
+					// We are using placeholders and $wpdb->prepare() inside the variable.
+					// phpcs:ignore
 					$mapped_domain = $wpdb->get_row( $sql_str );
 					if ( ( isset( $mapped_domain->domain ) ) && ( ! empty( $mapped_domain->domain ) ) ) {
 						$json_data['mapped_domain'] = $mapped_domain->domain;
@@ -4332,7 +4288,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						foreach ( $table_set as $table_name => $table_val ) {
 
 							/* If this table was in the last_tables for this blog set the value to on so it will be checked for the user */
-							if ( array_search( $table_name, $last_tables ) !== false ) {
+							if ( array_search( $table_name, $last_tables, true ) !== false ) {
 								$table_set[ $table_name ] = "checked";
 							} else {
 								$table_set[ $table_name ] = "";
@@ -4358,11 +4314,12 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					}
 				}
 			}
-			echo json_encode( $json_data );
+			echo wp_json_encode( $json_data );
 			die();
 		}
 
-		function snapshot_get_blog_restore_info() {
+		public function snapshot_get_blog_restore_info() {
+			check_ajax_referer( 'snapshot-ajax-nonce', 'security' );
 			global $wpdb;
 
 			$blog_id = 0;
@@ -4374,7 +4331,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			$home_path = apply_filters( 'snapshot_home_path', get_home_path() );
 			$snapshot_blog_id_search = sanitize_text_field( $_POST['snapshot_blog_id_search'] );
-			$PHP_URL_SCHEME = parse_url( $snapshot_blog_id_search, PHP_URL_SCHEME );
+			$PHP_URL_SCHEME = wp_parse_url( $snapshot_blog_id_search, PHP_URL_SCHEME );
 
 			if ( ! empty( $PHP_URL_SCHEME ) ) {
 				$snapshot_blog_id_search = str_replace( $PHP_URL_SCHEME . "://", '', $snapshot_blog_id_search );
@@ -4399,13 +4356,17 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					$sql_str = $wpdb->prepare( "SELECT blog_id FROM $wpdb->blogs WHERE domain = %s LIMIT 1", $full_domain );
 				} else {
 					$snapshot_blog_id_search_path = trim( $snapshot_blog_id_search, '/\\' ) . '/';
-					if ( '/' == $snapshot_blog_id_search_path ) {
+					if ( '/' === $snapshot_blog_id_search_path ) {
 						$snapshot_blog_id_search_path = '';
 					}
 
-					$sql_str = $wpdb->prepare( "SELECT blog_id FROM $wpdb->blogs WHERE domain = %s AND path = %s LIMIT 1",
-						$current_domain, $current_path . $snapshot_blog_id_search_path );
+					$sql_str = $wpdb->prepare(
+							"SELECT blog_id FROM $wpdb->blogs WHERE domain = %s AND path = %s LIMIT 1",
+							$current_domain, $current_path . $snapshot_blog_id_search_path
+						);
 				}
+				// We are using placeholders and $wpdb->prepare() inside the variable.
+				// phpcs:ignore
 				$blog = $wpdb->get_row( $sql_str );
 
 				if ( isset( $blog->blog_id ) && intval( $blog->blog_id ) > 0 ) {
@@ -4416,7 +4377,8 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							"SELECT blog_id FROM {$wpdb->prefix}domain_mapping WHERE domain = %s LIMIT 1",
 							$snapshot_blog_id_search
 						);
-
+						// We are using placeholders and $wpdb->prepare() inside the variable.
+						// phpcs:ignore
 						$blog = $wpdb->get_row( $sql_str );
 						if ( isset( $blog->blog_id ) && intval( $blog->blog_id ) > 0 ) {
 							$blog_id = intval( $blog->blog_id );
@@ -4431,9 +4393,12 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			$json_data['blog'] = get_blog_details( $blog_id );
 
 			if ( function_exists( 'is_plugin_active' ) && is_plugin_active( 'domain-mapping/domain-mapping.php' ) ) {
-				$sql_str = $wpdb->prepare( "SELECT domain FROM {$wpdb->prefix}domain_mapping WHERE blog_id = %d AND active=1 LIMIT 1",
-					$blog_id );
-
+				$sql_str = $wpdb->prepare(
+						"SELECT domain FROM {$wpdb->prefix}domain_mapping WHERE blog_id = %d AND active=1 LIMIT 1",
+						$blog_id
+					);
+				// We are using placeholders and $wpdb->prepare() inside the variable.
+				// phpcs:ignore
 				$mapped_domain = $wpdb->get_row( $sql_str );
 				if ( ! empty( $mapped_domain->domain ) ) {
 					$json_data['mapped_domain'] = $mapped_domain->domain;
@@ -4456,7 +4421,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			restore_current_blog();
 
-			echo json_encode( $json_data );
+			echo wp_json_encode( $json_data );
 			die();
 		}
 
@@ -4470,7 +4435,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function snapshot_ajax_disable_notif_proc() {
+		public function snapshot_ajax_disable_notif_proc() {
 			check_ajax_referer( 'snapshot-disable-notif', 'security' );
 			if ( current_user_can( "manage_options" ) ) {
 				update_option( 'snapshot-disable_notif_snapshot_page', time() );
@@ -4488,7 +4453,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return
 		 */
-		function snapshot_save_key_proc() {
+		public function snapshot_save_key_proc() {
 
 			if ( is_multisite() ) {
 				if ( ! is_super_admin() ) {
@@ -4502,8 +4467,8 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			}
 
 			check_ajax_referer( 'snapshot-save-key', 'security' );
-			$model = new Snapshot_Model_Full_Backup;
-			$data = new Snapshot_Model_Post;
+			$model = new Snapshot_Model_Full_Backup();
+			$data = new Snapshot_Model_Post();
 
 			if ( $data->is_empty() ) {
 				wp_send_json_error();
@@ -4545,7 +4510,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			//Testing secret-key
 			$token = Snapshot_Model_Full_Remote_Api::get()->get_token();
 
-			if ( $token === false ) {
+			if ( false === $token ) {
 				$this->config_data['config']['secret-key'] = '';
 				$this->save_config();
 				$model->set_config( 'secret-key', '' );
@@ -4577,16 +4542,17 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 * @return JSON formatted array status.
 		 */
 
-		function snapshot_ajax_restore_proc() {
+		public function snapshot_ajax_restore_proc() {
+			check_ajax_referer( 'snapshot-ajax-nonce', 'security');
 			// When zlib compression is turned on we get errors from this shutdown action setup by WordPress. So we disabled.
 			$zlib_compression = ini_get( 'zlib.output_compression' );
 			if ( $zlib_compression ) {
 				remove_action( 'shutdown', 'wp_ob_end_flush_all', 1 );
 			}
 
-			@ini_set( 'html_errors', 'Off' );
-			@ini_set( 'zlib.output_compression', 'Off' );
-			@set_time_limit( 0 );
+			@ini_set( 'html_errors', 'Off' ); // phpcs:ignore
+			@ini_set( 'zlib.output_compression', 'Off' ); // phpcs:ignore
+			@set_time_limit( 0 ); // phpcs:ignore
 
 			if ( isset( $_POST['item_key'] ) ) {
 				$item_key = intval( $_POST['item_key'] );
@@ -4597,12 +4563,14 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			}
 			$this->snapshot_logger = new Snapshot_Helper_Logger( $this->_settings['backupLogFolderFull'], $item_key, $data_item_key );
 
+			// We use set_error_handler() as logging code and not debug code.
+			// phpcs:ignore
 			$old_error_handler = set_error_handler( array( $this, 'snapshot_ErrorHandler' ) );
 
 			Snapshot_Helper_Debug::set_error_reporting( $this->config_data['config']['errorReporting'] );
 
 			if ( ( isset( $this->config_data['config']['memoryLimit'] ) ) && ( ! empty( $this->config_data['config']['memoryLimit'] ) ) ) {
-				@ini_set( 'memory_limit', $this->config_data['config']['memoryLimit'] );
+				@ini_set( 'memory_limit', $this->config_data['config']['memoryLimit'] ); // phpcs:ignore
 			}
 
 			if ( ( isset( $item_key ) ) && ( isset( $data_item_key ) ) ) {
@@ -4627,19 +4595,22 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							$function_output = ob_get_contents();
 							ob_end_clean();
 
-							if ( ( isset( $error_array['errorStatus'] ) ) && ( $error_array['errorStatus'] == true ) ) {
+							if ( ( isset( $error_array['errorStatus'] ) ) && ( true === $error_array['errorStatus'] ) ) {
 								// We have a problem.
 
-								$this->snapshot_logger->log_message( "init: _POST" . print_r( $_POST, true ) );
-								$this->snapshot_logger->log_message( "init: error_array" . print_r( $error_array, true ) );
-								$this->snapshot_logger->log_message( "init: _SESSION" . print_r( $this->_session->data, true ) );
+								// Not debug code. We use print_r() for logging purposes.
+								$this->snapshot_logger->log_message( "init: _POST" . print_r( $_POST, true ) ); // phpcs:ignore
+								$this->snapshot_logger->log_message( "init: error_array" . print_r( $error_array, true ) ); // phpcs:ignore
+								$this->snapshot_logger->log_message( "init: _SESSION" . print_r( $this->_session->data, true ) ); // phpcs:ignore
 								$this->snapshot_logger->log_message( "init: output:" . $function_output );
 
-								$this->snapshot_logger->log_message( "memory limit: " . ini_get( 'memory_limit' ) .
+								$this->snapshot_logger->log_message(
+                                     "memory limit: " . ini_get( 'memory_limit' ) .
 								                                     ": memory usage current: " . Snapshot_Helper_Utility::size_format( memory_get_usage( true ) ) .
-								                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) ) );
+								                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) )
+                                    );
 
-								echo json_encode( $error_array );
+								echo wp_json_encode( $error_array );
 
 								die();
 							}
@@ -4656,19 +4627,22 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							$error_array = $result;
 							$function_output = ob_get_contents();
 							ob_end_clean();
-							if ( ( isset( $error_array['errorStatus'] ) ) && ( $error_array['errorStatus'] == true ) ) {
+							if ( ( isset( $error_array['errorStatus'] ) ) && ( true === $error_array['errorStatus'] ) ) {
 								// We have a problem.
 
-								$this->snapshot_logger->log_message( "table: _POST" . print_r( $_POST, true ) );
-								$this->snapshot_logger->log_message( "table: error_array" . print_r( $error_array, true ) );
-								$this->snapshot_logger->log_message( "table: _SESSION" . print_r( $this->_session, true ) );
+								// Not debug code. We use print_r() for logging purposes.
+								$this->snapshot_logger->log_message( "table: _POST" . print_r( $_POST, true ) ); // phpcs:ignore
+								$this->snapshot_logger->log_message( "table: error_array" . print_r( $error_array, true ) ); // phpcs:ignore
+								$this->snapshot_logger->log_message( "table: _SESSION" . print_r( $this->_session, true ) ); // phpcs:ignore
 								$this->snapshot_logger->log_message( "table: output:" . $function_output );
 
-								$this->snapshot_logger->log_message( "memory limit: " . ini_get( 'memory_limit' ) .
+								$this->snapshot_logger->log_message(
+                                     "memory limit: " . ini_get( 'memory_limit' ) .
 								                                     ": memory usage current: " . Snapshot_Helper_Utility::size_format( memory_get_usage( true ) ) .
-								                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) ) );
+								                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) )
+                                    );
 
-								echo json_encode( $error_array );
+								echo wp_json_encode( $error_array );
 
 								die();
 							}
@@ -4683,19 +4657,22 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							$error_array = $this->snapshot_ajax_restore_file( $item );
 							$function_output = ob_get_contents();
 							ob_end_clean();
-							if ( ( isset( $error_array['errorStatus'] ) ) && ( $error_array['errorStatus'] == true ) ) {
+							if ( ( isset( $error_array['errorStatus'] ) ) && ( true === $error_array['errorStatus'] ) ) {
 								// We have a problem.
 
-								$this->snapshot_logger->log_message( "file: _POST" . print_r( $_POST, true ) );
-								$this->snapshot_logger->log_message( "file: error_array" . print_r( $error_array, true ) );
-								$this->snapshot_logger->log_message( "file: _SESSION" . print_r( $this->_session, true ) );
+								// Not debug code. We use print_r() for logging purposes.
+								$this->snapshot_logger->log_message( "file: _POST" . print_r( $_POST, true ) ); // phpcs:ignore
+								$this->snapshot_logger->log_message( "file: error_array" . print_r( $error_array, true ) ); // phpcs:ignore
+								$this->snapshot_logger->log_message( "file: _SESSION" . print_r( $this->_session, true ) ); // phpcs:ignore
 								$this->snapshot_logger->log_message( "file: output:" . $function_output );
 
-								$this->snapshot_logger->log_message( "memory limit: " . ini_get( 'memory_limit' ) .
+								$this->snapshot_logger->log_message(
+                                     "memory limit: " . ini_get( 'memory_limit' ) .
 								                                     ": memory usage current: " . Snapshot_Helper_Utility::size_format( memory_get_usage( true ) ) .
-								                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) ) );
+								                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) )
+                                    );
 
-								echo json_encode( $error_array );
+								echo wp_json_encode( $error_array );
 
 								die();
 							}
@@ -4712,19 +4689,22 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							$error_array = $this->snapshot_ajax_restore_finish( $item );
 							$function_output = ob_get_contents();
 							ob_end_clean();
-							if ( ( isset( $error_array['errorStatus'] ) ) && ( $error_array['errorStatus'] == true ) ) {
+							if ( ( isset( $error_array['errorStatus'] ) ) && ( true === $error_array['errorStatus'] ) ) {
 								// We have a problem.
 
-								$this->snapshot_logger->log_message( "finish: _POST" . print_r( $_POST, true ) );
-								$this->snapshot_logger->log_message( "finish: error_array" . print_r( $error_array, true ) );
-								$this->snapshot_logger->log_message( "finish: _SESSION" . print_r( $this->_session, true ) );
+								// Not debug code. We use print_r() for logging purposes.
+								$this->snapshot_logger->log_message( "finish: _POST" . print_r( $_POST, true ) ); // phpcs:ignore
+								$this->snapshot_logger->log_message( "finish: error_array" . print_r( $error_array, true ) ); // phpcs:ignore
+								$this->snapshot_logger->log_message( "finish: _SESSION" . print_r( $this->_session, true ) ); // phpcs:ignore
 								$this->snapshot_logger->log_message( "finish: output:" . $function_output );
 
-								$this->snapshot_logger->log_message( "memory limit: " . ini_get( 'memory_limit' ) .
+								$this->snapshot_logger->log_message(
+                                     "memory limit: " . ini_get( 'memory_limit' ) .
 								                                     ": memory usage current: " . Snapshot_Helper_Utility::size_format( memory_get_usage( true ) ) .
-								                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) ) );
+								                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) )
+                                    );
 
-								echo json_encode( $error_array );
+								echo wp_json_encode( $error_array );
 
 								die();
 							}
@@ -4749,7 +4729,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				$error_array['restore_admin_url'] = esc_url( get_admin_url( $blog_id ) );
 				$error_array['restore_site_url'] = esc_url( get_site_url( $blog_id ) );
 
-				echo json_encode( $error_array );
+				echo wp_json_encode( $error_array );
 			}
 
 			die();
@@ -4767,7 +4747,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return array JSON formatted array status.
 		 */
-		function snapshot_ajax_restore_init( $item ) {
+		public function snapshot_ajax_restore_init( $item ) {
 			global $wpdb, $current_blog;
 
 			$error_status = array();
@@ -4777,10 +4757,14 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			$home_path = apply_filters( 'snapshot_home_path', get_home_path() );
 
+			// We have checked for nonces coming into the function.
+			// phpcs:ignore
 			if ( ! isset( $_POST['item_data'] ) ) {
 				$error_status['errorStatus'] = true;
-				$error_status['errorText'] = "<p>" . __( "ERROR: The Snapshot missing 'item_data' key",
-						SNAPSHOT_I18N_DOMAIN ) . "</p>";
+				$error_status['errorText'] = "<p>" . __(
+						"ERROR: The Snapshot missing 'item_data' key",
+						SNAPSHOT_I18N_DOMAIN
+					) . "</p>";
 
 				return $error_status;
 			}
@@ -4789,8 +4773,12 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			if ( ! isset( $item['data'][ $item_data ] ) ) {
 				$error_status['errorStatus'] = true;
-				$error_status['errorText'] = "<p>" . __( "ERROR: The Snapshot incorrect 'item_data' [" . $item_data . "] key",
-						SNAPSHOT_I18N_DOMAIN ) . "</p>";
+				$error_status['errorText'] = "<p>" .
+					sprintf(
+						__( "ERROR: The Snapshot incorrect 'item_data' [%d] key", SNAPSHOT_I18N_DOMAIN ),
+						$item_data
+					) .
+				"</p>";
 
 				return $error_status;
 			}
@@ -4804,16 +4792,20 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			$restoreFile = trailingslashit( $backupZipFolder ) . $data_item['filename'];
 			$error_status['restoreFile'] = $restoreFile;
 			if ( ! file_exists( $restoreFile ) ) {
-				$error_status_errorText = "<p>" . __( "ERROR: The Snapshot file not found:",
-						SNAPSHOT_I18N_DOMAIN ) . " " . $restoreFile . "</p>";
+				$error_status_errorText = "<p>" . __(
+						"ERROR: The Snapshot file not found:",
+						SNAPSHOT_I18N_DOMAIN
+					) . " " . $restoreFile . "</p>";
 
 				$restoreFile = trailingslashit( $this->_settings['backupBaseFolderFull'] ) . $data_item['filename'];
 				$error_status['restoreFile'] = $restoreFile;
 
 				if ( ! file_exists( $restoreFile ) ) {
 					$error_status['errorStatus'] = true;
-					$error_status['errorText'] = $error_status_errorText . "<p>" . __( "ERROR: The Snapshot file not found:",
-							SNAPSHOT_I18N_DOMAIN ) . " " . $restoreFile . "</p>";
+					$error_status['errorText'] = $error_status_errorText . "<p>" . __(
+							"ERROR: The Snapshot file not found:",
+							SNAPSHOT_I18N_DOMAIN
+						) . " " . $restoreFile . "</p>";
 
 					return $error_status;
 				}
@@ -4824,30 +4816,36 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			wp_mkdir_p( $sessionRestoreFolder );
 			if ( ! is_writable( $sessionRestoreFolder ) ) {
 				$error_status['errorStatus'] = true;
-				$error_status['errorText'] = "<p>" . __( "ERROR: The Snapshot folder is not writeable. Check the settings",
-						SNAPSHOT_I18N_DOMAIN ) . " " . $sessionRestoreFolder . "</p>";
+				$error_status['errorText'] = "<p>" . __(
+						"ERROR: The Snapshot folder is not writeable. Check the settings",
+						SNAPSHOT_I18N_DOMAIN
+					) . " " . $sessionRestoreFolder . "</p>";
 
 				return $error_status;
 			}
 
 			// Cleanup any files from a previous restore attempt
-			if ( $dh = opendir( $sessionRestoreFolder ) ) {
-				while ( ( $file = readdir( $dh ) ) !== false ) {
-					if ( ( $file == '.' ) || ( $file == '..' ) ) {
+			$dh = opendir( $sessionRestoreFolder );
+			if ( $dh ) {
+				$file = readdir( $dh );
+				while ( false !== $file ) {
+					if ( ( '.' === $file ) || ( '..' === $file ) ) {
+						$file = readdir( $dh );
 						continue;
 					}
 
 					Snapshot_Helper_Utility::recursive_rmdir( $sessionRestoreFolder . $file );
+					$file = readdir( $dh );
 				}
 				closedir( $dh );
 			}
 
-			if ( $this->config_data['config']['zipLibrary'] == "PclZip" ) {
+			if ( "PclZip" === $this->config_data['config']['zipLibrary'] ) {
 				if ( ! defined( 'PCLZIP_TEMPORARY_DIR' ) ) {
 					define( 'PCLZIP_TEMPORARY_DIR', trailingslashit( $this->_settings['backupBackupFolderFull'] ) . $item['timestamp'] . "/" );
 				}
 				if ( ! class_exists( 'class PclZip' ) ) {
-					require_once( ABSPATH . '/wp-admin/includes/class-pclzip.php' );
+					require_once  ABSPATH . '/wp-admin/includes/class-pclzip.php' ;
 				}
 				$zipArchive = new PclZip( $restoreFile );
 				$zip_contents = $zipArchive->listContent();
@@ -4859,11 +4857,11 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				}
 
 			} else {
-				$zip = new ZipArchive;
+				$zip = new ZipArchive();
 				$res = $zip->open( $restoreFile );
-				if ( $res === true ) {
+				if ( true === $res ) {
 					$extract_ret = $zip->extractTo( $sessionRestoreFolder );
-					if ( $extract_ret !== false ) {
+					if ( false !== $extract_ret ) {
 						$this->_session->data['restoreFolder'] = $sessionRestoreFolder;
 					}
 				}
@@ -4874,18 +4872,6 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			if ( file_exists( $snapshot_manifest_file ) ) {
 				$error_status['MANIFEST'] = Snapshot_Helper_Utility::consume_archive_manifest( $snapshot_manifest_file );
 				//unlink($snapshot_manifest_file);
-			}
-
-			if ( isset( $error_status['MANIFEST']['SNAPSHOT_VERSION'] ) ) {
-				if ( ( $error_status['MANIFEST']['SNAPSHOT_VERSION'] == "1.0" ) && ( ! isset( $error_status['MANIFEST']['TABLES-DATA'] ) ) ) {
-
-					$backupFile = trailingslashit( $sessionRestoreFolder ) . 'snapshot_backups.sql';
-					$table_segments = Snapshot_Helper_Utility::get_table_segments_from_single( $backupFile );
-					if ( $table_segments ) {
-						$error_status['MANIFEST']['TABLES-DATA'] = $table_segments;
-						unlink( $backupFile );
-					}
-				}
 			}
 
 			//echo "item<pre>"; print_r($item); echo "</pre>";
@@ -4905,16 +4891,17 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			$error_status['MANIFEST']['RESTORE']['DEST'] = array();
 
 			if ( is_multisite() ) {
+				// phpcs:ignore
 				switch_to_blog( $_POST['snapshot-blog-id'] );
 
-				$error_status['MANIFEST']['RESTORE']['DEST']['WP_BLOG_ID'] = $_POST['snapshot-blog-id'];
-				$error_status['MANIFEST']['RESTORE']['DEST']['WP_DB_PREFIX'] = $wpdb->get_blog_prefix( $_POST['snapshot-blog-id'] );
-				$error_status['MANIFEST']['RESTORE']['DEST']['WP_DB_BASE_PREFIX'] = $wpdb->base_prefix;
-				$error_status['MANIFEST']['RESTORE']['DEST']['WP_DB_CHARSET_COLLATE'] = $wpdb->get_charset_collate();
-				$error_status['MANIFEST']['RESTORE']['DEST']['WP_SITEURL'] = get_site_url( $_POST['snapshot-blog-id'] );
+				$error_status['MANIFEST']['RESTORE']['DEST']['WP_BLOG_ID'] = $_POST['snapshot-blog-id']; // phpcs:ignore
+				$error_status['MANIFEST']['RESTORE']['DEST']['WP_DB_PREFIX'] = $wpdb->get_blog_prefix( $_POST['snapshot-blog-id'] ); // phpcs:ignore
+				$error_status['MANIFEST']['RESTORE']['DEST']['WP_DB_BASE_PREFIX'] = $wpdb->base_prefix; // phpcs:ignore
+				$error_status['MANIFEST']['RESTORE']['DEST']['WP_DB_CHARSET_COLLATE'] = $wpdb->get_charset_collate(); // phpcs:ignore
+				$error_status['MANIFEST']['RESTORE']['DEST']['WP_SITEURL'] = get_site_url( $_POST['snapshot-blog-id'] ); // phpcs:ignore
 				if ( empty( $error_status['MANIFEST']['RESTORE']['DEST']['WP_SITEURL'] ) ) {
-					if ( ! empty ( $_POST['snapshot_blog_search'] ) ) {
-						$error_status['MANIFEST']['RESTORE']['DEST']['WP_SITEURL'] = network_site_url( '/' . untrailingslashit( $_POST['snapshot_blog_search'] ) . '/' );
+					if ( ! empty ( $_POST['snapshot_blog_search'] ) ) { // phpcs:ignore
+						$error_status['MANIFEST']['RESTORE']['DEST']['WP_SITEURL'] = network_site_url( '/' . untrailingslashit( $_POST['snapshot_blog_search'] ) . '/' ); // phpcs:ignore
 					} else {
 						$error_status['MANIFEST']['RESTORE']['DEST']['WP_SITEURL'] = $error_status['MANIFEST']['RESTORE']['SOURCE']['WP_SITEURL'];
 					}
@@ -4935,28 +4922,32 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			$wp_upload_dir = wp_upload_dir();
 			$error_status['MANIFEST']['RESTORE']['DEST']['UPLOAD_DIR'] = str_replace( '\\', '/', $wp_upload_dir['basedir'] );
 
+			// phpcs:ignore
 			if ( ! isset( $_POST['snapshot-tables-option'] ) ) {
 				$_POST['snapshot-tables-option'] = "none";
 			}
 
-			if ( $_POST['snapshot-tables-option'] == "none" ) {
+			// phpcs:ignore
+			if ( "none" === $_POST['snapshot-tables-option'] ) {
 
 				unset( $error_status['MANIFEST']['TABLES'] );
 				$error_status['MANIFEST']['TABLES'] = array();
 
-			} else if ( $_POST['snapshot-tables-option'] == "selected" ) {
+			} else if ( "selected" === $_POST['snapshot-tables-option'] ) { // phpcs:ignore
 
+				// phpcs:ignore
 				if ( isset( $_POST['snapshot-tables-array'] ) ) {
+					// phpcs:ignore
 					$error_status['MANIFEST']['TABLES'] = $_POST['snapshot-tables-array'];
 				}
 
-			} else if ( $_POST['snapshot-tables-option'] == "all" ) {
+			} else if ( "all" === $_POST['snapshot-tables-option'] ) { // phpcs:ignore
 
 				$manifest_tables = array();
 				foreach ( $error_status['MANIFEST']['TABLES'] as $table_set_key => $table_set ) {
 
 					// Per the instructions on the page. When selecting 'all' we do not include the global tables: users and usermeta
-					if ( $table_set_key == 'global' ) {
+					if ( 'global' === $table_set_key ) {
 						continue;
 					}
 					$manifest_tables = array_merge( $manifest_tables, array_values( $table_set ) );
@@ -4982,31 +4973,41 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					$table_info = array();
 					$table_info['table_name'] = $table_name;
 
-					if ( strncasecmp( $table_name, $error_status['MANIFEST']['RESTORE']['SOURCE']['WP_DB_PREFIX'],
-							strlen( $error_status['MANIFEST']['RESTORE']['SOURCE']['WP_DB_PREFIX'] ) ) == 0
+					if ( 0 === strncasecmp(
+							$table_name, $error_status['MANIFEST']['RESTORE']['SOURCE']['WP_DB_PREFIX'],
+							strlen( $error_status['MANIFEST']['RESTORE']['SOURCE']['WP_DB_PREFIX'] )
+						)
 					) {
 						$table_info['table_name_base'] = str_replace( $error_status['MANIFEST']['RESTORE']['SOURCE']['WP_DB_PREFIX'], '', $table_name );
 
 						$table_info['table_name_restore'] = $this->_settings['recover_table_prefix'] . str_replace(
 								$error_status['MANIFEST']['RESTORE']['SOURCE']['WP_DB_PREFIX'],
 								$error_status['MANIFEST']['RESTORE']['DEST']['WP_DB_PREFIX'],
-								$table_name );
+								$table_name
+                            );
 
-						$table_name_dest = str_replace( $error_status['MANIFEST']['RESTORE']['SOURCE']['WP_DB_PREFIX'],
-							$error_status['MANIFEST']['RESTORE']['DEST']['WP_DB_PREFIX'], $table_name );
+						$table_name_dest = str_replace(
+								$error_status['MANIFEST']['RESTORE']['SOURCE']['WP_DB_PREFIX'],
+								$error_status['MANIFEST']['RESTORE']['DEST']['WP_DB_PREFIX'], $table_name
+							);
 
-					} else if ( strncasecmp( $table_name, $error_status['MANIFEST']['RESTORE']['SOURCE']['WP_DB_BASE_PREFIX'],
-							strlen( $error_status['MANIFEST']['RESTORE']['SOURCE']['WP_DB_BASE_PREFIX'] ) ) == 0
+					} else if ( 0 === strncasecmp(
+							$table_name, $error_status['MANIFEST']['RESTORE']['SOURCE']['WP_DB_BASE_PREFIX'],
+							strlen( $error_status['MANIFEST']['RESTORE']['SOURCE']['WP_DB_BASE_PREFIX'] )
+						)
 					) {
 						$table_info['table_name_base'] = str_replace( $error_status['MANIFEST']['RESTORE']['SOURCE']['WP_DB_BASE_PREFIX'], '', $table_name );
 
 						$table_info['table_name_restore'] = $this->_settings['recover_table_prefix'] . str_replace(
 								$error_status['MANIFEST']['RESTORE']['SOURCE']['WP_DB_BASE_PREFIX'],
 								$error_status['MANIFEST']['RESTORE']['DEST']['WP_DB_BASE_PREFIX'],
-								$table_name );
+								$table_name
+                            );
 
-						$table_name_dest = str_replace( $error_status['MANIFEST']['RESTORE']['SOURCE']['WP_DB_BASE_PREFIX'],
-							$error_status['MANIFEST']['RESTORE']['DEST']['WP_DB_BASE_PREFIX'], $table_name );
+						$table_name_dest = str_replace(
+								$error_status['MANIFEST']['RESTORE']['SOURCE']['WP_DB_BASE_PREFIX'],
+								$error_status['MANIFEST']['RESTORE']['DEST']['WP_DB_BASE_PREFIX'], $table_name
+							);
 					} else {
 						// If the table name is not using the DB_PREFIX or DB_BASE_PREFIX then don't convert it.
 						$table_info['table_name_base'] = $table_name;
@@ -5034,8 +5035,6 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 					if ( array_key_exists( $table_set['table_name'], $error_status['MANIFEST']['TABLES'] ) !== false ) {
 						$tables_data_sets[] = $table_set;
-					} else {
-						//echo "Table[". $table_set['table_name'] ."] not found in tables<br />";
 					}
 				}
 				$error_status['MANIFEST']['TABLES-DATA'] = $tables_data_sets;
@@ -5044,32 +5043,36 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			//echo "MANIFEST<pre>"; print_r($error_status['MANIFEST']['TABLES-DATA']); echo "</pre>";
 			//die();
 
+			// phpcs:ignore
 			if ( ! isset( $_POST['snapshot-files-option'] ) ) {
 				$_POST['snapshot-files-option'] = "none";
 			}
 
-			if ( $_POST['snapshot-files-option'] == "none" ) {
+			// phpcs:ignore
+			if ( "none" === $_POST['snapshot-files-option'] ) {
 
 				unset( $error_status['MANIFEST']['FILES-DATA'] );
 				$error_status['MANIFEST']['FILES-DATA'] = array();
 
-			} else if ( $_POST['snapshot-files-option'] == "selected" ) {
+			} else if ( "selected" === $_POST['snapshot-files-option'] ) { // phpcs:ignore
+				// phpcs:ignore
 				if ( isset( $_POST['snapshot-files-sections'] ) ) {
+					// phpcs:ignore
 					$error_status['MANIFEST']['FILES-DATA'] = $_POST['snapshot-files-sections'];
 				}
-			} else if ( $_POST['snapshot-files-option'] == "all" ) {
+			} else if ( "all" === $_POST['snapshot-files-option'] ) { // phpcs:ignore
 				if ( isset( $error_status['MANIFEST']['ITEM']['data'] ) ) {
 					$data_item = Snapshot_Helper_Utility::latest_data_item( $error_status['MANIFEST']['ITEM']['data'] );
 					if ( isset( $data_item['files-sections'] ) ) {
 						$error_status['MANIFEST']['FILES-DATA'] = array_values( $data_item['files-sections'] );
 
-						$array_idx = array_search( 'config', $error_status['MANIFEST']['FILES-DATA'] );
-						if ( $array_idx !== false ) {
+						$array_idx = array_search( 'config', $error_status['MANIFEST']['FILES-DATA'], true );
+						if ( false !== $array_idx ) {
 							unset( $error_status['MANIFEST']['FILES-DATA'][ $array_idx ] );
 						}
 
-						$array_idx = array_search( 'htaccess', $error_status['MANIFEST']['FILES-DATA'] );
-						if ( $array_idx !== false ) {
+						$array_idx = array_search( 'htaccess', $error_status['MANIFEST']['FILES-DATA'], true );
+						if ( false !== $array_idx ) {
 							unset( $error_status['MANIFEST']['FILES-DATA'][ $array_idx ] );
 						}
 					}
@@ -5099,7 +5102,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 * @return JSON formatted array status.
 		 */
 
-		function snapshot_ajax_restore_table( $item ) {
+		public function snapshot_ajax_restore_table( $item ) {
 			global $wpdb, $current_blog;
 
 			$error_status = array();
@@ -5107,15 +5110,19 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			$error_status['errorText'] = "";
 			$error_status['responseText'] = "";
 
-			if ( ( is_multisite() ) && ( $current_blog->blog_id != $this->_session->data['MANIFEST']['RESTORE']['DEST']['WP_BLOG_ID'] ) ) {
+			if ( ( is_multisite() ) && ( $current_blog->blog_id !== $this->_session->data['MANIFEST']['RESTORE']['DEST']['WP_BLOG_ID'] ) ) {
 				$wpdb->set_blog_id( $this->_session->data['MANIFEST']['RESTORE']['DEST']['WP_BLOG_ID'] );
 			}
 
+			// We have checked for nonces coming into the function.
+			// phpcs:ignore
 			if ( ( isset( $_POST['snapshot_table'] ) ) && ( isset( $_POST['table_data'] ) ) ) {
+				$this->snapshot_logger->log_message(
+						'restore: table: ' . $_POST['snapshot_table'] . ' (' . $_POST['table_data']['segment_idx'] . '/' . // phpcs:ignore
+						$_POST['table_data']['segment_total'] . ')' // phpcs:ignore
+					);
 
-				$this->snapshot_logger->log_message( 'restore: table: ' . $_POST['snapshot_table'] . ' (' . $_POST['table_data']['segment_idx'] . '/' .
-				                                     $_POST['table_data']['segment_total'] . ')' );
-
+				// phpcs:ignore
 				$table_data = $_POST['table_data'];
 				//echo "table_data<pre>"; print_r($table_data); echo "</pre>";
 				$table_name = $table_data['table_name'];
@@ -5123,9 +5130,10 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				if ( isset( $this->_session->data['MANIFEST']['TABLES'][ $table_name ] ) ) {
 					$table_set = $this->_session->data['MANIFEST']['TABLES'][ $table_name ];
 				} else {
-					echo "table_set for [" . $table_name . "] not found<br />";
+					echo wp_kses("table_set for [" . $table_name . "] not found<br />", array('br' => array()));
 					echo "TABLES<pre>";
-					print_r( $this->_session->data['MANIFEST']['TABLES'] );
+					// We use print_r() for easy support when restoration fails.
+					print_r( $this->_session->data['MANIFEST']['TABLES'] ); //phpcs:ignore
 					echo "</pre>";
 
 					die();
@@ -5134,14 +5142,17 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				//echo "_POST<pre>"; print_r($_POST); echo "</pre>";
 				//echo "MANIFEST<pre>"; print_r($this->_session->data['MANIFEST']); echo "</pre>";
 				//die();
+
+				// phpcs:ignore
 				$restoreFile = trailingslashit( $this->_session->data['restoreFolder'] ) . esc_attr( $_POST['snapshot_table'] ) . ".sql";
 				if ( file_exists( $restoreFile ) ) {
+					$fp = fopen( $restoreFile, 'r' ); // phpcs:ignore
 
-					$fp = fopen( $restoreFile, 'r' );
 					if ( $fp ) {
-						fseek( $fp, $_POST['table_data']['ftell_before'] );
-						$backup_file_content = fread( $fp, $table_data['ftell_after'] - $table_data['ftell_before'] );
+						fseek( $fp, $_POST['table_data']['ftell_before'] ); // phpcs:ignore
+						$backup_file_content = fread( $fp, $table_data['ftell_after'] - $table_data['ftell_before'] ); // phpcs:ignore
 
+						// phpcs:ignore
 						$source_table_name = $_POST['snapshot_table'];
 						$dest_table_name = $table_set['table_name_restore'];
 
@@ -5149,7 +5160,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							$backup_file_content = str_replace( "`" . $source_table_name . "`", "`" . $dest_table_name . "`", $backup_file_content );
 						}
 
-						@set_time_limit( 300 );
+						@set_time_limit( 300 ); // phpcs:ignore
 						$backup_db = new Snapshot_Model_Database_Backup();
 						$backup_db->restore_databases( $backup_file_content );
 
@@ -5168,7 +5179,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					//	$this->snapshot_ajax_restore_convert_db_content($table_data);
 					//}
 
-					if ( $table_data['segment_idx'] == $table_data['segment_total'] ) {
+					if ( $table_data['segment_idx'] === $table_data['segment_total'] ) {
 						//echo "table_data<pre>"; print_r($table_data); echo "</pre>";
 						//die();
 
@@ -5177,12 +5188,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 				} else {
 					$error_status['errorStatus'] = true;
-					$error_status['errorText'] = "<p>" . __( "ERROR: Unable to locate table restore file from archive: ",
-							SNAPSHOT_I18N_DOMAIN ) . " " . basename( $restoreFile ) . "</p>";
+					$error_status['errorText'] = "<p>" . __(
+							"ERROR: Unable to locate table restore file from archive: ",
+							SNAPSHOT_I18N_DOMAIN
+						) . " " . basename( $restoreFile ) . "</p>";
 
 					return $error_status;
 				}
 			}
+			// phpcs:ignore
 			$error_status['table_data'] = $_POST['table_data'];
 
 			return $error_status;
@@ -5199,7 +5213,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return JSON formatted array status.
 		 */
-		function snapshot_ajax_restore_file( $item ) {
+		public function snapshot_ajax_restore_file( $item ) {
 
 			$error_status = array();
 			$error_status['errorStatus'] = false;
@@ -5208,6 +5222,8 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			$home_path = apply_filters( 'snapshot_home_path', get_home_path() );
 
+			// We have checked for nonces coming into the function.
+			// phpcs:ignore
 			if ( ! isset( $_POST['file_data_idx'] ) ) {
 				$error_status['errorStatus'] = true;
 				$error_status['errorText'] = "<p>" . __( "ERROR: The Snapshot missing 'file_data_idx' key", SNAPSHOT_I18N_DOMAIN ) . "</p>";
@@ -5220,16 +5236,22 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			if ( ! isset( $this->_session->data['MANIFEST']['FILES-DATA'] ) ) {
 				$error_status['errorStatus'] = true;
-				$error_status['errorText'] = "<p>" . __( "ERROR: The Snapshot missing session 'FILES-DATA' object.",
-						SNAPSHOT_I18N_DOMAIN ) . "</p>";
+				$error_status['errorText'] = "<p>" . __(
+						"ERROR: The Snapshot missing session 'FILES-DATA' object.",
+						SNAPSHOT_I18N_DOMAIN
+					) . "</p>";
 
 				return $error_status;
 			}
 
 			if ( ! isset( $this->_session->data['MANIFEST']['FILES-DATA'][ $file_data_idx ] ) ) {
 				$error_status['errorStatus'] = true;
-				$error_status['errorText'] = "<p>" . __( "ERROR: The Snapshot missing restore file at idx [" . $file_data_idx . "]",
-						SNAPSHOT_I18N_DOMAIN ) . "</p>";
+				$error_status['errorText'] = "<p>" .
+					sprintf(
+						__( "ERROR: The Snapshot missing restore file at idx [%d]", SNAPSHOT_I18N_DOMAIN ),
+						$file_data_idx
+					).
+				"</p>";
 
 				return $error_status;
 			}
@@ -5311,7 +5333,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 				foreach ( $restoreFilesSet as $restoreFileFull ) {
 
-					if ( $this->_session->data['MANIFEST']['FILES-DATA'][ $file_data_idx ] == "media" ) {
+					if ( 'media' === $this->_session->data['MANIFEST']['FILES-DATA'][ $file_data_idx ] ) {
 						$uploads_source = $restoreFilesBase . $this->_session->data['MANIFEST']['RESTORE']['SOURCE']['UPLOAD_DIR'];
 						$uploads_dest = $this->_session->data['MANIFEST']['RESTORE']['DEST']['UPLOAD_DIR'];
 						$destinationFileFull = str_replace( $uploads_source, $uploads_dest, $restoreFileFull );
@@ -5329,8 +5351,12 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							if ( wp_mkdir_p( $currentFileDir ) === false ) {
 								$error_status['errorStatus'] = true;
 								$error_status['errorText'] =
-									"<p>" . sprintf( __( 'Unable to create directory %s. Make sure the parent folder is writeable.',
-										SNAPSHOT_I18N_DOMAIN ), $currentFileDir ) . "</p>";
+									"<p>" . sprintf(
+										__(
+											'Unable to create directory %s. Make sure the parent folder is writeable.',
+											SNAPSHOT_I18N_DOMAIN
+										), $currentFileDir
+									) . "</p>";
 
 								return $error_status;
 							}
@@ -5357,14 +5383,17 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 * @return JSON formatted array status.
 		 */
 
-		function snapshot_ajax_restore_finish( $item ) {
+		public function snapshot_ajax_restore_finish( $item ) {
 			$this->snapshot_ajax_restore_rename_restored_tables( $item );
 
 			if ( is_multisite() ) {
 				$this->snapshot_ajax_restore_convert_db_global_tables( $item );
 			}
 
+			// We have check for nonces coming into the function.
+			// phpcs:ignore
 			if ( isset( $_POST['snapshot_restore_theme'] ) ) {
+				// phpcs:ignore
 				$snapshot_restore_theme = esc_attr( $_REQUEST['snapshot_restore_theme'] );
 				if ( $snapshot_restore_theme ) {
 					$themes = Snapshot_Helper_Utility::get_blog_active_themes( $item['blog-id'] );
@@ -5384,7 +5413,8 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				}
 			}
 
-			if ( ( isset( $_REQUEST['snapshot_restore_plugin'] ) ) && ( esc_attr( $_REQUEST['snapshot_restore_plugin'] ) == "yes" ) ) {
+			// phpcs:ignore
+			if ( ( isset( $_REQUEST['snapshot_restore_plugin'] ) ) && ( esc_attr( 'yes' === $_REQUEST['snapshot_restore_plugin'] )) ) {
 				$_plugin_file = basename( dirname( __FILE__ ) ) . "/" . basename( __FILE__ );
 				$_plugins = array( $_plugin_file );
 				if ( is_multisite() ) {
@@ -5400,13 +5430,17 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			}
 
 			// Cleanup any files from restore in case any files were left
-			if ( $dh = opendir( $this->_session->data['restoreFolder'] ) ) {
-				while ( ( $file = readdir( $dh ) ) !== false ) {
-					if ( ( $file == '.' ) || ( $file == '..' ) ) {
+			$dh = opendir( $this->_session->data['restoreFolder'] );
+			if ( $dh ) {
+				$file = readdir( $dh );
+				while ( false !== $file ) {
+					if ( ( '.' === $file ) || ( '..' === $file ) ) {
+						$file = readdir( $dh );
 						continue;
 					}
 
 					Snapshot_Helper_Utility::recursive_rmdir( $this->_session->data['restoreFolder'] . $file );
+					$file = readdir( $dh );
 				}
 				closedir( $dh );
 			}
@@ -5420,7 +5454,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			return $error_status;
 		}
 
-		function snapshot_ajax_restore_rename_restored_tables( $item ) {
+		public function snapshot_ajax_restore_rename_restored_tables( $item ) {
 			global $wpdb;
 
 			$tables = array();
@@ -5429,7 +5463,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			if ( $tables_sections ) {
 				foreach ( $tables_sections as $_section => $_tables ) {
-					if ( $_section != "global" ) {
+					if ( 'global' !== $_section ) {
 						$tables = array_merge( $_tables, $tables );
 					} else {
 						// The 'global' tables will generally be set so the table name uses the base prefix. For restore we want to use
@@ -5437,7 +5471,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						if ( ! empty( $_tables ) ) {
 							foreach ( $_tables as $_table ) {
 								$table_dest = str_replace( $wpdb->base_prefix, $blog_prefix, $_table );
-								if ( $table_dest != $_table ) {
+								if ( $table_dest !== $_table ) {
 									if ( isset( $this->_session->data['MANIFEST']['TABLES'][ $_table ]['table_name_dest'] ) ) {
 										$this->_session->data['MANIFEST']['TABLES'][ $_table ]['table_name_dest'] = $table_dest;
 									}
@@ -5457,16 +5491,16 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				if ( isset( $tables[ $table_set['table_name_dest'] ] ) ) {
 					$sql_str = "DROP TABLE `" . $table_set['table_name_dest'] . "`;";
 					$this->snapshot_logger->log_message( 'drop original table: ' . $sql_str );
-					$wpdb->query( $sql_str );
+					$wpdb->query( esc_sql( "DROP TABLE `{$table_set['table_name_dest']}`;" ) );
 				}
 
 				$sql_str = "ALTER TABLE `" . $table_set['table_name_restore'] . "` RENAME `" . $table_set['table_name_dest'] . "`;";
 				$this->snapshot_logger->log_message( 'rename restored table: ' . $sql_str );
-				$wpdb->query( $sql_str );
+				$wpdb->query( esc_sql( "ALTER TABLE `{$table_set['table_name_restore']}` RENAME `{$table_set['table_name_dest']}`;" ) );
 			}
 		}
 
-		function snapshot_ajax_restore_convert_db_content( $table_data ) {
+		public function snapshot_ajax_restore_convert_db_content( $table_data ) {
 			global $wpdb;
 
 			//echo "table_data<pre>"; print_r($table_data); echo "</pre>";
@@ -5492,12 +5526,14 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			if ( ! isset( $this->_session->data['MANIFEST']['RESTORE']['DEST']['WP_SITEURL'] ) ) {
 				return;
 			}
-			if ( $this->_session->data['MANIFEST']['WP_HOME'] == $this->_session->data['MANIFEST']['RESTORE']['DEST']['WP_SITEURL']
-			     && $this->_session->data['MANIFEST']['RESTORE']['DEST']['WP_BLOG_ID'] == $this->_session->data['MANIFEST']['RESTORE']['SOURCE']['WP_BLOG_ID']
+			if ( $this->_session->data['MANIFEST']['WP_HOME'] === $this->_session->data['MANIFEST']['RESTORE']['DEST']['WP_SITEURL']
+			     && $this->_session->data['MANIFEST']['RESTORE']['DEST']['WP_BLOG_ID'] === $this->_session->data['MANIFEST']['RESTORE']['SOURCE']['WP_BLOG_ID']
 			) {
 				return;
 			}
 
+			// We have checked for nonces coming into the function.
+			// phpcs:ignore
 			$blog_prefix = $wpdb->get_blog_prefix( $_POST['snapshot-blog-id'] );
 			$_old_siteurl = str_replace( 'http://', '://', $this->_session->data['MANIFEST']['WP_HOME'] );
 			$_old_siteurl = str_replace( 'https://', '://', $_old_siteurl );
@@ -5542,12 +5578,11 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					// Options table
 					$limit_start = 0;
 					$limit_end = $limit_start + SNAPSHOT_RESTORE_MIGRATION_LIMIT_SIZE;
-					while ( true ) {
-						$sql_str = $wpdb->prepare( "SELECT * FROM `" . $table_set['table_name_restore'] . "` LIMIT %d,%d", $limit_start, $limit_end );
-						//echo "sql_str=[". $sql_str ."]<br />";
-						//error_log(__FUNCTION__ .": sql[". $sql_str ."]");
 
-						$db_rows = $wpdb->get_results( $sql_str );
+					$table_name_restore = $table_set['table_name_restore'];
+					while ( true ) {
+
+						$db_rows = $wpdb->get_results( $wpdb->prepare( esc_sql( "SELECT * FROM `$table_name_restore`" ) . " LIMIT %d, %d", $limit_start, $limit_end ) );
 						if ( ! empty( $db_rows ) ) {
 
 							foreach ( $db_rows as $row ) {
@@ -5556,10 +5591,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 								foreach ( $replacement_strs as $_old_str => $_new_str ) {
 									$new_value = Snapshot_Helper_Utility::replace_value( $new_value, $_old_str, $_new_str );
 								}
-								if ( $new_value != $row->option_value ) {
-									$sql_str = $wpdb->prepare( "UPDATE `" . $table_set['table_name_restore'] . "` SET option_value=%s WHERE option_id=%d",
-										$new_value, $row->option_id );
+								if ( $new_value !== $row->option_value ) {
+									$sql_str = $wpdb->prepare(
+											esc_sql( "UPDATE `$table_name_restore`" ) . " SET option_value=%s WHERE option_id=%d",
+											$new_value, $row->option_id
+										);
 									//error_log(__FUNCTION__ .": sql[". $sql_str ."]");
+
+									// We are using placeholders and $wpdb->prepare() inside the variable.
+									// phpcs:ignore
 									$wpdb->query( $sql_str );
 								}
 							}
@@ -5573,80 +5613,120 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					}
 
 					// Options - user_roles
-					$sql_str = $wpdb->prepare( "SELECT * FROM `" . $table_set['table_name_restore'] . "` WHERE option_name=%s LIMIT 1",
-						$this->_session->data['MANIFEST']['RESTORE']['SOURCE']['WP_DB_PREFIX'] . "user_roles" );
+					$sql_str = $wpdb->prepare(
+							esc_sql( "SELECT * FROM `$table_name_restore` " ) . " WHERE option_name=%s LIMIT 1",
+							$this->_session->data['MANIFEST']['RESTORE']['SOURCE']['WP_DB_PREFIX'] . "user_roles"
+						);
 					//echo "sql_str=[". $sql_str ."]<br />";
 					//error_log(__FUNCTION__ .": sql[". $sql_str ."]");
 
+					// We are using placeholders and $wpdb->prepare() inside the variable.
+					// phpcs:ignore
 					$db_row = $wpdb->get_row( $sql_str );
 					//echo "db_row<pre>"; print_r($db_row); echo "</pre>";
 					//error_log(__FUNCTION__ .": db_row<pre>". print_r($db_row, true). "</pre>");
 					if ( ! empty( $db_row ) ) {
 						$new_value = $this->_session->data['MANIFEST']['RESTORE']['DEST']['WP_DB_PREFIX'] . "user_roles";
 
-						$sql_str = $wpdb->prepare( "UPDATE `" . $table_set['table_name_restore'] . "` SET option_name=%s WHERE option_id=%d",
-							$new_value, $db_row->option_id );
+						$sql_str = $wpdb->prepare(
+								esc_sql( "UPDATE `$table_name_restore` " ) . " SET option_name=%s WHERE option_id=%d",
+								$new_value, $db_row->option_id
+							);
 						//echo "sql_str=[". $sql_str ."]<br />";
 						//error_log(__FUNCTION__ .": sql[". $sql_str ."]");
+
+						// We are using placeholders and $wpdb->prepare() inside the variable.
+						// phpcs:ignore
 						$wpdb->query( $sql_str );
 					}
 
 					// Options - upload_path
-					$sql_str = $wpdb->prepare( "SELECT * FROM `" . $table_set['table_name_restore'] . "` WHERE option_name=%s LIMIT 1", 'upload_path' );
+					$sql_str = $wpdb->prepare(
+						esc_sql( "SELECT * FROM `$table_name_restore` " ) . " WHERE option_name=%s LIMIT 1", 'upload_path'
+					);
 					//echo "sql_str=[". $sql_str ."]<br />";
+
+					// We are using placeholders and $wpdb->prepare() inside the variable.
+					// phpcs:ignore
 					$db_row = $wpdb->get_row( $sql_str );
 					//echo "db_row<pre>"; print_r($db_row); echo "</pre>";
 					if ( ! empty( $db_row ) ) {
-						$new_value = Snapshot_Helper_Utility::replace_value( $db_row->option_value,
-							$this->_session->data['MANIFEST']['RESTORE']['SOURCE']['UPLOAD_DIR'],
-							$this->_session->data['MANIFEST']['RESTORE']['DEST']['UPLOAD_DIR'] );
+						$new_value = Snapshot_Helper_Utility::replace_value(
+								$db_row->option_value,
+								$this->_session->data['MANIFEST']['RESTORE']['SOURCE']['UPLOAD_DIR'],
+								$this->_session->data['MANIFEST']['RESTORE']['DEST']['UPLOAD_DIR']
+							);
 
-						if ( $new_value != $db_row->option_value ) {
-							$sql_str = $wpdb->prepare( "UPDATE `" . $table_set['table_name_restore'] . "` SET option_value=%s WHERE option_id=%d",
-								$new_value, $db_row->option_id );
+						if ( $new_value !== $db_row->option_value ) {
+							$sql_str = $wpdb->prepare(
+									esc_sql( "UPDATE `$table_name_restore` " ) . " SET option_value=%s WHERE option_id=%d",
+									$new_value, $db_row->option_id
+								);
 
+							// We are using placeholders and $wpdb->prepare() inside the variable.
+							// phpcs:ignore
 							$wpdb->query( $sql_str );
 						}
 					}
 
 					// Options - upload_url_path
-					$sql_str = $wpdb->prepare( "SELECT * FROM `" . $table_set['table_name_restore'] . "` WHERE option_name=%s LIMIT 1", 'upload_url_path' );
+					$sql_str = $wpdb->prepare( esc_sql( "SELECT * FROM `$table_name_restore` " ) . " WHERE option_name=%s LIMIT 1", 'upload_url_path' );
 					//echo "sql_str=[". $sql_str ."]<br />";
+
+					// We are using placeholders and $wpdb->prepare() inside the variable.
+					// phpcs:ignore
 					$db_row = $wpdb->get_row( $sql_str );
 					//echo "db_row<pre>"; print_r($db_row); echo "</pre>";
 					if ( ! empty( $db_row ) ) {
-						$new_value = Snapshot_Helper_Utility::replace_value( $db_row->option_value,
-							$this->_session->data['MANIFEST']['RESTORE']['SOURCE']['UPLOAD_DIR'],
-							$this->_session->data['MANIFEST']['RESTORE']['DEST']['UPLOAD_DIR'] );
+						$new_value = Snapshot_Helper_Utility::replace_value(
+								$db_row->option_value,
+								$this->_session->data['MANIFEST']['RESTORE']['SOURCE']['UPLOAD_DIR'],
+								$this->_session->data['MANIFEST']['RESTORE']['DEST']['UPLOAD_DIR']
+							);
 
-						if ( $new_value != $db_row->option_value ) {
-							$sql_str = $wpdb->prepare( "UPDATE `" . $table_set['table_name_restore'] . "` SET option_value=%s WHERE option_id=%d",
-								$new_value, $db_row->option_id );
-
+						if ( $new_value !== $db_row->option_value ) {
+							$sql_str = $wpdb->prepare(
+									esc_sql( "UPDATE `$table_name_restore` " ) . " SET option_value=%s WHERE option_id=%d",
+									$new_value, $db_row->option_id
+								);
+							// We are using placeholders and $wpdb->prepare() inside the variable.
+							// phpcs:ignore
 							$wpdb->query( $sql_str );
 						}
 					}
 
 					// Options - siteurl
-					$sql_str = $wpdb->prepare( "SELECT * FROM `" . $table_set['table_name_restore'] . "` WHERE option_name=%s LIMIT 1", 'siteurl' );
+					$sql_str = $wpdb->prepare( esc_sql( "SELECT * FROM `$table_name_restore` " ) . " WHERE option_name=%s LIMIT 1", 'siteurl' );
 					//echo "sql_str=[". $sql_str ."]<br />";
+
+					// We are using placeholders and $wpdb->prepare() inside the variable.
+					// phpcs:ignore
 					$db_row = $wpdb->get_row( $sql_str );
 					//echo "db_row<pre>"; print_r($db_row); echo "</pre>";
 					if ( ! empty( $db_row ) ) {
-						$new_value = Snapshot_Helper_Utility::replace_value( $db_row->option_value,
-							$this->_session->data['MANIFEST']['RESTORE']['SOURCE']['WP_SITEURL'],
-							$this->_session->data['MANIFEST']['RESTORE']['DEST']['WP_SITEURL'] );
+						$new_value = Snapshot_Helper_Utility::replace_value(
+								$db_row->option_value,
+								$this->_session->data['MANIFEST']['RESTORE']['SOURCE']['WP_SITEURL'],
+								$this->_session->data['MANIFEST']['RESTORE']['DEST']['WP_SITEURL']
+							);
 
-						if ( $new_value != $db_row->option_value ) {
-							$sql_str = $wpdb->prepare( "UPDATE `" . $table_set['table_name_restore'] . "` SET option_value=%s WHERE option_id=%d",
-								$new_value, $db_row->option_id );
+						if ( $new_value !== $db_row->option_value ) {
+							$sql_str = $wpdb->prepare(
+									esc_sql( "UPDATE `$table_name_restore` " ) . " SET option_value=%s WHERE option_id=%d",
+									$new_value, $db_row->option_id
+								);
+							// We are using placeholders and $wpdb->prepare() inside the variable.
+							// phpcs:ignore
 							$wpdb->query( $sql_str );
 						}
 					}
 
 					// Options - home
-					$sql_str = $wpdb->prepare( "SELECT * FROM `" . $table_set['table_name_restore'] . "` WHERE option_name=%s LIMIT 1", 'home' );
+					$sql_str = $wpdb->prepare( esc_sql( "SELECT * FROM `$table_name_restore` " ) . " WHERE option_name=%s LIMIT 1", 'home' );
 					//echo "sql_str=[". $sql_str ."]<br />";
+
+					// We are using placeholders and $wpdb->prepare() inside the variable.
+					// phpcs:ignore
 					$db_row = $wpdb->get_row( $sql_str );
 					//echo "db_row<pre>"; print_r($db_row); echo "</pre>";
 					if ( ! empty( $db_row ) ) {
@@ -5667,13 +5747,19 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							}
 						}
 
-						$new_value = Snapshot_Helper_Utility::replace_value( $db_row->option_value,
-							$this->_session->data['MANIFEST']['WP_HOME'],
-							$home_url );
+						$new_value = Snapshot_Helper_Utility::replace_value(
+								$db_row->option_value,
+								$this->_session->data['MANIFEST']['WP_HOME'],
+								$home_url
+							);
 
-						if ( $new_value != $db_row->option_value ) {
-							$sql_str = $wpdb->prepare( "UPDATE `" . $table_set['table_name_restore'] . "` SET option_value=%s WHERE option_id=%d",
-								$new_value, $db_row->option_id );
+						if ( $new_value !== $db_row->option_value ) {
+							$sql_str = $wpdb->prepare(
+									esc_sql( "UPDATE `$table_name_restore` " ) . " SET option_value=%s WHERE option_id=%d",
+									$new_value, $db_row->option_id
+								);
+							// We are using placeholders and $wpdb->prepare() inside the variable.
+							// phpcs:ignore
 							$wpdb->query( $sql_str );
 						}
 					}
@@ -5684,10 +5770,11 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					// Posts table
 					$limit_start = 0;
 					$limit_end = $limit_start + SNAPSHOT_RESTORE_MIGRATION_LIMIT_SIZE;
+
+					$table_name_restore = $table_set['table_name_restore'];
 					while ( true ) {
-						$sql_str = $wpdb->prepare( "SELECT * FROM `" . $table_set['table_name_restore'] . "` LIMIT %d,%d", $limit_start, $limit_end );
-						//echo "sql_str=[". $sql_str ."]<br />";
-						$db_rows = $wpdb->get_results( $sql_str );
+
+						$db_rows = $wpdb->get_results( $wpdb->prepare( esc_sql( "SELECT * FROM `$table_name_restore`" ) . " LIMIT %d, %d", $limit_start, $limit_end ) );
 						if ( ! empty( $db_rows ) ) {
 
 							//echo "dp_rows<pre>"; print_r($db_rows); echo "</pre>";
@@ -5699,10 +5786,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 									foreach ( $replacement_strs as $_old_str => $_new_str ) {
 										$new_value = Snapshot_Helper_Utility::replace_value( $new_value, $_old_str, $_new_str );
 									}
-									if ( $new_value != $row->post_title ) {
-										$sql_str = $wpdb->prepare( "UPDATE `" . $table_set['table_name_restore'] . "` SET post_title=%s WHERE ID=%d",
-											$new_value, $row->ID );
+									if ( $new_value !== $row->post_title ) {
+										$sql_str = $wpdb->prepare(
+												esc_sql( "UPDATE `$table_name_restore`" ) . " SET post_title=%s WHERE ID=%d",
+												$new_value, $row->ID
+											);
 										//echo "sql_str=[". $sql_str ."]<br />";
+
+										// We are using placeholders and $wpdb->prepare() inside the variable.
+										// phpcs:ignore
 										$wpdb->query( $sql_str );
 									}
 								}
@@ -5713,10 +5805,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 									foreach ( $replacement_strs as $_old_str => $_new_str ) {
 										$new_value = Snapshot_Helper_Utility::replace_value( $new_value, $_old_str, $_new_str );
 									}
-									if ( $new_value != $row->post_content ) {
-										$sql_str = $wpdb->prepare( "UPDATE `" . $table_set['table_name_restore'] . "` SET post_content=%s WHERE ID=%d",
-											$new_value, $row->ID );
+									if ( $new_value !== $row->post_content ) {
+										$sql_str = $wpdb->prepare(
+												esc_sql( "UPDATE `$table_name_restore`" ) . " SET post_content=%s WHERE ID=%d",
+												$new_value, $row->ID
+											);
 										//echo "sql_str=[". $sql_str ."]<br />";
+
+										// We are using placeholders and $wpdb->prepare() inside the variable.
+										// phpcs:ignore
 										$wpdb->query( $sql_str );
 									}
 								}
@@ -5727,9 +5824,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 									foreach ( $replacement_strs as $_old_str => $_new_str ) {
 										$new_value = Snapshot_Helper_Utility::replace_value( $new_value, $_old_str, $_new_str );
 									}
-									if ( $new_value != $row->post_content_filtered ) {
-										$sql_str = $wpdb->prepare( "UPDATE `" . $table_set['table_name_restore'] . "` SET post_content_filtered=%s WHERE ID=%d", $new_value, $row->ID );
+									if ( $new_value !== $row->post_content_filtered ) {
+										$sql_str = $wpdb->prepare(
+												esc_sql( "UPDATE `$table_name_restore`" ) . " SET post_content_filtered=%s WHERE ID=%d",
+												$new_value, $row->ID
+											);
 										//echo "sql_str=[". $sql_str ."]<br />";
+
+										// We are using placeholders and $wpdb->prepare() inside the variable.
+										// phpcs:ignore
 										$wpdb->query( $sql_str );
 									}
 								}
@@ -5740,11 +5843,16 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 									foreach ( $replacement_strs as $_old_str => $_new_str ) {
 										$new_value = Snapshot_Helper_Utility::replace_value( $new_value, $_old_str, $_new_str );
 									}
-									if ( $new_value != $row->post_excerpt ) {
+									if ( $new_value !== $row->post_excerpt ) {
 
-										$sql_str = $wpdb->prepare( "UPDATE `" . $table_set['table_name_restore'] . "` SET post_excerpt=%s WHERE ID=%d",
-											$new_value, $row->ID );
+										$sql_str = $wpdb->prepare(
+												esc_sql( "UPDATE `$table_name_restore`" ) . " SET post_excerpt=%s WHERE ID=%d",
+												$new_value, $row->ID
+											);
 										//echo "sql_str=[". $sql_str ."]<br />";
+
+										// We are using placeholders and $wpdb->prepare() inside the variable.
+										// phpcs:ignore
 										$wpdb->query( $sql_str );
 									}
 								}
@@ -5755,11 +5863,16 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 									foreach ( $replacement_strs as $_old_str => $_new_str ) {
 										$new_value = Snapshot_Helper_Utility::replace_value( $new_value, $_old_str, $_new_str );
 									}
-									if ( $new_value != $row->guid ) {
+									if ( $new_value !== $row->guid ) {
 
-										$sql_str = $wpdb->prepare( "UPDATE `" . $table_set['table_name_restore'] . "` SET guid=%s WHERE ID=%d",
-											$new_value, $row->ID );
+										$sql_str = $wpdb->prepare(
+												esc_sql( "UPDATE `$table_name_restore`" ) . " SET guid=%s WHERE ID=%d",
+												$new_value, $row->ID
+											);
 										//echo "sql_str=[". $sql_str ."]<br />";
+
+										// We are using placeholders and $wpdb->prepare() inside the variable.
+										// phpcs:ignore
 										$wpdb->query( $sql_str );
 									}
 								}
@@ -5769,11 +5882,16 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 									foreach ( $replacement_strs as $_old_str => $_new_str ) {
 										$new_value = Snapshot_Helper_Utility::replace_value( $new_value, $_old_str, $_new_str );
 									}
-									if ( $new_value != $row->guid ) {
+									if ( $new_value !== $row->guid ) {
 
-										$sql_str = $wpdb->prepare( "UPDATE `" . $table_set['table_name_restore'] . "` SET pinged=%s WHERE ID=%d",
-											$new_value, $row->ID );
+										$sql_str = $wpdb->prepare(
+												esc_sql( "UPDATE `$table_name_restore`" ) . " SET pinged=%s WHERE ID=%d",
+												$new_value, $row->ID
+											);
 										//echo "sql_str=[". $sql_str ."]<br />";
+
+										// We are using placeholders and $wpdb->prepare() inside the variable.
+										// phpcs:ignore
 										$wpdb->query( $sql_str );
 									}
 								}
@@ -5792,10 +5910,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					// Posts Meta table
 					$limit_start = 0;
 					$limit_end = $limit_start + SNAPSHOT_RESTORE_MIGRATION_LIMIT_SIZE;
+
+					$table_name_restore = $table_set['table_name_restore'];
 					while ( true ) {
 
-						$sql_str = $wpdb->prepare( "SELECT * FROM `" . $table_set['table_name_restore'] . "` LIMIT %d,%d", $limit_start, $limit_end );
+						$sql_str = $wpdb->prepare( esc_sql( "SELECT * FROM `$table_name_restore` " ) . " LIMIT %d,%d", $limit_start, $limit_end );
 						//echo "sql_str=[". $sql_str ."]<br />";
+
+						// We are using placeholders and $wpdb->prepare() inside the variable.
+						// phpcs:ignore
 						$db_rows = $wpdb->get_results( $sql_str );
 						if ( ! empty( $db_rows ) ) {
 							//echo "dp_rows<pre>"; print_r($db_rows); echo "</pre>";
@@ -5804,12 +5927,17 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 								foreach ( $replacement_strs as $_old_str => $_new_str ) {
 									$new_value = Snapshot_Helper_Utility::replace_value( $new_value, $_old_str, $_new_str );
 								}
-								if ( $new_value != $row->meta_value ) {
+								if ( $new_value !== $row->meta_value ) {
 									//echo "postmeta [". $row->meta_name ."] [". $row->meta_value ."] [". $new_value ."]<br />";
 
-									$sql_str = $wpdb->prepare( "UPDATE `" . $table_set['table_name_restore'] . "` SET meta_value=%s WHERE meta_id=%d",
-										$new_value, $row->meta_id );
+									$sql_str = $wpdb->prepare(
+                                         esc_sql( "UPDATE `$table_name_restore` " ) . " SET meta_value=%s WHERE meta_id=%d",
+										$new_value, $row->meta_id
+                                        );
 									//echo "sql_str=[". $sql_str ."]<br />";
+
+									// We are using placeholders and $wpdb->prepare() inside the variable.
+									// phpcs:ignore
 									$wpdb->query( $sql_str );
 								}
 							}
@@ -5827,10 +5955,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					// Comments table
 					$limit_start = 0;
 					$limit_end = $limit_start + SNAPSHOT_RESTORE_MIGRATION_LIMIT_SIZE;
+
+					$table_name_restore = $table_set['table_name_restore'];
 					while ( true ) {
 
-						$sql_str = $wpdb->prepare( "SELECT * FROM `" . $table_set['table_name_restore'] . "` LIMIT %d,%d", $limit_start, $limit_end );
+						$sql_str = $wpdb->prepare( esc_sql( "SELECT * FROM `$table_name_restore` " ) . " LIMIT %d, %d", $limit_start, $limit_end );
 						//echo "sql_str=[". $sql_str ."]<br />";
+
+						// We are using placeholders and $wpdb->prepare() inside the variable.
+						// phpcs:ignore
 						$db_rows = $wpdb->get_results( $sql_str );
 						//echo "dp_rows<pre>"; print_r($db_rows); echo "</pre>";
 						if ( ! empty( $db_rows ) ) {
@@ -5842,9 +5975,14 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 									foreach ( $replacement_strs as $_old_str => $_new_str ) {
 										$new_value = Snapshot_Helper_Utility::replace_value( $new_value, $_old_str, $_new_str );
 									}
-									if ( $new_value != $row->comment_content ) {
-										$sql_str = $wpdb->prepare( "UPDATE `" . $table_set['table_name_restore'] . "` SET comment_content=%s WHERE comment_ID=%d",
-											$new_value, $row->comment_ID );
+									if ( $new_value !== $row->comment_content ) {
+										$sql_str = $wpdb->prepare(
+												esc_sql( "UPDATE `$table_name_restore` " ) . " SET comment_content=%s WHERE comment_ID=%d",
+												$new_value, $row->comment_ID
+											);
+
+										// We are using placeholders and $wpdb->prepare() inside the variable.
+										// phpcs:ignore
 										$wpdb->query( $sql_str );
 									}
 								}
@@ -5855,10 +5993,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 									foreach ( $replacement_strs as $_old_str => $_new_str ) {
 										$new_value = Snapshot_Helper_Utility::replace_value( $new_value, $_old_str, $_new_str );
 									}
-									if ( $new_value != $row->comment_author_url ) {
-										$sql_str = $wpdb->prepare( "UPDATE `" . $table_set['table_name_restore'] . "` SET comment_author_url=%s WHERE comment_ID=%d",
-											$new_value, $row->comment_ID );
+									if ( $new_value !== $row->comment_author_url ) {
+										$sql_str = $wpdb->prepare(
+												esc_sql( "UPDATE `$table_name_restore` " ) . " SET comment_author_url=%s WHERE comment_ID=%d",
+												$new_value, $row->comment_ID
+											);
 										//echo "sql_str=[". $sql_str ."]<br />";
+
+										// We are using placeholders and $wpdb->prepare() inside the variable.
+										// phpcs:ignore
 										$wpdb->query( $sql_str );
 									}
 								}
@@ -5877,9 +6020,14 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					// Comment Meta table
 					$limit_start = 0;
 					$limit_end = $limit_start + SNAPSHOT_RESTORE_MIGRATION_LIMIT_SIZE;
+
+					$table_name_restore = $table_set['table_name_restore'];
 					while ( true ) {
-						$sql_str = $wpdb->prepare( "SELECT * FROM `" . $table_set['table_name_restore'] . "` LIMIT %d,%d", $limit_start, $limit_end );
+						$sql_str = $wpdb->prepare( esc_sql( "SELECT * FROM `$table_name_restore` " ) . " LIMIT %d,%d", $limit_start, $limit_end );
 						//echo "sql_str=[". $sql_str ."]<br />";
+
+						// We are using placeholders and $wpdb->prepare() inside the variable.
+						// phpcs:ignore
 						$db_rows = $wpdb->get_results( $sql_str );
 						if ( ! empty( $db_rows ) ) {
 							//echo "dp_rows<pre>"; print_r($db_rows); echo "</pre>";
@@ -5888,10 +6036,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 								foreach ( $replacement_strs as $_old_str => $_new_str ) {
 									$new_value = Snapshot_Helper_Utility::replace_value( $new_value, $_old_str, $_new_str );
 								}
-								if ( $new_value != $row->meta_value ) {
-									$sql_str = $wpdb->prepare( "UPDATE `" . $table_set['table_name_restore'] . "` SET meta_value=%s WHERE meta_id=%d",
-										$new_value, $row->meta_id );
+								if ( $new_value !== $row->meta_value ) {
+									$sql_str = $wpdb->prepare(
+											esc_sql( "UPDATE `$table_name_restore` " ) . " SET meta_value=%s WHERE meta_id=%d",
+											$new_value, $row->meta_id
+										);
 									//echo "sql_str=[". $sql_str ."]<br />";
+
+									// We are using placeholders and $wpdb->prepare() inside the variable.
+									// phpcs:ignore
 									$wpdb->query( $sql_str );
 								}
 							}
@@ -5907,28 +6060,34 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				case 'usermeta':
 					$limit_start = 0;
 					$limit_end = $limit_start + SNAPSHOT_RESTORE_MIGRATION_LIMIT_SIZE;
+
+					$table_name_restore = $table_set['table_name_restore'];
 					while ( true ) {
-						$sql_str = sprintf( "SELECT * FROM `" . $table_set['table_name_restore'] . "` WHERE meta_key LIKE '" .
-						                    $this->_session->data['MANIFEST']['RESTORE']['SOURCE']['WP_DB_PREFIX'] . "%s' LIMIT %d,%d", '%', $limit_start, $limit_end );
-						//echo "sql_str=[". $sql_str ."]<br />";
-						//error_log(__FUNCTION__ .": sql[". $sql_str ."]");
 
 						//$this->snapshot_logger->log_message('restore: table: '. $table_data['table_name'] .' sql_str ['. $sql_str .']');
 
-						$db_rows = $wpdb->get_results( $sql_str );
+						$db_rows = $wpdb->get_results( $wpdb->prepare( esc_sql( "SELECT * FROM `$table_name_restore` WHERE meta_key LIKE " ) .
+														"%s LIMIT %d,%d" , $this->_session->data['MANIFEST']['RESTORE']['SOURCE']['WP_DB_PREFIX'] . '%', $limit_start, $limit_end  ) );
 						if ( ! empty( $db_rows ) ) {
 							//echo "dp_rows<pre>"; print_r($db_rows); echo "</pre>";
 							//die();
 
 							foreach ( $db_rows as $row ) {
-								$new_value = str_replace( $this->_session->data['MANIFEST']['RESTORE']['SOURCE']['WP_DB_PREFIX'],
-									$this->_session->data['MANIFEST']['RESTORE']['DEST']['WP_DB_PREFIX'], $row->meta_key );
+								$new_value = str_replace(
+										$this->_session->data['MANIFEST']['RESTORE']['SOURCE']['WP_DB_PREFIX'],
+										$this->_session->data['MANIFEST']['RESTORE']['DEST']['WP_DB_PREFIX'], $row->meta_key
+									);
 
-								$sql_str = $wpdb->prepare( "UPDATE `" . $table_set['table_name_restore'] . "` SET meta_key=%s WHERE umeta_id=%d",
-									$new_value, $row->umeta_id );
+								$sql_str = $wpdb->prepare(
+										esc_sql( "UPDATE `$table_name_restore`") . " SET meta_key=%s WHERE umeta_id=%d",
+										$new_value, $row->umeta_id
+									);
 								//$this->snapshot_logger->log_message('restore: table: '. $table_data['table_name'] .' sql_str ['. $sql_str .']');
 								//echo "sql_str=[". $sql_str ."]<br />";
 								//error_log(__FUNCTION__ .": sql[". $sql_str ."]");
+
+								// We are using placeholders and $wpdb->prepare() inside the variable.
+								// phpcs:ignore
 								$wpdb->query( $sql_str );
 							}
 
@@ -5942,12 +6101,12 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					break;
 
 				case 'users':
+				$table_name_restore = $table_set['table_name_restore'];
 					if ( ! is_multisite() ) {
 
 						// For non-Multisite we want to drop the extra columns from the users table. But we don't
 						// know if the archive was from a regular or Miltisite.
-						$sql_str = "SELECT * FROM `" . $table_set['table_name_restore'] . "` WHERE 1=1 LIMIT 1";
-						$db_rows = $wpdb->get_row( $sql_str );
+						$db_rows = $wpdb->get_row( esc_sql( "SELECT * FROM `$table_name_restore` WHERE 1=1 LIMIT 1" ) );
 						if ( $db_rows ) {
 							$alter_tables = array();
 							if ( isset( $db_rows->spam ) ) {
@@ -5957,8 +6116,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 								$alter_tables[] = "DROP `deleted`";
 							}
 							if ( count( $alter_tables ) ) {
-								$sql_str_alter = "ALTER TABLE `" . $table_set['table_name_restore'] . "` " . implode( ',', $alter_tables );
-								$wpdb->query( $sql_str_alter );
+								$wpdb->query( esc_sql( "ALTER TABLE `$table_name_restore` " . implode( ',', $alter_tables ) ) );
 							}
 						}
 					}
@@ -5969,10 +6127,13 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			}
 		}
 
-		function snapshot_ajax_restore_convert_db_global_tables( $item ) {
+		public function snapshot_ajax_restore_convert_db_global_tables( $item ) {
 			global $wpdb, $current_blog, $current_user;
 
-			if ( ( is_multisite() ) && ( $current_blog->blog_id != $_POST['snapshot-blog-id'] ) ) {
+			// We have checked nonces coming into the function.
+			// phpcs:ignore
+			if ( ( is_multisite() ) && ( $current_blog->blog_id !== $_POST['snapshot-blog-id'] ) ) {
+				// phpcs:ignore
 				$wpdb->set_blog_id( $_POST['snapshot-blog-id'] );
 			}
 
@@ -5983,6 +6144,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			$table_prefix_org = $this->_session->data['MANIFEST']['WP_DB_PREFIX'];
 			//echo "table_prefix_org[". $table_prefix_org ."]<br />";
 
+			// phpcs:ignore
 			$blog_prefix = $wpdb->get_blog_prefix( $_POST['snapshot-blog-id'] );
 			//echo "blog_prefix[". $blog_prefix ."]<br />";
 
@@ -5997,8 +6159,10 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			$users_table = $blog_prefix . 'users';
 
 			// Avoid PHP Notice when prefix_[ID]_users don't exist.
-			if ( in_array( $users_table, $tables ) ) {
+			if ( in_array( $users_table, $tables, true ) ) {
 				$sql_str = "SELECT * FROM " . $users_table;
+				// We are using non-dynamic data here.
+				// phpcs:ignore
 				$users_restore = $wpdb->get_results( $sql_str );
 			}
 
@@ -6032,38 +6196,51 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 								$user_restore->deleted = 0;
 							}
 						}
-						$sql_insert_user = "INSERT INTO $wpdb->users VALUES (0, '$user_restore->user_login', '$user_restore->user_pass', '$user_restore->user_nicename', '$user_restore->user_email', '$user_restore->user_url', '$user_restore->user_registered', '$user_restore->user_activation_key',  '$user_restore->user_status', '$user_restore->display_name', $user_restore->spam, $user_restore->deleted)";
+
 						//echo "sql_insert_user[". $sql_insert_user ."]<br />";
-						$wpdb->get_results( $sql_insert_user );
+						$wpdb->get_results( $wpdb->prepare( "INSERT INTO $wpdb->users VALUES (0, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s )", $user_restore->user_login, $user_restore->user_pass, $user_restore->user_nicename, $user_restore->user_email, $user_restore->user_url, $user_restore->user_registered, $user_restore->user_activation_key,  $user_restore->user_status, $user_restore->display_name, $user_restore->spam, $user_restore->deleted ) );
 						if ( ! $wpdb->insert_id ) {
-							echo "ERROR: Failed to insert user record for User ID[" . $user_restore->ID . "] WP Error[" . $wpdb->last_error . "]<br />";
+							echo nl2br(
+								esc_html(
+									sprintf(
+										"ERROR: Failed to insert user record for User ID[%d] WP Error[%s]\n",
+										esc_html($user_restore->ID), esc_html($wpdb->last_error)
+									)
+								)
+							);
 						} else {
 							$user_restore_new_id = $wpdb->insert_id;
-							$sql_usermeta_str = "SELECT * FROM " . $blog_prefix . "usermeta WHERE user_id=" . $user_restore->ID;
 							//echo "sql_usermeta_str=[". $sql_usermeta_str ."]<br />";
-							$usermeta_restore = $wpdb->get_results( $sql_usermeta_str );
+
+							// The interpolated variable is non-dynamic data.
+							// phpcs:ignore
+							$usermeta_restore = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$blog_prefix}usermeta WHERE user_id=%s", $user_restore->ID ) );
 
 							if ( ( $usermeta_restore ) && ( count( $usermeta_restore ) ) ) {
 								//$meta_sql_str = '';
 								foreach ( $usermeta_restore as $meta ) {
-									$meta_sql_str = "INSERT into $wpdb->usermeta VALUES(0, '$user_restore_new_id', '$meta->meta_key', '$meta->meta_value')";
 									//echo "meta_sql_str=[". $meta_sql_str ."]<br />";
-									$ret = $wpdb->query( $meta_sql_str );
+									$ret = $wpdb->query( $wpdb->prepare( "INSERT into $wpdb->usermeta VALUES(0, %s, %s, %s)", $user_restore_new_id, $meta->meta_key, $meta->meta_value ) );
 									//echo "ret[". $ret ."] wpdb<pre>"; print_r($wpdb); echo "</pre>";
 								}
 								update_user_meta( $user_restore_new_id, $blog_prefix . 'old_user_id', $user_restore->ID );
 
 								if ( is_multisite() ) {
+									// phpcs:ignore
 									add_user_meta( $user_restore_new_id, 'primary_blog', $_POST['snapshot-blog-id'] );
 								}
 							}
 
 							// Update the Posts post_author field
 							$sql_posts_str = $wpdb->prepare( "UPDATE $wpdb->posts SET post_author = %d WHERE post_author = %d", $user_restore_new_id, $user_restore->ID );
+							// We are using placeholders and $wpdb->prepare() inside the variable.
+							// phpcs:ignore
 							$wpdb->query( $sql_posts_str );
 
 							// Update the Comments user_id field
 							$sql_comments_str = $wpdb->prepare( "UPDATE $wpdb->comments SET user_id = %d WHERE user_id = %d", $user_restore_new_id, $user_restore->ID );
+							// We are using placeholders and $wpdb->prepare() inside the variable.
+							// phpcs:ignore
 							$wpdb->query( $sql_comments_str );
 						}
 						continue;
@@ -6073,22 +6250,24 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						//die();
 
 						// If the user an exact match?
-						if ( ( $user_local->ID == $user_restore->ID ) && ( $user_local->user_login == $user_restore->user_login ) ) {
+						if ( ( $user_local->ID === $user_restore->ID ) && ( $user_local->user_login === $user_restore->user_login ) ) {
 
 							// Now we have the user, we need to add the user meta. We only add meta keys which do not already exist.
-							$sql_usermeta_str = "SELECT * FROM " . $blog_prefix . "usermeta WHERE user_id=" . $user_local->ID;
 							//echo "sql_usermeta_str=[". $sql_usermeta_str ."]<br />";
-							$usermeta_restore = $wpdb->get_results( $sql_usermeta_str );
+
+							// We are using placeholders for dynamic data.
+							// phpcs:ignore
+							$usermeta_restore = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $blog_prefix . "usermeta WHERE user_id=%s", $user_local->ID ) );
 							if ( ( $usermeta_restore ) && ( count( $usermeta_restore ) ) ) {
 								foreach ( $usermeta_restore as $meta ) {
 									if ( ! get_user_meta( $user_local->ID, $meta->meta_key ) ) {
-										$meta_sql_str = "INSERT into $wpdb->usermeta VALUES(0, '$user_restore->ID', '$meta->meta_key', '$meta->meta_value');";
 										//echo "meta_sql_str=[". $meta_sql_str ."]<br />";
-										$wpdb->query( $meta_sql_str );
+										$wpdb->query( $wpdb->prepare( "INSERT into $wpdb->usermeta VALUES(0, %s, %s, %s)", $user_restore->ID, $meta->meta_key, $meta->meta_value ) );
 									}
 								}
 								if ( is_multisite() ) {
 									if ( ! get_user_meta( $user_local->ID, 'primary_blog' ) ) {
+										// phpcs:ignore
 										add_user_meta( $user_local->ID, 'primary_blog', $_POST['snapshot-blog-id'] );
 									}
 								}
@@ -6099,21 +6278,22 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							//echo "HERE: Need to copy restored user, usermeta, post, comments<br />";
 
 							// IF here we need to copy the usermeta records to the new local_user ID. Copy the usermeta records over to the main table
-							$sql_usermeta_str = "SELECT * FROM " . $blog_prefix . "usermeta WHERE user_id=" . $user_restore->ID;
-							$usermeta_restore = $wpdb->get_results( $sql_usermeta_str );
+							// We are using placeholders for dynamic data.
+							// phpcs:ignore
+							$usermeta_restore = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . $blog_prefix . "usermeta WHERE user_id=%s", $user_restore->ID ) );
 							if ( ( $usermeta_restore ) && ( count( $usermeta_restore ) ) ) {
 								//echo "usermeta_restore<pre>"; print_r($usermeta_restore); echo "</pre>";
 								foreach ( $usermeta_restore as $meta ) {
 									if ( ! get_user_meta( $user_local->ID, $meta->meta_key ) ) {
-										$meta_sql_str = "INSERT into $wpdb->usermeta VALUES(0, '$user_local->ID', '$meta->meta_key', '$meta->meta_value'); ";
 										//echo "meta_sql_str=[". $meta_sql_str ."]<br />";
-										$wpdb->query( $meta_sql_str );
+										$wpdb->query( $wpdb->prepare( "INSERT into $wpdb->usermeta VALUES(0, %s, %s, %s)", $user_local->ID, $meta->meta_key, $meta->meta_value ) );
 									}
 								}
 								update_user_meta( $user_local->ID, $blog_prefix . 'old_user_id', $user_restore->ID );
 
 								if ( is_multisite() ) {
 									if ( ! get_user_meta( $user_local->ID, 'primary_blog' ) ) {
+										// phpcs:ignore
 										add_user_meta( $user_local->ID, 'primary_blog', $_POST['snapshot-blog-id'] );
 									}
 								}
@@ -6121,24 +6301,19 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 							// Update the Posts post_author field
 							$sql_posts_str = $wpdb->prepare( "UPDATE $wpdb->posts SET post_author = %d WHERE post_author = %d", $user_local->ID, $user_restore->ID );
+							// We are using placeholders and $wpdb->prepare() inside the variable.
+							// phpcs:ignore
 							$wpdb->query( $sql_posts_str );
 
 							// Update the Comments user_id field
 							$sql_comments_str = $wpdb->prepare( "UPDATE $wpdb->comments SET user_id = %d WHERE user_id = %d", $user_local->ID, $user_restore->ID );
+							// We are using placeholders and $wpdb->prepare() inside the variable.
+							// phpcs:ignore
 							$wpdb->query( $sql_comments_str );
 
 						}
 					}
 				}
-			}
-			//echo "FIN<br />";
-			//die();
-			return;
-
-			// We are done with the temp users and usermeta table. Remove them for good cleanup.
-			if ( is_multisite() ) {
-				$sql_str = "DROP TABLE " . $blog_prefix . "users, " . $blog_prefix . "usermeta;";
-				$wpdb->query( $sql_str );
 			}
 		}
 
@@ -6153,7 +6328,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 * @return void
 		 */
 
-		function uninstall_snapshot() {
+		public function uninstall_snapshot() {
 
 			$this->load_config();
 			$this->set_backup_folder();
@@ -6163,120 +6338,6 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			}
 
 			delete_option( $this->_settings['options_key'] );
-		}
-
-		/**
-		 * Utility function to migrate previous snapshot items to new data structure and filename format
-		 *
-		 * @since 1.0.2
-		 * @see
-		 *
-		 * @param blog_id
-		 * @param IS_SUPER_BLOG true is for multisite primary blog ID 1
-		 *
-		 * @return void
-		 */
-
-		function snapshot_migrate_config_proc( $blog_id = 0 ) {
-
-			//		if (is_multisite()) {
-			//			if (!$blog_id) return;
-			//
-			//			$blog_id = intval($blog_id);
-			//			if ($IS_SUPER_BLOG == true) {
-			//
-			//				// If this is the Primary Blog and we already have the updated
-			//				$config_data = get_blog_option($blog_id, $this->_settings['options_key']);
-			//				if ($config_data)
-			//					return;
-			//			}
-			//
-			//		} else {
-			//
-			//			// Single WordPress (Not Multisite)
-			//			$config_data = get_option($this->_settings['options_key']);
-			//			if ($config_data)
-			//				return;
-			//		}
-			//
-			//		// else we need to pull the previous version and convert.
-			//		if (is_multisite())
-			//			$config_data = get_blog_option($blog_id, 'snapshot_1.0');
-			//		else
-			//			$config_data = get_option( 'snapshot_1.0');
-
-			$ret_value = false;
-			$config_data = get_option( 'snapshot_1.0' );
-			if ( $config_data ) {
-
-				foreach ( $config_data['items'] as $item_key => $item ) {
-
-					// Need to update filename to reflect new filename formats
-					$backupFile = trailingslashit( $this->_settings['backupBaseFolderFull'] ) . $item['file'];
-
-					if ( file_exists( $backupFile ) ) {
-						$path_filename = pathinfo( $item['file'], PATHINFO_FILENAME );
-						if ( ! $path_filename ) {
-							// PHP Not supported. Do it old school
-
-							$path_filename = substr( $item['file'], 0, strlen( $item['file'] ) - 4 );
-						}
-
-						$snapshot_file_parts = explode( '-', $path_filename );
-						if ( count( $snapshot_file_parts ) == 3 ) {
-							// Old style snapshot-yymmdd-hhmms format
-							// Need to convert to snapshot-{blog_id}-yymmdd-hhmmss-{checksum}.zip
-
-							while ( true ) {
-								$checksum = Snapshot_Helper_Utility::get_file_checksum( $backupFile );
-								$snapshot_new_filename = $snapshot_file_parts[0] . '-' . $item_key . '-' . $snapshot_file_parts[1] . '-' .
-								                         $snapshot_file_parts[2] . '-' . $checksum . '.zip';
-
-								$masterFile = trailingslashit( $this->_settings['backupBaseFolderFull'] ) . $snapshot_new_filename;
-
-								// File does not exist so break and save file.
-								if ( ! file_exists( $masterFile ) ) {
-									break;
-								}
-							}
-							rename( $backupFile, $masterFile );
-
-							$item['blog-id'] = $blog_id;
-							$item['interval'] = '';
-
-							unset( $item['file'] );
-
-							$item_data = array();
-							$item_data['filename'] = $snapshot_new_filename;
-							$item_data['timestamp'] = $item_key;
-							$item_data['tables'] = $item['tables'];
-
-							$item['data'] = array();
-							$item['data'][ $item_key ] = $item_data;
-
-							$this->config_data['items'][ $item_key ] = $item;
-						}
-					}
-				}
-				//echo "config_data<pre>"; print_r($this->config_data); echo "</pre>";
-				//exit;
-
-				if ( isset( $config_data['config']['tables'] ) ) {
-					$this->config_data['config']['tables_last'][ $blog_id ] = $config_data['config']['tables'];
-				}
-
-				// Now we want to archive the old style options to get them out of the database.
-				$configFile = trailingslashit( $this->_settings['backupBaseFolderFull'] ) . "_configs";
-				wp_mkdir_p( $configFile );
-				$configFile = trailingslashit( $this->_settings['backupBaseFolderFull'] ) . "_configs/blog_" . $blog_id . ".conf";
-				$fp = fopen( $configFile, 'w' );
-				fwrite( $fp, serialize( $config_data ) );
-				fclose( $fp );
-				$ret_value = true;
-				delete_option( 'snapshot_1.0' );
-			}
-
-			return $ret_value;
 		}
 
 		/**
@@ -6290,7 +6351,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 * @return string value of setting
 		 */
 
-		function get_setting( $setting ) {
+		public function get_setting( $setting ) {
 			return isset( $this->_settings[ $setting ] ) ? $this->_settings[ $setting ] : null;
 		}
 
@@ -6304,7 +6365,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return string value of setting
 		 */
-		function snapshot_update_setting( $setting, $_value ) {
+		public function snapshot_update_setting( $setting, $_value ) {
 			//echo "_settings<pre>"; print_r($this->_settings); echo "</pre>";
 			if ( isset( $this->_settings[ $setting ] ) ) {
 				$this->_settings[ $setting ] = $_value;
@@ -6324,7 +6385,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 * @return string value of pagehook
 		 */
 
-		function snapshot_get_pagehook( $setting ) {
+		public function snapshot_get_pagehook( $setting ) {
 			if ( isset( $this->_pagehooks[ $setting ] ) ) {
 				return $this->_pagehooks[ $setting ];
 			}
@@ -6341,7 +6402,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 * @return string admin url of pagehook
 		 */
 
-		function snapshot_get_pagehook_url( $setting ) {
+		public function snapshot_get_pagehook_url( $setting ) {
 			$page_url = '';
 			$original_setting = $setting;
 
@@ -6361,12 +6422,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			return $page_url;
 		}
 
-		function snapshot_add_destination_proc() {
+		public function snapshot_add_destination_proc() {
 
+			// We have checked for nonces coming into the function.
+			// phpcs:ignore
 			if ( ! isset( $_POST['snapshot-destination']['type'] ) ) {
 				return;
 			}
 
+			// phpcs:ignore
 			$destination_info = $_POST['snapshot-destination'];
 			$destination_type = $destination_info['type'];
 
@@ -6392,7 +6456,8 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				$this->config_data['destinations'] = array();
 			}
 
-			$destination_slug = $original_destination_slug = sanitize_title( $destination_info['name'] );
+			$original_destination_slug = sanitize_title( $destination_info['name'] );
+			$destination_slug = $original_destination_slug;
 
 			/* Ensure that the destination slug is unique */
 			for ( $counter = 0; isset( $this->config_data['destinations'][ $destination_slug ] ) && $counter < 100; $counter ++ ) {
@@ -6402,10 +6467,12 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			$this->config_data['destinations'][ $destination_slug ] = $destination_info;
 
 			if ( ! empty( $destination_info['form-step-url'] ) ) {
-				$location_redirect_url = add_query_arg( array(
-					'item' => $destination_slug,
-					'message', 'success-add',
-				), $destination_info['form-step-url'] );
+				$location_redirect_url = add_query_arg(
+					array(
+						'item' => $destination_slug,
+						'message', 'success-add',
+					), $destination_info['form-step-url']
+				);
 			}
 
 			$this->save_config();
@@ -6423,19 +6490,23 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			}
 
 			$location = add_query_arg( 'message', 'success-add', $location_redirect_url );
+			$location = add_query_arg( 'destination-noonce-field', wp_create_nonce( 'snapshot-destination' ), $location_redirect_url );
 
 			if ( $location ) {
 				wp_redirect( esc_url_raw( $location ) );
 			}
 		}
 
-		function snapshot_update_destination_proc() {
+		public function snapshot_update_destination_proc() {
 
 			// For the form post we need both elements to continue;
+			// We have checked for nonce coming into the function.
+			// phpcs:ignore
 			if ( ! isset( $_POST['snapshot-destination']['type'], $_POST['item'] ) ) {
 				return;
 			}
 
+			// phpcs:ignore
 			$destination_key = $_POST['item'];
 
 			// If not a valid destination key, them abort.
@@ -6443,6 +6514,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				return;
 			}
 
+			// phpcs:ignore
 			$destination_info = $_POST['snapshot-destination'];
 			$destination_type = $destination_info['type'];
 
@@ -6457,10 +6529,18 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			$_POST['snapshot-destination'] = $destination_info;
 			$location_redirect_url = '';
 
+			// If there are form errors, abort updating the config_data and continuing.
 			if ( count( $destination_type_object->form_errors ) ) {
 				$this->form_errors = $destination_type_object->form_errors;
 
-				return;
+				// If the only form error is about access_token, give the user the chance to fix that.
+				if ( isset( $destination_type_object->form_errors['access_token'] ) ) {
+					if ( 1 !== count( $destination_type_object->form_errors ) ) {
+						return;
+					}
+				} else {
+					return;
+				}
 			}
 
 			$this->config_data['destinations'][ $destination_key ] = $destination_info;
@@ -6479,12 +6559,14 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						'snapshot-action' => 'edit',
 						'type' => $destination_type,
 						'item' => $destination_key,
+						'destination-noonce-field' => wp_create_nonce( 'snapshot-destination' ),
 					),
 					$this->snapshot_get_pagehook_url( 'snapshots-newui-destinations' )
 				);
 			}
 
 			$location = add_query_arg( 'message', 'success-update', $location_redirect_url );
+			$location = add_query_arg( 'destination-noonce-field', wp_create_nonce( 'snapshot-destination' ), $location_redirect_url );
 
 			if ( isset( $location ) ) {
 				wp_redirect( esc_url_raw( $location ) );
@@ -6502,14 +6584,17 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function snapshot_delete_bulk_destination_proc() {
+		public function snapshot_delete_bulk_destination_proc() {
 
+			// We have checked nonces coming into the function.
+			// phpcs:ignore
 			if ( ! isset( $_REQUEST['delete-bulk-destination'] ) ) {
 				wp_redirect( $this->_settings['SNAPSHOT_MENU_URL'] . 'snapshots_destinations_panel' );
 				die();
 			}
 
 			$CONFIG_CHANGED = false;
+			// phpcs:ignore
 			foreach ( $_REQUEST['delete-bulk-destination'] as $key => $val ) {
 				if ( $this->snapshot_delete_destination_proc( $key, true ) ) {
 					$CONFIG_CHANGED = true;
@@ -6522,6 +6607,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 				$location = esc_url_raw( add_query_arg( 'message', 'success-delete', $this->_settings['SNAPSHOT_MENU_URL'] . 'snapshots_destinations_panel' ) );
 
+				// phpcs:ignore
 				if ( isset( $_GET['page'] ) && sanitize_text_field( $_GET['page'] ) === 'snapshot_pro_destinations' ) {
 					$location = esc_url_raw( add_query_arg( 'message', 'success-delete', $this->_settings['SNAPSHOT_MENU_URL'] . 'snapshot_pro_destinations' ) );
 
@@ -6537,12 +6623,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			die();
 		}
 
-		function snapshot_delete_destination_proc( $item_key = 0, $DEFER_LOG_UPDATE = false ) {
+		public function snapshot_delete_destination_proc( $item_key = 0, $DEFER_LOG_UPDATE = false ) {
 
 			$CONFIG_CHANGED = false;
 
 			if ( ! $item_key ) {
+				// We have checked nonces coming into the function.
+				// phpcs:ignore
 				if ( isset( $_GET['item'] ) ) {
+					// phpcs:ignore
 					$item_key = $_GET['item'];
 				}
 			}
@@ -6558,6 +6647,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					$this->save_config();
 
 					$location = esc_url_raw( add_query_arg( 'message', 'success-delete', $this->_settings['SNAPSHOT_MENU_URL'] . 'snapshots_destinations_panel' ) );
+					// phpcs:ignore
 					if ( isset( $_GET['page'] ) && sanitize_text_field( $_GET['page'] ) === 'snapshot_pro_destinations' ) {
 						$location = esc_url_raw( add_query_arg( 'message', 'success-delete', $this->_settings['SNAPSHOT_MENU_URL'] . 'snapshot_pro_destinations' ) );
 
@@ -6569,6 +6659,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					}
 				}
 
+				// phpcs:ignore
 				if ( isset( $_GET['page'] ) && sanitize_text_field( $_GET['page'] ) === 'snapshot_pro_destinations' ) {
 					wp_redirect( $this->_settings['SNAPSHOT_MENU_URL'] . 'snapshot_pro_destinations' );
 					die();
@@ -6597,7 +6688,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 * @return void
 		 */
 
-		function snapshot_scheduler() {
+		public function snapshot_scheduler() {
 
 			$HAVE_SCHEDULED_EVENTS = false;
 			// A two-step process.
@@ -6609,7 +6700,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 				foreach ( $this->config_data['items'] as $key_slug => $item ) {
 
-					if ( ( isset( $item['interval'] ) ) && ( $item['interval'] != "" ) ) {
+					if ( ( isset( $item['interval'] ) ) && ( '' !== $item['interval'] ) ) {
 
 						if ( isset( $scheds[ $item['interval'] ] ) ) {
 
@@ -6619,8 +6710,10 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 								//$interval_offset = $scheds[$item['interval']]['interval'];
 								//$offset_timestamp = time() - $interval_offset;
 								//wp_schedule_event($offset_timestamp, $item['interval'], $this->_settings['backup_cron_hook'], array(intval($key_slug)) );
-								wp_schedule_event( time() + Snapshot_Helper_Utility::calculate_interval_offset_time( $item['interval'], $item['interval-offset'] ),
-									$item['interval'], $this->_settings['backup_cron_hook'], array( intval( $key_slug ) ) );
+								wp_schedule_event(
+										time() + Snapshot_Helper_Utility::calculate_interval_offset_time( $item['interval'], $item['interval-offset'] ),
+										$item['interval'], $this->_settings['backup_cron_hook'], array( intval( $key_slug ) )
+									);
 								$HAVE_SCHEDULED_EVENTS = true;
 							}
 						}
@@ -6633,7 +6726,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			if ( $crons ) {
 				foreach ( $crons as $cron_time => $cron_set ) {
 					foreach ( $cron_set as $cron_callback_function => $cron_item ) {
-						if ( $cron_callback_function == "snapshot_backup_cron" ) {
+						if ( "snapshot_backup_cron" === $cron_callback_function ) {
 							foreach ( $cron_item as $cron_key => $cron_details ) {
 								if ( isset( $cron_details['args'][0] ) ) {
 									$item_key = intval( $cron_details['args'][0] );
@@ -6647,7 +6740,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 									}
 								}
 							}
-						} else if ( $cron_callback_function == $this->_settings['remote_file_cron_hook'] ) {
+						} else if ( $cron_callback_function === $this->_settings['remote_file_cron_hook'] ) {
 							foreach ( $cron_item as $cron_key => $cron_details ) {
 								if ( $cron_details['schedule'] !== $this->_settings['remote_file_cron_interval'] ) {
 									$timestamp = wp_next_scheduled( $this->_settings['remote_file_cron_hook'] );
@@ -6678,17 +6771,18 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				}
 			}
 
-			if ( $HAVE_SCHEDULED_EVENTS == true ) {
-				wp_remote_post( get_option( 'siteurl' ) . '/wp-cron.php',
-					array(
-						'timeout' => 3,
-						'blocking' => false,
-						'sslverify' => false,
-						'body' => array(
-							'nonce' => wp_create_nonce( 'WPMUDEVSnapshot' ),
-							'type' => 'start',
-						),
-						'user-agent' => 'WPMUDEVSnapshot',
+			if ( true === $HAVE_SCHEDULED_EVENTS ) {
+				wp_remote_post(
+					get_option( 'siteurl' ) . '/wp-cron.php',
+						array(
+							'timeout' => 3,
+							'blocking' => false,
+							'sslverify' => false,
+							'body' => array(
+								'nonce' => wp_create_nonce( 'WPMUDEVSnapshot' ),
+								'type' => 'start',
+							),
+							'user-agent' => 'WPMUDEVSnapshot',
 					)
 				);
 			}
@@ -6705,24 +6799,26 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function snapshot_backup_cron_proc( $item_key ) {
+		public function snapshot_backup_cron_proc( $item_key ) {
 
 			global $wpdb;
 
 			$home_path = apply_filters( 'snapshot_home_path', get_home_path() );
 
-			@set_time_limit( 0 );
+			@set_time_limit( 0 ); // phpcs:ignore
 
+			// We use set_error_handler() as logging code and not debug code.
+			// phpcs:ignore
 			$old_error_handler = set_error_handler( array( $this, 'snapshot_ErrorHandler' ) );
 
 			if ( ( isset( $this->config_data['config']['memoryLimit'] ) ) && ( ! empty( $this->config_data['config']['memoryLimit'] ) ) ) {
-				@ini_set( 'memory_limit', $this->config_data['config']['memoryLimit'] );
+				@ini_set( 'memory_limit', $this->config_data['config']['memoryLimit'] ); // phpcs:ignore
 			}
 
 			$item_key = intval( $item_key );
 
 			// If we are somehow called for an item_key not in our list then remove any future cron calls then die
-			if ( ( ! defined( 'SNAPSHOT_DOING_CRON' ) ) || ( SNAPSHOT_DOING_CRON != true ) ) {
+			if ( ( ! defined( 'SNAPSHOT_DOING_CRON' ) ) || ( true !== SNAPSHOT_DOING_CRON ) ) {
 				if ( ! isset( $this->config_data['items'][ $item_key ] ) ) {
 					$timestamp = wp_next_scheduled( $this->_settings['backup_cron_hook'], array( intval( $item_key ) ) );
 					if ( $timestamp ) {
@@ -6743,39 +6839,26 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			// If we are syncing/mirroring file and we don't have and database files. Then no need going through the
 			// process of creating a new data_item entry.
 			$_has_incomplete = false;
-			if ( $item['destination-sync'] == "mirror" ) {
+			if ( "mirror" === $item['destination-sync'] ) {
 				if ( ( isset( $item['data'] ) ) && ( count( $item['data'] ) ) ) {
 					$data_item = Snapshot_Helper_Utility::latest_data_item( $item['data'] );
 					//echo "data_item<pre>"; print_r($data_item); echo "</pre>";
 					if ( ( isset( $data_item['destination-status'] ) ) && ( count( $data_item['destination-status'] ) ) ) {
 						$dest_item = Snapshot_Helper_Utility::latest_data_item( $data_item['destination-status'] );
-						if ( ( ! isset( $dest_item['sendFileStatus'] ) ) || ( $dest_item['sendFileStatus'] !== true ) ) {
+						if ( ( ! isset( $dest_item['sendFileStatus'] ) ) || ( true !== $dest_item['sendFileStatus'] ) ) {
 							$_has_incomplete = true;
 						}
 					}
 				}
 			}
 
-			if ( ( $item['destination-sync'] != "mirror" )
-			     || ( $_has_incomplete == false )
-			     || ( $item['tables-option'] == "all" ) || ( $item['tables-option'] == "selected" )
+			if ( ( 'mirror' !== $item['destination-sync'] )
+			     || ( false === $_has_incomplete )
+			     || ( "all" === $item['tables-option'] ) || ( "selected" === $item['tables-option'] )
 			) {
 
 				if ( ! isset( $this->config_data['items'][ $item_key ]['data'][ $data_item_key ]['archive-status'] ) ) {
 					$this->config_data['items'][ $item_key ]['data'][ $data_item_key ]['archive-status'] = array();
-				}
-
-				if ( ( ! defined( 'SNAPSHOT_DOING_CRON' ) ) || ( SNAPSHOT_DOING_CRON != true ) ) {
-
-					// If we have a valid time_key but the item's interval is not a scheduled item then remove future cron and die
-					//if ((isset($item['interval'])) && ($item['interval'] == "")) {
-					//	$timestamp = wp_next_scheduled( $this->_settings['backup_cron_hook'], array(intval($item_key)) );
-					//
-					//	if ($timestamp) {
-					//		wp_unschedule_event($timestamp, $this->_settings['backup_cron_hook'], array(intval($item_key)) );
-					//	}
-					//	die();
-					//}
 				}
 
 				$snapshot_locker = new Snapshot_Helper_Locker( $this->_settings['backupLockFolderFull'], $item_key );
@@ -6798,7 +6881,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				Snapshot_Helper_Debug::set_error_reporting( $this->config_data['config']['errorReporting'] );
 
 				/* Needed to create the archvie zip file */
-				if ( $this->config_data['config']['zipLibrary'] == "PclZip" ) {
+				if ( "PclZip" === $this->config_data['config']['zipLibrary'] ) {
 					if ( ! defined( 'PCLZIP_TEMPORARY_DIR' ) ) {
 						define( 'PCLZIP_TEMPORARY_DIR', trailingslashit( $this->_settings['backupBackupFolderFull'] ) . $item_key . "/" );
 					}
@@ -6822,10 +6905,10 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				$_post_array['snapshot-destination-sync'] = $item['destination-sync'];
 
 				$_post_array['snapshot-tables-array'] = array();
-				if ( $_post_array['snapshot-tables-option'] == "none" ) {
-					// Nothing to process here.
+				if ( "none" === $_post_array['snapshot-tables-option'] ) {
+					assert(true); // Nothing to process here.
 
-				} else if ( $_post_array['snapshot-tables-option'] == "all" ) {
+				} else if ( "all" === $_post_array['snapshot-tables-option'] ) {
 
 					$tables_sections = Snapshot_Helper_Utility::get_database_tables( $item['blog-id'] );
 					//$this->_session->data['tables_sections'] = $tables_sections;
@@ -6834,7 +6917,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							$_post_array['snapshot-tables-array'] = array_merge( $_post_array['snapshot-tables-array'], $tables );
 						}
 					}
-				} else if ( $_post_array['snapshot-tables-option'] == "selected" ) {
+				} else if ( "selected" === $_post_array['snapshot-tables-option'] ) {
 
 					if ( isset( $item['tables-sections'] ) ) {
 						$this->_session->data['tables-sections'] = $item['tables-sections'];
@@ -6845,12 +6928,12 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					}
 				}
 
-				if ( $item['destination-sync'] == "archive" ) {
+				if ( "archive" === $item['destination-sync'] ) {
 					$_post_array['snapshot-files-option'] = $item['files-option'];
 					$_post_array['snapshot-files-sections'] = array();
-					if ( $_post_array['snapshot-files-option'] == "none" ) {
-
-					} else if ( $_post_array['snapshot-files-option'] == "all" ) {
+					if ( "none" === $_post_array['snapshot-files-option'] ) {
+						assert(true); // No-op.
+					} else if ( "all" === $_post_array['snapshot-files-option'] ) {
 
 						if ( is_main_site( $item['blog-id'] ) ) {
 							$_post_array['snapshot-files-sections'] = array( 'themes', 'plugins', 'media' );
@@ -6861,7 +6944,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							$_post_array['snapshot-files-sections'] = array( 'media' );
 						}
 
-					} else if ( $_post_array['snapshot-files-option'] == "selected" ) {
+					} else if ( "selected" === $_post_array['snapshot-files-option'] ) {
 
 						if ( isset( $item['files-sections'] ) ) {
 							$_post_array['snapshot-files-sections'] = $item['files-sections'];
@@ -6876,15 +6959,18 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				$function_output = ob_get_contents();
 				ob_end_clean();
 
-				if ( ( isset( $error_array['errorStatus'] ) ) && ( $error_array['errorStatus'] == true ) ) {
+				if ( ( isset( $error_array['errorStatus'] ) ) && ( true === $error_array['errorStatus'] ) ) {
 
-					$this->snapshot_logger->log_message( "init: error_array" . print_r( $error_array, true ) );
-					$this->snapshot_logger->log_message( "init: item" . print_r( $item, true ) );
+					// Not debug code. We use print_r() for logging purposes.
+					$this->snapshot_logger->log_message( "init: error_array" . print_r( $error_array, true ) ); // phpcs:ignore
+					$this->snapshot_logger->log_message( "init: item" . print_r( $item, true ) ); // phpcs:ignore
 					$this->snapshot_logger->log_message( "init: output:" . $function_output );
 
-					$this->snapshot_logger->log_message( "memory limit: " . ini_get( 'memory_limit' ) .
+					$this->snapshot_logger->log_message(
+                         "memory limit: " . ini_get( 'memory_limit' ) .
 					                                     ": memory usage current: " . Snapshot_Helper_Utility::size_format( memory_get_usage( true ) ) .
-					                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) ) );
+					                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) )
+                        );
 
 					$this->config_data['items'][ $item_key ]['data'][ $data_item_key ]['archive-status'][ time() ] = $error_array;
 					$this->add_update_config_item( $item_key, $this->config_data['items'][ $item_key ] );
@@ -6911,25 +6997,30 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						$_post_array['snapshot-data-item'] = $data_item_key;
 						$_post_array['snapshot-table-data-idx'] = $idx;
 
-						$this->snapshot_logger->log_message( "table: " . $table_item['table_name'] .
-						                                     " segment: " . $table_item['segment_idx'] . "/" . $table_item['segment_total'] );
+						$this->snapshot_logger->log_message(
+                             "table: " . $table_item['table_name'] .
+						                                     " segment: " . $table_item['segment_idx'] . "/" . $table_item['segment_total']
+                            );
 
 						ob_start();
 						$error_array_table = $this->snapshot_ajax_backup_table( $item, $_post_array );
 						$function_output = ob_get_contents();
 						ob_end_clean();
 
-						if ( ( isset( $error_array['errorStatus'] ) ) && ( $error_array['errorStatus'] == true ) ) {
+						if ( ( isset( $error_array['errorStatus'] ) ) && ( true === $error_array['errorStatus'] ) ) {
 							// We have a problem.
 
-							$this->snapshot_logger->log_message( "table: " . $table_item['table_name'] . ": error_array" . print_r( $error_array_table, true ) );
-							$this->snapshot_logger->log_message( "table: " . $table_item['table_name'] . ": _SESSION" . print_r( $this->_session, true ) );
-							$this->snapshot_logger->log_message( "table: " . $table_item['table_name'] . ": item" . print_r( $item, true ) );
+							// Not debug code. We use print_r() for logging purposes.
+							$this->snapshot_logger->log_message( "table: " . $table_item['table_name'] . ": error_array" . print_r( $error_array_table, true ) ); // phpcs:ignore
+							$this->snapshot_logger->log_message( "table: " . $table_item['table_name'] . ": _SESSION" . print_r( $this->_session, true ) ); // phpcs:ignore
+							$this->snapshot_logger->log_message( "table: " . $table_item['table_name'] . ": item" . print_r( $item, true ) ); // phpcs:ignore
 							$this->snapshot_logger->log_message( "table: output:" . $function_output );
 
-							$this->snapshot_logger->log_message( "memory limit: " . ini_get( 'memory_limit' ) .
+							$this->snapshot_logger->log_message(
+                                 "memory limit: " . ini_get( 'memory_limit' ) .
 							                                     ": memory usage current: " . Snapshot_Helper_Utility::size_format( memory_get_usage( true ) ) .
-							                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) ) );
+							                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) )
+                                );
 
 							$this->config_data['items'][ $item_key ]['data'][ $data_item_key ]['archive-status'][ time() ] = $error_array;
 							$this->add_update_config_item( $item_key, $this->config_data['items'][ $item_key ] );
@@ -6949,7 +7040,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					$this->snapshot_logger->log_message( "table: non selected" );
 				}
 
-				if ( $item['destination-sync'] == "archive" ) {
+				if ( "archive" === $item['destination-sync'] ) {
 
 					if ( ( isset( $error_array['files_data'] ) ) && ( count( $error_array['files_data'] ) ) ) {
 
@@ -6967,18 +7058,21 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							$function_output = ob_get_contents();
 							ob_end_clean();
 
-							if ( ( isset( $error_array_file['errorStatus'] ) ) && ( $error_array_file['errorStatus'] == true ) ) {
+							if ( ( isset( $error_array_file['errorStatus'] ) ) && ( true === $error_array_file['errorStatus'] ) ) {
 								// We have a problem.
 
-								$this->snapshot_logger->log_message( "file: _post_array:" . print_r( $_post_array, true ) );
-								$this->snapshot_logger->log_message( "file: error_array:" . print_r( $error_array_file, true ) );
-								$this->snapshot_logger->log_message( "file: _SESSION:" . print_r( $this->_session, true ) );
-								$this->snapshot_logger->log_message( "file: item:" . print_r( $item, true ) );
+								// Not debug code. We use print_r() for logging purposes.
+								$this->snapshot_logger->log_message( "file: _post_array:" . print_r( $_post_array, true ) ); // phpcs:ignore
+								$this->snapshot_logger->log_message( "file: error_array:" . print_r( $error_array_file, true ) ); // phpcs:ignore
+								$this->snapshot_logger->log_message( "file: _SESSION:" . print_r( $this->_session, true ) ); // phpcs:ignore
+								$this->snapshot_logger->log_message( "file: item:" . print_r( $item, true ) ); // phpcs:ignore
 								$this->snapshot_logger->log_message( "file: output:" . $function_output );
 
-								$this->snapshot_logger->log_message( "memory limit: " . ini_get( 'memory_limit' ) .
+								$this->snapshot_logger->log_message(
+                                     "memory limit: " . ini_get( 'memory_limit' ) .
 								                                     ": memory usage current: " . Snapshot_Helper_Utility::size_format( memory_get_usage( true ) ) .
-								                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) ) );
+								                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) )
+                                    );
 
 								$this->config_data['items'][ $item_key ]['data'][ $data_item_key ]['archive-status'][ time() ] = $error_array;
 								$this->add_update_config_item( $item_key, $this->config_data['items'][ $item_key ] );
@@ -6991,8 +7085,12 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 						if ( ( isset( $error_array['files_data']['excluded']['pattern'] ) ) && ( count( $error_array['files_data']['excluded']['pattern'] ) ) ) {
 
-							$this->snapshot_logger->log_message( __( "file: The following files are excluded due to match exclusion patterns.",
-								SNAPSHOT_I18N_DOMAIN ) );
+							$this->snapshot_logger->log_message(
+                                __(
+                                 "file: The following files are excluded due to match exclusion patterns.",
+								SNAPSHOT_I18N_DOMAIN
+                                )
+                                );
 
 							foreach ( $error_array['files_data']['excluded']['pattern'] as $idx => $filename ) {
 								$filename = str_replace( $home_path, '', $filename );
@@ -7028,17 +7126,20 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				$function_output = ob_get_contents();
 				ob_end_clean();
 
-				if ( ( isset( $error_array['errorStatus'] ) ) && ( $error_array['errorStatus'] == true ) ) {
+				if ( ( isset( $error_array['errorStatus'] ) ) && ( true === $error_array['errorStatus'] ) ) {
 					// We have a problem.
 
-					$this->snapshot_logger->log_message( "finish: error_array:" . print_r( $error_array, true ) );
-					$this->snapshot_logger->log_message( "finish: _SESSION:" . print_r( $this->_session, true ) );
-					$this->snapshot_logger->log_message( "finish: item:" . print_r( $item, true ) );
+					// Not debug code. We use print_r() for logging purposes.
+					$this->snapshot_logger->log_message( "finish: error_array:" . print_r( $error_array, true ) ); // phpcs:ignore
+					$this->snapshot_logger->log_message( "finish: _SESSION:" . print_r( $this->_session, true ) ); // phpcs:ignore
+					$this->snapshot_logger->log_message( "finish: item:" . print_r( $item, true ) ); // phpcs:ignore
 					$this->snapshot_logger->log_message( "finish: output:" . $function_output );
 
-					$this->snapshot_logger->log_message( "memory limit: " . ini_get( 'memory_limit' ) .
+					$this->snapshot_logger->log_message(
+                         "memory limit: " . ini_get( 'memory_limit' ) .
 					                                     ": memory usage current: " . Snapshot_Helper_Utility::size_format( memory_get_usage( true ) ) .
-					                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) ) );
+					                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) )
+                        );
 
 					$this->config_data['items'][ $item_key ]['data'][ $data_item_key ]['archive-status'][ time() ] = $error_array;
 					$this->add_update_config_item( $item_key, $this->config_data['items'][ $item_key ] );
@@ -7046,13 +7147,13 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					unset( $snapshot_locker );
 
 					die();
-				} else {
-
 				}
 
-				$this->snapshot_logger->log_message( "memory limit: " . ini_get( 'memory_limit' ) .
+				$this->snapshot_logger->log_message(
+                     "memory limit: " . ini_get( 'memory_limit' ) .
 				                                     ": memory usage current: " . Snapshot_Helper_Utility::size_format( memory_get_usage( true ) ) .
-				                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) ) );
+				                                     ": memory usage peak: " . Snapshot_Helper_Utility::size_format( memory_get_peak_usage( true ) )
+                    );
 
 				if ( isset( $error_array['responseFile'] ) ) {
 					$this->snapshot_logger->log_message( "finish: " . basename( $error_array['responseFile'] ) );
@@ -7078,7 +7179,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return bool
 		 */
-		function purge_remote_destination_archive ($item) {
+		public function purge_remote_destination_archive ($item) {
 			if (empty($item['clean-remote'])) {
 				// Item remotes should not be cleaned up.
 				// Nothing to do, so bail out.
@@ -7102,7 +7203,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			return true;
 		}
 
-		function purge_archive_limit( $item_key ) {
+		public function purge_archive_limit( $item_key ) {
 			$home_path = apply_filters( 'snapshot_home_path', get_home_path() );
 
 			if ( ! isset( $this->config_data['items'][ $item_key ] ) ) {
@@ -7120,8 +7221,10 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				     && ( count( $this->config_data['items'][ $item_key ]['data'] ) > $archive_count )
 				) {
 
-					$this->snapshot_logger->log_message( "archive cleanup: max archive:" . intval( $item['archive-count'] )
-					                                     . " number of archives: " . count( $this->config_data['items'][ $item_key ]['data'] ) );
+					$this->snapshot_logger->log_message(
+							"archive cleanup: max archive:" . intval( $item['archive-count'] )
+							. " number of archives: " . count( $this->config_data['items'][ $item_key ]['data'] )
+						);
 
 					$item_data = $this->config_data['items'][ $item_key ]['data'];
 					ksort( $item_data );
@@ -7156,11 +7259,11 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 								}
 								$this->snapshot_logger->log_message( "DEBUG: backupFile=[" . $backupFile . "]" );
 
-								if ( file_exists( $backupFile ) ) {
-									@unlink( $backupFile );
+								if ( is_writable( $backupFile ) ) {
+									unlink( $backupFile );
 									$this->snapshot_logger->log_message( "archive cleanup: filename: " . str_replace( $home_path, '', $backupFile ) . " removed" );
 								} else {
-									$this->snapshot_logger->log_message( "archive cleanup: filename: " . str_replace( $home_path, '', $backupFile ) . " not found" );
+									$this->snapshot_logger->log_message( "archive cleanup: filename: " . str_replace( $home_path, '', $backupFile ) . " not found or it is not writeable" );
 								}
 							}
 							//}
@@ -7168,8 +7271,8 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							$backupLogFileFull = trailingslashit( $this->_settings['backupLogFolderFull'] )
 							                     . $item['timestamp'] . "_" . $data_item['timestamp'] . ".log";
 
-							if ( file_exists( $backupLogFileFull ) ) {
-								@unlink( $backupLogFileFull );
+							if ( is_writable( $backupLogFileFull ) ) {
+								unlink( $backupLogFileFull );
 							}
 						}
 					}
@@ -7178,7 +7281,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 		}
 
-		function process_item_remote_files( $item_key ) {
+		public function process_item_remote_files( $item_key ) {
 
 			$item_key = intval( $item_key );
 
@@ -7193,7 +7296,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			$item = $this->config_data['items'][ $item_key ];
 
 			// If the item destination is not set or is empty then the file stay local.
-			if ( empty( $item['destination'] ) || 'local' == $item['destination'] ) {
+			if ( empty( $item['destination'] ) || 'local' === $item['destination'] ) {
 				return;
 			}
 
@@ -7240,7 +7343,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			}
 		}
 
-		function process_item_send_archive( $item, $data_item, $snapshot_locker ) {
+		public function process_item_send_archive( $item, $data_item, $snapshot_locker ) {
 			$item_key = $item['timestamp'];
 			$data_item_key = $data_item['timestamp'];
 
@@ -7268,10 +7371,10 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			// If the data_item destination is not empty...
 			if ( ( isset( $data_item['destination'] ) ) && ( ! empty( $data_item['destination'] ) ) ) {
-
 				// We make sure to check it against the item master. If they don't match it means
 				// the data_item archive was sent to the data_item destination. We probably don't
 				// have the archive file to resent.
+				assert(true); // @TODO ... or we don't?
 			}
 
 			$destination_key = $item['destination'];
@@ -7300,7 +7403,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			}
 
 			$files_sync = array();
-			if ( $data_item['destination-sync'] == "archive" ) {
+			if ( "archive" === $data_item['destination-sync'] ) {
 
 				// If the data item is there but no final archive filename (probably stopped in an error). Abort
 				if ( empty( $data_item['filename'] ) ) {
@@ -7342,7 +7445,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					}
 				}
 
-				if ( ( isset( $error_array['errorStatus'] ) ) && ( $error_array['errorStatus'] == true ) ) {
+				if ( ( isset( $error_array['errorStatus'] ) ) && ( true === $error_array['errorStatus'] ) ) {
 					if ( ( isset( $error_array['errorArray'] ) ) && ( count( $error_array['errorArray'] ) ) ) {
 						foreach ( $error_array['errorArray'] as $message ) {
 							$snapshot_logger->log_message( "ERROR: " . $message );
@@ -7354,10 +7457,10 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					$data_item['destination-status'] = array();
 				}
 
-				if ( isset( $item['store-local'] ) && ( $item['store-local'] == 0 ) ) {
-					if ( ( isset( $error_array['sendFileStatus'] ) ) && ( $error_array['sendFileStatus'] === true ) ) {
+				if ( isset( $item['store-local'] ) && ( 0 === $item['store-local'] ) ) {
+					if ( ( isset( $error_array['sendFileStatus'] ) ) && ( true === $error_array['sendFileStatus'] ) ) {
 						$snapshot_logger->log_message( "Local archive removed: " . basename( $backupFile ) );
-						@unlink( $backupFile );
+						unlink( $backupFile );
 					}
 				}
 
@@ -7397,7 +7500,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				}
 				$gather_files_sync = $this->snapshot_gather_item_files( $data_item );
 				foreach ( $data_item['files-sections'] as $file_section ) {
-					if ( ( $file_section == "config" ) || ( $file_section == "config" ) ) {
+					if ( ( "config" === $file_section ) || ( "config" === $file_section ) ) {
 						$file_section = "files";
 					}
 
@@ -7417,8 +7520,10 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						}
 
 						if ( count( $gather_files_sync['included'][ $file_section ] ) ) {
-							$snapshot_sync_files['included'][ $file_section ] = array_merge( $snapshot_sync_files['included'][ $file_section ],
-								$gather_files_sync['included'][ $file_section ] );
+							$snapshot_sync_files['included'][ $file_section ] = array_merge(
+								$snapshot_sync_files['included'][ $file_section ],
+								$gather_files_sync['included'][ $file_section ]
+							);
 
 							$snapshot_sync_files['included'][ $file_section ] = array_unique( $snapshot_sync_files['included'][ $file_section ] );
 							$snapshot_sync_files['included'][ $file_section ] = array_values( $snapshot_sync_files['included'][ $file_section ] );
@@ -7433,7 +7538,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				update_option( $snapshot_sync_files_option, $snapshot_sync_files );
 				$error_array = $destination_object->syncfiles_to_remote( $destination, $snapshot_sync_files, $snapshot_sync_files_option );
 
-				if ( ( isset( $error_array['errorStatus'] ) ) && ( $error_array['errorStatus'] == true ) ) {
+				if ( ( isset( $error_array['errorStatus'] ) ) && ( true === $error_array['errorStatus'] ) ) {
 					if ( ( isset( $error_array['errorArray'] ) ) && ( count( $error_array['errorArray'] ) ) ) {
 						foreach ( $error_array['errorArray'] as $message ) {
 							$snapshot_logger->log_message( "ERROR: " . $message );
@@ -7481,7 +7586,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						}
 					}
 
-					if ( ( isset( $error_array['errorStatus'] ) ) && ( $error_array['errorStatus'] == true ) ) {
+					if ( ( isset( $error_array['errorStatus'] ) ) && ( true === $error_array['errorStatus'] ) ) {
 						if ( ( isset( $error_array['errorArray'] ) ) && ( count( $error_array['errorArray'] ) ) ) {
 							foreach ( $error_array['errorArray'] as $message ) {
 								$snapshot_logger->log_message( "ERROR: " . $message );
@@ -7489,10 +7594,10 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 						}
 					}
 
-					if ( isset( $item['store-local'] ) && ( $item['store-local'] == 0 ) ) {
-						if ( ( isset( $error_array['sendFileStatus'] ) ) && ( $error_array['sendFileStatus'] === true ) ) {
+					if ( isset( $item['store-local'] ) && ( 0 === $item['store-local'] ) ) {
+						if ( ( isset( $error_array['sendFileStatus'] ) ) && ( true === $error_array['sendFileStatus'] ) ) {
 							$snapshot_logger->log_message( "Local archive removed: " . basename( $backupFile ) );
-							@unlink( $backupFile );
+							unlink( $backupFile );
 						}
 					}
 
@@ -7524,18 +7629,20 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 *
 		 * @return void
 		 */
-		function snapshot_remote_file_cron_proc() {
+		public function snapshot_remote_file_cron_proc() {
 
 			global $wpdb;
 
-			@ini_set( 'html_errors', 'Off' );
-			@ini_set( 'zlib.output_compression', 'Off' );
-			@set_time_limit( 0 );
+			@ini_set( 'html_errors', 'Off' ); // phpcs:ignore
+			@ini_set( 'zlib.output_compression', 'Off' ); // phpcs:ignore
+			@set_time_limit( 0 ); // phpcs:ignore
 
+			// We use set_error_handler() as logging code and not debug code.
+			// phpcs:ignore
 			$old_error_handler = set_error_handler( array( $this, 'snapshot_ErrorHandler' ) );
 
 			if ( ( isset( $this->config_data['config']['memoryLimit'] ) ) && ( ! empty( $this->config_data['config']['memoryLimit'] ) ) ) {
-				@ini_set( 'memory_limit', $this->config_data['config']['memoryLimit'] );
+				@ini_set( 'memory_limit', $this->config_data['config']['memoryLimit'] ); // phpcs:ignore
 			}
 
 			// If we are somehow called for an item_key not in our list then remove any future cron calls then die
@@ -7564,42 +7671,42 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 * @return void
 		 */
 
-		function snapshot_ErrorHandler( $errno, $errstr, $errfile, $errline ) {
+		public function snapshot_ErrorHandler( $errno, $errstr, $errfile, $errline ) {
 			//echo "errno[". $errno ."]<br />";
 			//echo "errstr[". $errstr ."]<br />";
 			//echo "errfile[". $errfile ."]<br />";
 			//echo "errline[". $errline ."]<br />";
 
 			$errType = '';
-			if ( ( defined( 'E_ERROR' ) ) && ( $errno == E_ERROR ) ) {
+			if ( ( defined( 'E_ERROR' ) ) && ( E_ERROR === $errno ) ) {
 				$errType = "Error";
-			} else if ( ( defined( 'E_WARNING' ) ) && ( $errno == E_WARNING ) ) {
+			} else if ( ( defined( 'E_WARNING' ) ) && ( E_WARNING === $errno ) ) {
 				$errType = "Warning";
-			} else if ( ( defined( 'E_PARSE' ) ) && ( $errno == E_PARSE ) ) {
+			} else if ( ( defined( 'E_PARSE' ) ) && ( E_PARSE === $errno ) ) {
 				$errType = "Parse";
-			} else if ( ( defined( 'E_NOTICE' ) ) && ( $errno == E_NOTICE ) ) {
+			} else if ( ( defined( 'E_NOTICE' ) ) && ( E_NOTICE === $errno ) ) {
 				$errType = "Notice";
-			} else if ( ( defined( 'E_CORE_ERROR' ) ) && ( $errno == E_CORE_ERROR ) ) {
+			} else if ( ( defined( 'E_CORE_ERROR' ) ) && ( E_CORE_ERROR === $errno ) ) {
 				$errType = "Error (core)";
-			} else if ( ( defined( 'E_CORE_WARNING' ) ) && ( $errno == E_CORE_WARNING ) ) {
+			} else if ( ( defined( 'E_CORE_WARNING' ) ) && ( E_CORE_WARNING === $errno ) ) {
 				$errType = "Warning (core)";
-			} else if ( ( defined( 'E_COMPILE_ERROR' ) ) && ( $errno == E_COMPILE_ERROR ) ) {
+			} else if ( ( defined( 'E_COMPILE_ERROR' ) ) && ( E_COMPILE_ERROR === $errno ) ) {
 				$errType = "Error (compile)";
-			} else if ( ( defined( 'E_COMPILE_WARNING' ) ) && ( $errno == E_COMPILE_WARNING ) ) {
+			} else if ( ( defined( 'E_COMPILE_WARNING' ) ) && ( E_COMPILE_WARNING === $errno ) ) {
 				$errType = "Warning (compile)";
-			} else if ( ( defined( 'E_USER_ERROR' ) ) && ( $errno == E_USER_ERROR ) ) {
+			} else if ( ( defined( 'E_USER_ERROR' ) ) && ( E_USER_ERROR === $errno ) ) {
 				$errType = "Error (user)";
-			} else if ( ( defined( 'E_USER_WARNING' ) ) && ( $errno == E_USER_WARNING ) ) {
+			} else if ( ( defined( 'E_USER_WARNING' ) ) && ( E_USER_WARNING === $errno ) ) {
 				$errType = "Warning (user)";
-			} else if ( ( defined( 'E_USER_NOTICE' ) ) && ( $errno == E_USER_NOTICE ) ) {
+			} else if ( ( defined( 'E_USER_NOTICE' ) ) && ( E_USER_NOTICE === $errno ) ) {
 				$errType = "Notice (user)";
-			} else if ( ( defined( 'E_STRICT' ) ) && ( $errno == E_STRICT ) ) {
+			} else if ( ( defined( 'E_STRICT' ) ) && ( E_STRICT === $errno ) ) {
 				$errType = "Strict";
-			} else if ( ( defined( 'E_RECOVERABLE_ERROR' ) ) && ( $errno == E_RECOVERABLE_ERROR ) ) {
+			} else if ( ( defined( 'E_RECOVERABLE_ERROR' ) ) && ( E_RECOVERABLE_ERROR === $errno ) ) {
 				$errType = "Error (recoverable)";
-			} else if ( ( defined( 'E_DEPRECATED' ) ) && ( $errno == E_DEPRECATED ) ) {
+			} else if ( ( defined( 'E_DEPRECATED' ) ) && ( E_DEPRECATED === $errno ) ) {
 				$errType = "Deprecated";
-			} else if ( ( defined( 'E_USER_DEPRECATED' ) ) && ( $errno == E_USER_DEPRECATED ) ) {
+			} else if ( ( defined( 'E_USER_DEPRECATED' ) ) && ( E_USER_DEPRECATED === $errno ) ) {
 				$errType = "Deprecated (user)";
 			} else {
 				$errType = "Unknown";
@@ -7621,6 +7728,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			//}
 
 			// This error code is not included in error_reporting
+			// phpcs:ignore
 			if ( ! ( error_reporting() & $errno ) ) {
 				return;
 			}
@@ -7630,11 +7738,11 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			$error_array['errorText'] = "<p>" . $error_string . "</p>";
 			$error_array['responseText'] = "";
 
-			echo json_encode( $error_array );
+			echo wp_json_encode( $error_array );
 			die();
 		}
 
-		function snapshot_get_item_destination_path( $item = array(), $data_item = array(), $create_folder = true ) {
+		public function snapshot_get_item_destination_path( $item = array(), $data_item = array(), $create_folder = true ) {
 			$home_path = apply_filters( 'snapshot_home_path', get_home_path() );
 
 			// If not destination in the data_item we can't process.
@@ -7660,7 +7768,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			$backupFolder = trim( $data_item['destination-directory'] );
 
-			if ( ( empty( $data_item['destination'] ) ) || ( $data_item['destination'] == "local" ) ) {
+			if ( ( empty( $data_item['destination'] ) ) || ( "local" === $data_item['destination'] ) ) {
 				$backupFolder = str_replace( '[DEST_PATH]', $this->_settings['backupBaseFolderFull'], $backupFolder );
 			} else {
 				$destination_key = $data_item['destination'];
@@ -7694,7 +7802,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			} else {
 				$siteurl = get_option( 'siteurl' );
 				if ( $siteurl ) {
-					$domain = parse_url( $siteurl, PHP_URL_HOST );
+					$domain = wp_parse_url( $siteurl, PHP_URL_HOST );
 				}
 			}
 
@@ -7707,21 +7815,22 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 			// Only for local destination. If the destination path does not start with a leading slash (for absolute paths), then prepend
 			// the site root path.
-			if ( ( ( empty( $data_item['destination'] ) ) || ( $data_item['destination'] == "local" ) ) && ( ! empty( $backupFolder ) ) ) {
-				if ( substr( $backupFolder, 0, 1 ) != "/" ) {
+			if ( ( ( empty( $data_item['destination'] ) ) || ( "local" === $data_item['destination'] ) ) && ( ! empty( $backupFolder ) ) ) {
+				if ( '/' !== substr( $backupFolder, 0, 1 ) ) {
 					$backupFolder = trailingslashit( $home_path ) . $backupFolder;
 				}
 				if ( $create_folder ) {
 					if ( ! file_exists( $backupFolder ) ) {
-						@wp_mkdir_p( $backupFolder );
+						wp_mkdir_p( $backupFolder );
 					}
 				}
 			}
 			return $backupFolder;
 		}
 
-		function snapshot_ajax_view_log_proc() {
+		public function snapshot_ajax_view_log_proc() {
 
+			check_ajax_referer( 'snapshot-view-log', 'snapshot-noonce-field');
 			if ( ( isset( $_REQUEST['snapshot-item'] ) ) && ( isset( $_REQUEST['snapshot-data-item'] ) ) ) {
 				$item_key = intval( $_REQUEST['snapshot-item'] );
 				if ( isset( $this->config_data['items'][ $item_key ] ) ) {
@@ -7746,21 +7855,30 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							$log_file_information['payload'] = '';
 							$log_file_information['position'] = $log_position;
 
-							$handle = @fopen( $backupLogFileFull, "r" );
-							if ( $handle ) {
-								fseek( $handle, $log_position );
+							global $wp_filesystem;
+
+							if ( Snapshot_Helper_Utility::connect_fs() ) {
 								//while ( ( $buffer = fgets( $handle, 4096 ) ) !== false ) {
 								//	$log_file_information['payload'] .= $buffer . "<br />";
 								//}
-								if ( ! feof( $handle ) ) {
+								$log_file_information_temp = $wp_filesystem->get_contents( $backupLogFileFull );
+								$log_file_filesize = strlen( $log_file_information_temp );
+								if ( $log_position >= $log_file_filesize ) {
 									$log_file_information['payload'] = array();
 									$log_file_information['payload'][] = "Error: unexpected fgets() fail\n";
 								}
-								$log_file_information['payload'] = fread( $handle, 10000 );
-								$log_file_information['payload'] = nl2br( $log_file_information['payload'] );
-								$log_file_information['position'] = ftell( $handle );
-								fclose( $handle );
-								echo json_encode( $log_file_information );
+								if ( $log_position < $log_file_filesize - 1) {
+									$log_file_information['payload'] = substr( $log_file_information_temp, $log_position, 10000 );
+									$log_file_information['payload'] = nl2br( $log_file_information['payload'] );
+								}
+
+								if ( ( $log_position + 10000 ) >= $log_file_filesize )
+									$log_file_information['position'] = $log_file_filesize - 1;
+								else
+									$log_file_information['position'] = $log_position + 10000;
+
+								$log_file_information['filesize'] = $log_file_filesize;
+								echo wp_json_encode( $log_file_information );
 								die();
 							}
 							echo "<br /><br />";
@@ -7773,7 +7891,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			die();
 		}
 
-		function snapshot_gather_item_files( $item ) {
+		public function snapshot_gather_item_files( $item ) {
 			global $wpdb, $site_id;
 
 			$item_files = array();
@@ -7783,12 +7901,12 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				return $item_files;
 			}
 
-			if ( $item['files-option'] == "none" ) {
+			if ( "none" === $item['files-option'] ) {
 				if ( ( isset( $item['files-sections'] ) ) && ( count( $item['files-sections'] ) ) ) {
 					unset( $item['files-sections'] );
 					$item['files-sections'] = array();
 				}
-			} else if ( $item['files-option'] == "all" ) {
+			} else if ( "all" === $item['files-option'] ) {
 				if ( is_main_site( $item['blog-id'] ) ) {
 					$files_sections = array( 'themes', 'plugins', 'media' );
 
@@ -7799,7 +7917,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 				} else {
 					$files_sections = array( 'media' );
 				}
-			} else if ( $item['files-option'] == "selected" ) {
+			} else if ( "selected" === $item['files-option'] ) {
 				$files_sections = $item['files-sections'];
 			}
 
@@ -7910,13 +8028,15 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 
 				$main_site_upload_path = Snapshot_Helper_Utility::get_blog_upload_path( $blog_id );
 				$sql_str = $wpdb->prepare( "SELECT blog_id FROM " . $wpdb->base_prefix . "blogs WHERE blog_id != %d AND site_id=%d LIMIT 5", $blog_id, $site_id );
+				// We are using placeholders and $wpdb->prepare() inside the variable.
+				// phpcs:ignore
 				$blog_ids = $wpdb->get_col( $sql_str );
 				if ( ! empty( $blog_ids ) ) {
 					foreach ( $blog_ids as $blog_id_tmp ) {
 						$sub_site_upload_path = Snapshot_Helper_Utility::get_blog_upload_path( $blog_id_tmp );
 						if ( ! empty( $sub_site_upload_path ) ) {
 							if ( ( $sub_site_upload_path !== $main_site_upload_path )
-							     && ( substr( $sub_site_upload_path, 0, strlen( $main_site_upload_path ) ) == $main_site_upload_path )
+							     && ( substr( $sub_site_upload_path, 0, strlen( $main_site_upload_path ) ) === $main_site_upload_path )
 							) {
 								$item_ignore_files[] = dirname( $sub_site_upload_path );
 							}
@@ -7973,13 +8093,13 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 							//echo "item_set_files_file<pre>"; print_r($item_set_files_file); echo "</pre>";
 							//echo "item_ignore_file[". $item_ignore_file ."]<br />";
 							$stristr_ret = stristr( $item_set_files_file, $item_ignore_file );
-							if ( $stristr_ret !== false ) {
+							if ( false !== $stristr_ret ) {
 								$EXCLUDE_THIS_FILE = true;
 								break;
 							}
 						}
 
-						if ( $EXCLUDE_THIS_FILE == false ) {
+						if ( false === $EXCLUDE_THIS_FILE ) {
 							// If file is valid we keep it
 							if ( ! isset( $item_section_files['included'][ $item_set_key ] ) ) {
 								$item_section_files['included'][ $item_set_key ] = array();
@@ -8002,12 +8122,12 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			return $item_section_files;
 		}
 
-		function destination_register_proc( $name_class ) {
+		public function destination_register_proc( $name_class ) {
 
 			//		echo "name_class=[". $name_class ."]<br />";
 			//		if (class_exists($name_class)) {
 
-			$classObject = new $name_class;
+			$classObject = new $name_class();
 			if ( isset( $classObject->name_slug ) ) {
 				if ( ! isset( $this->_settings['destinationClasses'][ $classObject->name_slug ] ) ) {
 					$this->_settings['destinationClasses'][ $classObject->name_slug ] = $classObject;
@@ -8016,70 +8136,23 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			//		}
 		}
 
-		function snapshot_ajax_item_abort_proc() {
-
-			$error_array = array();
-			$error_array['errorStatus'] = false;
-			$error_array['errorText'] = "";
-			$error_array['responseText'] = "";
-
-			$item_info = array();
-			if ( isset( $_POST['snapshot_item_info'] ) ) {
-				$post_info = explode( '&', $_POST['snapshot_item_info'] );
-
-				foreach ( $post_info as $post_info_item ) {
-					$_parts = explode( '=', $post_info_item );
-					if ( ( isset( $_parts[0] ) ) && ( ! empty( $_parts[0] ) )
-					     && ( isset( $_parts[1] ) ) && ( ! empty( $_parts[1] ) )
-					) {
-						$item_info[ $_parts[0] ] = $_parts[1];
-					}
-				}
-			}
-
-			if ( ( isset( $item_info['pid'] ) ) && ( ! empty( $item_info['pid'] ) )
-			     && ( isset( $item_info['item'] ) ) && ( ! empty( $item_info['item'] ) )
-			     && ( current_user_can( 'manage_snapshots_items' ) )
-			) {
-
-				$snapshot_locker = new Snapshot_Helper_Locker( $this->_settings['backupLockFolderFull'], $item_info['item'] );
-				if ( ! $snapshot_locker->is_locked() ) {
-					$locker_info = $snapshot_locker->get_locker_info();
-					if ( intval( $locker_info['pid'] ) === intval( $item_info['pid'] ) ) {
-						posix_kill( intval( $item_info['pid'] ), 9 );
-						$error_array['responseText'] = " Aborted Item. Page will reload.";
-
-						$snapshot_logger = new Snapshot_Helper_Logger( $this->_settings['backupLogFolderFull'],
-							$locker_info['item_key'], $locker_info['data_item_key'] );
-
-						$current_user = wp_get_current_user();
-						//echo "display_name=[". $current_user->display_name ."]<br />";
-						//echo "current_user<pre>"; print_r($current_user); echo "</pre>";
-
-						$snapshot_logger->log_message( 'Process [' . $item_info['pid'] . '] ABORT by user: ' . $current_user->display_name );
-
-					}
-				}
-
-			} else {
-
-			}
-
-			echo json_encode( $error_array );
-			die();
-		}
-
 		// Add body class to admin page if needed
-		function snapshot_maybe_add_body_classes( $classes ) {
+		public function snapshot_maybe_add_body_classes( $classes ) {
 
 			if ( ! isset( $_REQUEST['snapshot-action'] ) ) {
+				if ( ! isset( $_REQUEST['snapshot-noonce-field']  ) ) {
+					return $classes;
+				}
+				if ( ! wp_verify_nonce( $_REQUEST['snapshot-noonce-field'], 'snapshot-nonce' ) ) {
+					return $classes;
+				}
 				return $classes;
 			}
 
 			$screen_id = $this->get_current_screen_id();
 			$snapshot_action = sanitize_text_field( $_REQUEST['snapshot-action'] );
 
-			if ( $snapshot_action == 'new' || $snapshot_action == 'backup' ) {
+			if ( 'new' === $snapshot_action || 'backup' === $snapshot_action ) {
 				if ( 'snapshot_page_snapshot_pro_managed_backups' === $screen_id ) {
 					$classes .= ( ' ' === substr( $classes, -1 ) ) ? 'snapshot_page_snapshot_pro_managed_backups_create ' : ' snapshot_page_snapshot_pro_managed_backups_create ';
 
@@ -8087,7 +8160,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 					$classes .= ( ' ' === substr( $classes, -1 ) ) ? 'snapshot_page_snapshot_pro_snapshot_create ' : ' snapshot_page_snapshot_pro_snapshot_create ';
 				}
 			}
-			if ( $snapshot_action == 'restore' ) {
+			if ( 'restore' === $snapshot_action ) {
 				if ( 'snapshot_page_snapshot_pro_managed_backups' === $screen_id ) {
 					$classes .= ( ' ' === substr( $classes, -1 ) ) ? 'snapshot_page_snapshot_pro_managed_backups_restore ' : ' snapshot_page_snapshot_pro_managed_backups_restore ';
 
@@ -8099,14 +8172,22 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 			return $classes;
 		}
 
-		// Redirect to dashboard once activated
-		function snapshot_activated( $plugin, $network_activation ) {
+		/**
+		 * Handles redirection to dashboard once activated
+		 *
+		 * @param string $plugin Activated plugin path.
+		 * @param bool $network_activation Whether the activation was network-wide.
+		 */
+		public function snapshot_activated( $plugin, $network_activation ) {
+			global $pagenow;
+			if ( 'plugins.php' !== $pagenow ) {
+				// Do not redirect if not on plugins page.
+				return false;
+			}
+
 			if ( ! $network_activation ) {
-				$re = sprintf( '/%s$/', basename( __FILE__ ) );
-				if ( preg_match( $re, $plugin ) ) {
-					$dashboard_url = 'admin.php?page=snapshot_pro_dashboard';
-					wp_safe_redirect( $dashboard_url );
-					exit;
+				if ( preg_match( '/' . preg_quote( basename( __FILE__ ), '/' ) . '$/', $plugin ) ) {
+					return true;
 				}
 			}
 		}
@@ -8159,7 +8240,7 @@ if ( ! class_exists( 'WPMUDEVSnapshot' ) ) {
 		 */
 		public static function instance() {
 			if ( is_null( self::$instance ) ) {
-				self::$instance = new self;
+				self::$instance = new self();
 			}
 
 			return self::$instance;

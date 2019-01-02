@@ -121,7 +121,6 @@ class Scan_Api extends Component {
 				ABSPATH . 'wp-includes',
 			)
 		), true, $settings->max_filesize );
-
 		$cache->set( self::CACHE_CORE, array_merge( $firstLevelFiles, $coreFiles ), 0 );
 
 		return array_merge( $firstLevelFiles, $coreFiles );
@@ -131,6 +130,10 @@ class Scan_Api extends Component {
 	 * @return array
 	 */
 	public static function getContentFiles() {
+//		return array(
+//			ABSPATH . 'trash/sample/content-image.php',
+//			//ABSPATH . 'trash/antispam-bee/inc/columns.class.php'
+//		);
 		$cache  = Container::instance()->get( 'cache' );
 		$cached = $cache->get( self::CACHE_CONTENT, false );
 		if ( is_array( $cached ) && ! empty( $cached ) ) {
@@ -140,6 +143,9 @@ class Scan_Api extends Component {
 		$files    = File_Helper::findFiles( WP_CONTENT_DIR, true, false, array(), array(
 			'ext' => array( 'php' )
 		), true, $settings->max_filesize );
+//		$files = File_Helper::findFiles( ABSPATH . 'wp-content/trash/sample', true, false, array(), array(
+//			'ext' => array( 'php' )
+//		), true, $settings->max_filesize );
 		//include wp-config.php here
 		$files[] = ABSPATH . 'wp-config.php';
 
@@ -429,6 +435,9 @@ class Scan_Api extends Component {
 				}
 			}
 		}
+		if ( php_sapi_name() == "cli" ) {
+			echo $total . PHP_EOL;
+		}
 
 		if ( $total > 0 ) {
 			return round( ( $currentIndex / $total ) * 100, 2 );
@@ -617,6 +626,7 @@ class Scan_Api extends Component {
 		if ( is_wp_error( $patterns ) || $patterns == false ) {
 			$patterns = array();
 		}
+
 
 		update_site_option( Scan_Api::SCAN_PATTERN, $patterns );
 

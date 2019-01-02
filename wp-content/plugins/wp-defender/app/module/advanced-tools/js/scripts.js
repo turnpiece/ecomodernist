@@ -28,6 +28,16 @@ jQuery(function ($) {
             $(this).closest('.column').find('.well').addClass('is-hidden')
         }
     });
+
+    $('body').on('change', '.toggle-checkbox', function (e) {
+        console.log( $(this).attr('id') );
+        if ($(this).prop('checked') == true) {
+            $('label[for="'+$(this).attr('id')+'"]').attr('aria-checked',true);
+        } else {
+            $('label[for="'+$(this).attr('id')+'"]').attr('aria-checked',false);
+        }
+    });
+
     $('body').on('change', '#customGraphic', function (e) {
         if ($(this).prop('checked') == true) {
             $(this).closest('.column').find('.well').removeClass('is-hidden')
@@ -43,7 +53,60 @@ jQuery(function ($) {
         }
     })
 
+    $('body').on( 'click','.2f-send-test-email', function(){
+        var jq = jQuery,
+            parentForm = jq('.wd-one-time-pass-email form'),
+            that = jq(this),
+            data = parentForm.serialize();
+        data = data + '&action=testTwoFactorOPTEmail';
+        // return;
+        jq.ajax({
+            type: 'POST',
+            url: ajaxurl,
+            data: data,
+            beforeSend: function () {
+                parentForm.find('button[type="button"]').attr('disabled', 'disabled');
+            },
+            success: function (data) {
+                var notificationType = 'success';
+                if( ! data.success ) {
+                    notificationType = 'error';
+                }
+                parentForm.find('button[type="button"]').removeAttr('disabled');
+                Defender.showNotification( notificationType, data.data.message);
+            }
+        })
+        return false;
+    });
 
+    $('body').on( 'click','.save-2f-opt-email', function(){
+        var jq = jQuery,
+            parentForm = jq('.wd-one-time-pass-email form'),
+            that = jq(this),
+            data = parentForm.serialize();
+        data = data + '&action=saveTwoFactorOPTEmail';
+        // return;
+        jq.ajax({
+            type: 'POST',
+            url: ajaxurl,
+            data: data,
+            beforeSend: function () {
+                parentForm.find('button[type="button"]').attr('disabled', 'disabled');
+            },
+            success: function (data) {
+                var notificationType = 'success';
+                if( ! data.success ) {
+                    notificationType = 'error';
+                }
+                parentForm.find('button[type="button"]').removeAttr('disabled');
+                Defender.showNotification( notificationType, data.data.message);
+                if (data.data.reload != undefined) {
+                    location.reload();
+                }
+            }
+        })
+        return false;
+    });
     var mediaUploader;
     $('.file-picker').click(function () {
         if (mediaUploader) {

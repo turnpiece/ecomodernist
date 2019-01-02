@@ -37,7 +37,7 @@ class DB_Prefix extends Rule {
 		if ( ! $this->verifyNonce() ) {
 			return;
 		}
-		$dbprefix                       = HTTP_Helper::retrieve_post( 'dbprefix' );
+		$dbprefix                       = HTTP_Helper::retrieve_post( 'dbprefix' );	   			 	 		  		  	 	
 		$this->getService()->new_prefix = $dbprefix;
 		$ret                            = $this->getService()->process();
 

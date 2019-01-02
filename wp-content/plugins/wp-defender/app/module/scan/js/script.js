@@ -14,6 +14,25 @@ jQuery(function ($) {
             Defender.showNotification('error', data.data.message);
         }
     });
+    var current_issue = null;
+    $('body').on('click', '#next_issue', function () {
+        var parent = $(this).parent().parent().find('.inner-sourcecode').first();
+        var issues = parent.find('del');
+        if (issues.size() == 0) {
+            return;
+        }
+        if (current_issue === null) {
+            current_issue = 0;
+        } else {
+            current_issue = current_issue + 1;
+            if (issues[current_issue] === undefined) {
+                current_issue = 0;
+            }
+        }
+        console.log($(issues[current_issue]).text());
+        var pos = $(issues[current_issue]).position();
+        parent.scrollTop(pos.top);
+    })
     //processing scan
     if ($('#scanning').size() > 0) {
         $('body').addClass('wpmud');
@@ -121,6 +140,7 @@ jQuery(function ($) {
         }
 
         if (data.success == true) {
+            current_issue = null;
             var parent = form.closest('.source-code');
             parent.html(data.data.html);
 

@@ -344,6 +344,8 @@
 
 		jQuery("form#snapshot-add-update button#snapshot-blog-id-lookup").click(function () {
 			var blog_id_search = jQuery("form#snapshot-add-update input#snapshot-blog-id-search").val();
+
+			var security = jQuery(':hidden#snapshot-ajax-nonce').val();
 			// console.log("blog_id_search=["+blog_id_search+"]");
 			if (blog_id_search !== undefined) {
 
@@ -352,7 +354,8 @@
 
 				var data = {
 					action: 'snapshot_show_blog_tables',
-					snapshot_blog_id_search: blog_id_search
+					snapshot_blog_id_search: blog_id_search,
+					'security': security
 				};
 
 				jQuery.ajax({
@@ -451,6 +454,7 @@
 
 		jQuery("form#snapshot-edit-restore button#snapshot-blog-id-lookup").click(function () {
 			var blog_id_search = jQuery("form#snapshot-edit-restore input#snapshot-blog-id-search").val();
+			var security = jQuery(':hidden#snapshot-ajax-nonce').val();
 
 			if (blog_id_search !== undefined) {
 
@@ -459,7 +463,8 @@
 
 				var data = {
 					action: 'snapshot_get_blog_restore_info',
-					snapshot_blog_id_search: blog_id_search
+					snapshot_blog_id_search: blog_id_search,
+					'security': security
 				};
 
 				jQuery.ajax({
@@ -1722,8 +1727,22 @@
 		if (!$freq.length) return false;
 
 		$(".select-container.offset").hide().find("select").attr("disabled", true);
+		$(".select-container #frequency").attr("disabled", false);
+		$(".select-container #schedule_time").attr("disabled", false);
 		var $el = $(".select-container.offset." + $freq.val());
 		if ($el.length) $el.show().find("select").attr("disabled", false);
+
+		// Handle the day label toggling.
+		if ($freq.val()==='weekly'){
+			$(".offset-monthly-label").hide();
+			$(".offset-weekly-label").show();
+		} else if ($freq.val()==='monthly'){
+			$(".offset-weekly-label").hide();
+			$(".offset-monthly-label").show();
+		} else {
+			$(".offset-monthly-label").hide();
+			$(".offset-weekly-label").hide();
+		}
 	}
 	$(window).on('load', toggle_offset_visibility);
 	$(document).on('change', 'select[name="frequency"]', toggle_offset_visibility);

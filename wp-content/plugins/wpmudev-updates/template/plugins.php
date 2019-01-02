@@ -97,6 +97,7 @@ $this->render_header( $page_title );
 
 
 <?php $this->load_template( 'element-last-refresh' ); ?>
+<?php $this->load_template('footer'); ?>
 
 <div class="project-list hidden">
 	<?php
@@ -113,6 +114,6 @@ $this->render_header( $page_title );
 jQuery(function(){
 	window.WDP = window.WDP || {};
 	WDP.data = WDP.data || {};
-	WDP.data.hash_show_popup = <?php echo json_encode( wp_create_nonce( 'show-popup' ) ); ?>;	 	 	 	 	 		    	
+	WDP.data.hash_show_popup = <?php echo json_encode( wp_create_nonce( 'show-popup' ) ); ?>;
 });
 </script>

@@ -29,7 +29,7 @@
                                        id="toggle_report"/>
                                 <label class="toggle-label" for="toggle_report"></label>
                                 </span>
-                    <label>
+                    <label for="toggle_report" role="checkbox" aria-checked="true">
 						<?php esc_html_e( "Send regular email report", wp_defender()->domain ) ?>
                     </label>
                     <div class="clear mline"></div>
@@ -76,7 +76,7 @@
         </form>
         <div class="presale-text">
             <div>
-			    <?php printf( __( "Schedule automated file scanning and email reporting for all your websites. This feature is included in a WPMU DEV membership along with 100+ plugins & themes, 24/7 support and lots of handy site management tools  – <a target='_blank' href=\"%s\">Try it all FREE today!</a>", wp_defender()->domain ), \WP_Defender\Behavior\Utils::instance()->campaignURL('defender_iplockouts_reports_upsell_link') ) ?>
+			    <?php printf( __( "Schedule automated file scanning and email reporting for all your websites. This feature is included in a WPMU DEV membership along with 100+ plugins, 24/7 support and lots of handy site management tools  – <a target='_blank' href=\"%s\">Try it all FREE today!</a>", wp_defender()->domain ), \WP_Defender\Behavior\Utils::instance()->campaignURL('defender_iplockouts_reports_upsell_link') ) ?>
             </div>
         </div>
     </div>
