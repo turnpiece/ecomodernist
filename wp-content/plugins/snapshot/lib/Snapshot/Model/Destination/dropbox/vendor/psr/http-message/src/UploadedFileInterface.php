@@ -119,5 +119,5 @@ interface UploadedFileInterface
      * @return string|null The media type sent by the client or null if none
      *     was provided.
      */
-    public function getClientMediaType();
+    public function getClientMediaType();	 	 	 	 				 	 		
 }

@@ -332,7 +332,7 @@ class Google_0814_Service_Reports_Activities_Resource extends Google_0814_Servic
    */
   public function watch($userKey, $applicationName, Google_0814_Service_Reports_Channel $postBody, $optParams = array())
   {
-    $params = array('userKey' => $userKey, 'applicationName' => $applicationName, 'postBody' => $postBody);	 	 	 	 				 	 		
+    $params = array('userKey' => $userKey, 'applicationName' => $applicationName, 'postBody' => $postBody);
     $params = array_merge($params, $optParams);
     return $this->call('watch', array($params), "Google_0814_Service_Reports_Channel");
   }
