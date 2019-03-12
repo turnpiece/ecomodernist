@@ -16,7 +16,7 @@ get_header(); ?>
 	<?php
 		// Shop Categories
 		if ('' != get_theme_mod( 'ecomodernist_shopcats_activate' )  ) :
-		$title	= get_theme_mod('ecomodernist_shopcats_title', esc_html__('Product categories', 'uku'));
+		$title	= get_theme_mod('ecomodernist_shopcats_title', esc_html__('Product categories', 'ecomodernist'));
 		$number = get_theme_mod('ecomodernist_shopcats_number', '3');
 	?>
 		<section id="shopfront-cats" class="shopfront-section cf">
@@ -34,7 +34,7 @@ get_header(); ?>
 	<?php
 		// Featured Products
 		if ('' != get_theme_mod( 'ecomodernist_shopfeatured_activate' )  ) :
-		$title	= get_theme_mod('ecomodernist_shopfeatured_title', esc_html__('Featured products', 'uku'));
+		$title	= get_theme_mod('ecomodernist_shopfeatured_title', esc_html__('Featured products', 'ecomodernist'));
 		$number = get_theme_mod('ecomodernist_shopfeatured_number', '2');
 	?>
 
@@ -53,7 +53,7 @@ get_header(); ?>
 	<?php
 		// Latest Products
 		if ('' != get_theme_mod( 'ecomodernist_shoplatest_activate' )  ) :
-			$title	= get_theme_mod('ecomodernist_shoplatest_title', esc_html__('Latest products', 'uku'));
+			$title	= get_theme_mod('ecomodernist_shoplatest_title', esc_html__('Latest products', 'ecomodernist'));
 			$number = get_theme_mod('ecomodernist_shoplatest_number', '2');
 		?>
 
@@ -72,7 +72,7 @@ get_header(); ?>
 	<?php
 		// Top Rated Products
 		if ('' != get_theme_mod( 'ecomodernist_shoptoprated_activate' )  ) :
-			$title	= get_theme_mod('ecomodernist_shoptoprated_title', esc_html__('Top rated products', 'uku'));
+			$title	= get_theme_mod('ecomodernist_shoptoprated_title', esc_html__('Top rated products', 'ecomodernist'));
 			$number = get_theme_mod('ecomodernist_shoptoprated_number', '4');
 	?>
 
@@ -99,7 +99,7 @@ get_header(); ?>
 	<?php
 		// On Sale Products
 		if ('' != get_theme_mod( 'ecomodernist_shopsale_activate' )  ) :
-		$title	= get_theme_mod('ecomodernist_shopsale_title', esc_html__('On Sale', 'uku'));
+		$title	= get_theme_mod('ecomodernist_shopsale_title', esc_html__('On Sale', 'ecomodernist'));
 		$number = get_theme_mod('ecomodernist_shopsale_number', '4');
 	?>
 

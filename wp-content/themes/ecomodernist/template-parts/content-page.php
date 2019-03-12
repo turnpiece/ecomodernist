@@ -19,12 +19,12 @@
 		<?php the_content(); ?>
 		<?php
 			wp_link_pages( array(
-				'before' => '<div class="page-links">' . esc_html__( 'Pages:', 'uku' ),
+				'before' => '<div class="page-links">' . esc_html__( 'Pages:', 'ecomodernist' ),
 				'after'  => '</div>',
 			) );
 		?>
 	</div><!-- .entry-content -->
 	
-	<?php edit_post_link( esc_html__( 'Edit Page', 'uku' ), '<div class="edit-link cf">', '</div>' ); ?>
+	<?php edit_post_link( esc_html__( 'Edit Page', 'ecomodernist' ), '<div class="edit-link cf">', '</div>' ); ?>
 
 </article><!-- #post-## -->

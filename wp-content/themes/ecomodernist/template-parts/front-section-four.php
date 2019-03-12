@@ -27,9 +27,9 @@
 <section id="front-section-four" class="front-section cf">
 
 	<?php if ( '' != get_theme_mod( 'ecomodernist_front_section_four_title' ) && '' != get_theme_mod( 'ecomodernist_front_section_four_cat') ) : ?>
-		<h3 class="front-section-title"><?php echo esc_html( get_theme_mod( 'ecomodernist_front_section_four_title' ) ); ?><span><a class="all-posts-link" href="<?php echo esc_url( $category_link ); ?>"><?php esc_html_e('All posts', 'uku') ?></a></span></h3>
+		<h3 class="front-section-title"><?php echo esc_html( get_theme_mod( 'ecomodernist_front_section_four_title' ) ); ?><span><a class="all-posts-link" href="<?php echo esc_url( $category_link ); ?>"><?php esc_html_e('All posts', 'ecomodernist') ?></a></span></h3>
 	<?php elseif ( '' != get_theme_mod( 'ecomodernist_front_section_four_title' ) && '' != get_theme_mod( 'ecomodernist_front_section_four_tag' ) ) : ?>
-		<h3 class="front-section-title"><?php echo esc_html( get_theme_mod( 'ecomodernist_front_section_four_title' ) ); ?><span><a class="all-posts-link" href="<?php echo esc_url( $tag_link ); ?>"><?php esc_html_e('All posts', 'uku') ?></a></span></h3>
+		<h3 class="front-section-title"><?php echo esc_html( get_theme_mod( 'ecomodernist_front_section_four_title' ) ); ?><span><a class="all-posts-link" href="<?php echo esc_url( $tag_link ); ?>"><?php esc_html_e('All posts', 'ecomodernist') ?></a></span></h3>
 	<?php endif; ?>
 
 	<?php if($ecomodernist_section_four_query->have_posts()) : ?>
@@ -63,14 +63,14 @@
 						<?php if ( comments_open() ) : ?>
 						<span class="entry-comments">
 							<?php comments_popup_link(
-								'<span class="leave-reply"><span class="comment-name">' . esc_html__( 'Comments', 'uku' ) .  '</span>' . esc_html__( '0', 'uku' ) . '</span>',
-								'<span class="comment-name">' . esc_html__( 'Comments', 'uku' ) .  '</span>' . esc_html__( '1', 'uku' ),
-								'<span class="comment-name">' . esc_html__( 'Comments', 'uku' ) .  '</span>' . esc_html__( '%', 'uku' ) )
+								'<span class="leave-reply"><span class="comment-name">' . esc_html__( 'Comments', 'ecomodernist' ) .  '</span>' . esc_html__( '0', 'ecomodernist' ) . '</span>',
+								'<span class="comment-name">' . esc_html__( 'Comments', 'ecomodernist' ) .  '</span>' . esc_html__( '1', 'ecomodernist' ),
+								'<span class="comment-name">' . esc_html__( 'Comments', 'ecomodernist' ) .  '</span>' . esc_html__( '%', 'ecomodernist' ) )
 							; ?>
 						</span><!-- end .entry-comments -->
 					<?php endif; // comments_open() ?>
 
-						<?php edit_post_link( esc_html__( 'Edit Post', 'uku' ), '<span class="entry-edit">', '</span>' ); ?>
+						<?php edit_post_link( esc_html__( 'Edit Post', 'ecomodernist' ), '<span class="entry-edit">', '</span>' ); ?>
 					</div><!-- end .entry-meta -->
 				</div><!-- .entry-main -->
 			</div><!-- .meta-main-wrap -->

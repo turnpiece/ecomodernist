@@ -1024,12 +1024,6 @@ msgstr ""
 msgid "&mdash; Select &mdash;"
 msgstr ""
 
-#: ../inc/demo-installer.php:39
-msgid ""
-"Make sure you have the WooCommerce plugin installed, before importing this "
-"demo!"
-msgstr ""
-
 #: ../inc/template-tags.php:26
 #, php-format
 msgctxt "post date"

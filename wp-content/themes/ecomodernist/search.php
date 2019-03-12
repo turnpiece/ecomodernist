@@ -19,7 +19,7 @@ get_header(); ?>
 			<?php if ( have_posts() ) : ?>
 
 				<header class="archive-header">
-					<h1 class="archive-title"><?php echo absint($wp_query->found_posts); ?> <?php printf( esc_html__( 'Search Results for: %s', 'uku' ), '<span>' . get_search_query() . '</span>' ); ?></h1>
+					<h1 class="archive-title"><?php echo absint($wp_query->found_posts); ?> <?php printf( esc_html__( 'Search Results for: %s', 'ecomodernist' ), '<span>' . get_search_query() . '</span>' ); ?></h1>
 					</header><!--end .archive-header -->
 
 					<div class="posts-wrap">
@@ -40,11 +40,11 @@ get_header(); ?>
 
 				// Previous/next page navigation.
 				the_posts_pagination( array(
-					'next_text' => '<span aria-hidden="true" class="meta-nav">' . esc_html__( 'Older', 'uku' ) . '</span> ' .
-					'<span class="screen-reader-text">' . esc_html__( 'Older Posts', 'uku' ) . '</span> ',
-					'prev_text' => '<span aria-hidden="true" class="meta-nav">' . esc_html__( 'Newer', 'uku' ) . '</span> ' .
-					'<span class="screen-reader-text">' . esc_html__( 'Newer Posts', 'uku' ) . '</span> ' ,
-					'before_page_number' => '<span class="meta-nav screen-reader-text">' . esc_html__( 'Page', 'uku' ) . ' </span>',
+					'next_text' => '<span aria-hidden="true" class="meta-nav">' . esc_html__( 'Older', 'ecomodernist' ) . '</span> ' .
+					'<span class="screen-reader-text">' . esc_html__( 'Older Posts', 'ecomodernist' ) . '</span> ',
+					'prev_text' => '<span aria-hidden="true" class="meta-nav">' . esc_html__( 'Newer', 'ecomodernist' ) . '</span> ' .
+					'<span class="screen-reader-text">' . esc_html__( 'Newer Posts', 'ecomodernist' ) . '</span> ' ,
+					'before_page_number' => '<span class="meta-nav screen-reader-text">' . esc_html__( 'Page', 'ecomodernist' ) . ' </span>',
 					) );
 
 					// If no content, include the "No posts found" template.

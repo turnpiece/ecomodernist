@@ -47,7 +47,7 @@
 				 <?php endif; ?>
 
 				<p class="site-description"><?php bloginfo( 'description' ); ?></p>
-				<button id="overlay-open" class="overlay-open overlay-btn"><span><?php esc_html_e( 'Menu', 'uku' ); ?></span></button>
+				<button id="overlay-open" class="overlay-open overlay-btn"><span><?php esc_html_e( 'Menu', 'ecomodernist' ); ?></span></button>
 
 				<?php if (ecomodernist_woocommerce_active() ) : ?>
 					<?php get_template_part( 'template-parts/shop-menu' ); ?>
@@ -71,10 +71,10 @@
 			<?php endif; ?>
 
 			<?php if ( '' == get_theme_mod( 'ecomodernist_hidesearch' ) ) : ?>
-			<button id="search-open" class="search-open search-btn"><span><?php esc_html_e( 'Search', 'uku' ); ?></span></button>
+			<button id="search-open" class="search-open search-btn"><span><?php esc_html_e( 'Search', 'ecomodernist' ); ?></span></button>
 				<div class="desktop-search">
 					<?php if ( 'neo' == get_theme_mod( 'ecomodernist_main_design') || 'serif' == get_theme_mod( 'ecomodernist_main_design' )) : ?>
-						<button id="search-close" class="search-close"><span><?php esc_html_e( 'Search', 'uku' ); ?></span></button>
+						<button id="search-close" class="search-close"><span><?php esc_html_e( 'Search', 'ecomodernist' ); ?></span></button>
 					<?php endif; ?>
 					<?php get_search_form(); ?>
 				</div><!-- end .desktop-search -->
@@ -83,9 +83,9 @@
 		</div><!-- .site-header-content -->
 
 		<div class="sticky-header hidden">
-			<button id="overlay-open-sticky" class="overlay-open overlay-btn"><span><?php esc_html_e( 'Menu', 'uku' ); ?></span></button>
+			<button id="overlay-open-sticky" class="overlay-open overlay-btn"><span><?php esc_html_e( 'Menu', 'ecomodernist' ); ?></span></button>
 			<?php if ( '' == get_theme_mod( 'ecomodernist_hidesearch' ) ) : ?>
-				<button id="search-open-sticky" class="search-open search-btn"><span><?php esc_html_e( 'Search', 'uku' ); ?></span></button>
+				<button id="search-open-sticky" class="search-open search-btn"><span><?php esc_html_e( 'Search', 'ecomodernist' ); ?></span></button>
 			<?php endif; ?>
 
 			<?php if ( has_custom_logo() ) : ?>
@@ -115,7 +115,7 @@
 
 			<div class="inner-offcanvas-wrap">
 				<div class="close-btn-wrap">
-					<button id="overlay-close" class="overlay-btn"><span><?php esc_html_e( 'Close', 'uku' ); ?></span></button>
+					<button id="overlay-close" class="overlay-btn"><span><?php esc_html_e( 'Close', 'ecomodernist' ); ?></span></button>
 				</div><!-- end .close-btn-wrap -->
 
 				<div class="overlay-desktop-content cf">
@@ -157,6 +157,8 @@
 
 			</div><!-- end .inner-offcanvas-wrap -->
 
+		<div class="header-logo-image"></div>
+		
 	</header><!-- end #masthead -->
 
 	<div id="overlay-wrap" class="overlay-wrap cf"></div><!-- end #overlay-wrap -->
@@ -171,7 +173,7 @@
 				<?php endif; ?>
 
 				<?php if ( 'Scroll Down' == get_theme_mod( 'ecomodernist_scrolldownbtn_text' )  || '' == get_theme_mod( 'ecomodernist_scrolldownbtn_text' )) : ?>
-					<a href="#page-start" id="scrolldown"><?php esc_html_e( 'Scroll Down', 'uku' ); ?></a>
+					<a href="#page-start" id="scrolldown"><?php esc_html_e( 'Scroll Down', 'ecomodernist' ); ?></a>
 				<?php else : ?>
 					<a href="#page-start" id="scrolldown"><?php echo esc_html( get_theme_mod( 'ecomodernist_scrolldownbtn_text' ) ); ?></a>
 				<?php endif; ?>

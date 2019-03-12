@@ -13,54 +13,54 @@ function ecomodernist_customize_register( $wp_customize ) {
 	$wp_customize->get_setting( 'blogdescription' )->transport  = 'postMessage';
 
 	// Rename the label to "Site Title Color" because this only affects the site title in this theme.
-	$wp_customize->get_control( 'header_textcolor' )->label = esc_html__( 'Site Title Color', 'uku' );
+	$wp_customize->get_control( 'header_textcolor' )->label = esc_html__( 'Site Title Color', 'ecomodernist' );
 
 	// Custom Ecomodernist panels:
 	$wp_customize->add_panel( 'ecomodernist_themeoptions', array(
 		'priority' 	               => 1,
 		'theme_supports' 	         => '',
-		'title' 	                 => esc_html__('Theme Options', 'uku'),
+		'title' 	                 => esc_html__('Theme Options', 'ecomodernist'),
 	) );
 
 	$wp_customize->add_panel( 'ecomodernist_frontpage', array(
 		'priority' 	               => 2,
 		'theme_supports' 	         => '',
-		'title' 	                 => esc_html__('Blog Front Page', 'uku'),
+		'title' 	                 => esc_html__('Blog Front Page', 'ecomodernist'),
 	) );
 
 	$wp_customize->add_panel( 'ecomodernist_shop', array(
 		'priority' 	               => 3,
 		'theme_supports' 	         => '',
-		'title' 	                 => esc_html__('Shop Front Page', 'uku'),
+		'title' 	                 => esc_html__('Shop Front Page', 'ecomodernist'),
 	) );
 
 	// Ecomodernist Theme Options Sections:
 	$wp_customize->add_section( 'ecomodernist_style', array(
-		'title' 		               => esc_html__( 'Design Style', 'uku' ),
+		'title' 		               => esc_html__( 'Design Style', 'ecomodernist' ),
 		'priority' 	               => 1,
 		'panel' 					         => 'ecomodernist_themeoptions',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_general', array(
-		'title' 		               => esc_html__( 'General', 'uku' ),
+		'title' 		               => esc_html__( 'General', 'ecomodernist' ),
 		'priority' 	               => 2,
 		'panel' 					         => 'ecomodernist_themeoptions',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_header', array(
-		'title' 		               => esc_html__( 'Header', 'uku' ),
+		'title' 		               => esc_html__( 'Header', 'ecomodernist' ),
 		'priority' 	               => 3,
 		'panel' 					         => 'ecomodernist_themeoptions',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_images', array(
-		'title' 		               => esc_html__( 'Images', 'uku' ),
+		'title' 		               => esc_html__( 'Images', 'ecomodernist' ),
 		'priority' 	               => 4,
 		'panel' 					         => 'ecomodernist_themeoptions',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_footerfeature', array(
-		'title' 		               => esc_html__( 'Footer Featured Area', 'uku' ),
+		'title' 		               => esc_html__( 'Footer Featured Area', 'ecomodernist' ),
 		'priority' 	               => 5,
 		'panel' 					         => 'ecomodernist_themeoptions',
 	) );
@@ -72,83 +72,83 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_main_design', array(
-		'label' 			             => esc_html__( 'Design Style', 'uku' ),
-		'description'					     => esc_html__( 'Choose your main design style.', 'uku' ),
+		'label' 			             => esc_html__( 'Design Style', 'ecomodernist' ),
+		'description'					     => esc_html__( 'Choose your main design style.', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_style',
 		'priority' 			           => 1,
 		'type' 			               => 'select',
 		'choices' 						     => array(
-					'standard'		       => esc_html__( 'standard', 'uku' ),
-					'neo' 				       => esc_html__( 'neo', 'uku' ),
-					'serif' 			       => esc_html__( 'serif', 'uku' ),
+					'standard'		       => esc_html__( 'standard', 'ecomodernist' ),
+					'neo' 				       => esc_html__( 'neo', 'ecomodernist' ),
+					'serif' 			       => esc_html__( 'serif', 'ecomodernist' ),
 		),
 	) );
 
 
 	// Ecomodernist Front Page Sections.
 	$wp_customize->add_section( 'ecomodernist_frontpage_general', array(
-		'title' 		               => esc_html__( 'General', 'uku' ),
+		'title' 		               => esc_html__( 'General', 'ecomodernist' ),
 		'priority' 	               => 1,
 		'panel' 					         => 'ecomodernist_frontpage',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_slider', array(
-		'title' 		               => esc_html__( 'Featured Posts Slider', 'uku' ),
-		'description'			         => esc_html__( 'Up to 6 posts will show up in the Front page slider. The image dimension for the Featured post images should be at least 1440 x 530 pixels for the standard design style and 1500 x 690 for neo and serif.', 'uku' ),
+		'title' 		               => esc_html__( 'Featured Posts Slider', 'ecomodernist' ),
+		'description'			         => esc_html__( 'Up to 6 posts will show up in the Front page slider. The image dimension for the Featured post images should be at least 1440 x 530 pixels for the standard design style and 1500 x 690 for neo and serif.', 'ecomodernist' ),
 		'priority' 	               => 3,
 		'panel' 					         => 'ecomodernist_frontpage',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_front_section_one', array(
-		'title' 		               => esc_html__( 'Section Featured Top', 'uku' ),
+		'title' 		               => esc_html__( 'Section Featured Top', 'ecomodernist' ),
 		'priority' 	               => 3,
 		'panel' 					         => 'ecomodernist_frontpage',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_front_section_twocolumn', array(
-		'title' 		               => esc_html__( 'Section 2-Columns', 'uku' ),
+		'title' 		               => esc_html__( 'Section 2-Columns', 'ecomodernist' ),
 		'priority' 	               => 4,
 		'panel' 					         => 'ecomodernist_frontpage',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_front_section_threecolumn', array(
-		'title' 		               => esc_html__( 'Section 3-Columns', 'uku' ),
+		'title' 		               => esc_html__( 'Section 3-Columns', 'ecomodernist' ),
 		'priority' 	               => 5,
 		'panel' 					         => 'ecomodernist_frontpage',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_front_section_four', array(
-		'title' 		               => esc_html__( 'Section Fullwidth', 'uku' ),
+		'title' 		               => esc_html__( 'Section Fullwidth', 'ecomodernist' ),
 		'priority' 	               => 6,
 		'panel' 					         => 'ecomodernist_frontpage',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_front_section_two', array(
-		'title' 		               => esc_html__( 'Section Featured Bottom', 'uku' ),
+		'title' 		               => esc_html__( 'Section Featured Bottom', 'ecomodernist' ),
 		'priority' 	               => 7,
 		'panel' 					         => 'ecomodernist_frontpage',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_front_section_about', array(
-		'title' 		               => esc_html__( 'Section About', 'uku' ),
+		'title' 		               => esc_html__( 'Section About', 'ecomodernist' ),
 		'priority' 	               => 8,
 		'panel' 					         => 'ecomodernist_frontpage',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_front_section_three', array(
-		'title' 		               => esc_html__( 'Section on Background', 'uku' ),
+		'title' 		               => esc_html__( 'Section on Background', 'ecomodernist' ),
 		'priority' 	               => 9,
 		'panel' 					         => 'ecomodernist_frontpage',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_front_section_fourcolumn', array(
-		'title' 		               => esc_html__( 'Section 4-Columns', 'uku' ),
+		'title' 		               => esc_html__( 'Section 4-Columns', 'ecomodernist' ),
 		'priority' 	               => 10,
 		'panel' 					         => 'ecomodernist_frontpage',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_front_section_sixcolumn', array(
-		'title' 		               => esc_html__( 'Section 6-Columns', 'uku' ),
+		'title' 		               => esc_html__( 'Section 6-Columns', 'ecomodernist' ),
 		'priority' 	               => 11,
 		'panel' 					         => 'ecomodernist_frontpage',
 	) );
@@ -156,37 +156,37 @@ function ecomodernist_customize_register( $wp_customize ) {
 
 	// Ecomodernist Shop Sections.
 	$wp_customize->add_section( 'ecomodernist_shop_front_general', array(
-		'title' 		               => esc_html__( 'General', 'uku' ),
+		'title' 		               => esc_html__( 'General', 'ecomodernist' ),
 		'priority' 	               => 1,
 		'panel' 					         => 'ecomodernist_shop',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_shop_front_cats', array(
-		'title' 		               => esc_html__( 'Product Categories', 'uku' ),
+		'title' 		               => esc_html__( 'Product Categories', 'ecomodernist' ),
 		'priority' 	               => 2,
 		'panel' 					         => 'ecomodernist_shop',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_shop_front_featured', array(
-		'title' 		               => esc_html__( 'Featured Products', 'uku' ),
+		'title' 		               => esc_html__( 'Featured Products', 'ecomodernist' ),
 		'priority' 	               => 3,
 		'panel' 					         => 'ecomodernist_shop',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_shop_front_latest', array(
-		'title' 		               => esc_html__( 'Latest Products', 'uku' ),
+		'title' 		               => esc_html__( 'Latest Products', 'ecomodernist' ),
 		'priority' 	               => 4,
 		'panel' 					         => 'ecomodernist_shop',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_shop_front_toprated', array(
-		'title' 		               => esc_html__( 'Top Rated Products', 'uku' ),
+		'title' 		               => esc_html__( 'Top Rated Products', 'ecomodernist' ),
 		'priority' 	               => 5,
 		'panel' 					         => 'ecomodernist_shop',
 	) );
 
 	$wp_customize->add_section( 'ecomodernist_shop_front_sale', array(
-		'title' 		               => esc_html__( 'On Sale Products', 'uku' ),
+		'title' 		               => esc_html__( 'On Sale Products', 'ecomodernist' ),
 		'priority' 	               => 6,
 		'panel' 					         => 'ecomodernist_shop',
 	) );
@@ -201,7 +201,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'ecomodernist_link_color', array(
-		'label'								     => esc_html__( 'Text Link Color', 'uku' ),
+		'label'								     => esc_html__( 'Text Link Color', 'ecomodernist' ),
 		'section'							     => 'colors',
 		'settings'						     => 'ecomodernist_link_color',
 	) ) );
@@ -213,7 +213,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'ecomodernist_linkhover_color', array(
-		'label'								     => esc_html__( 'Text Link Hover Color', 'uku' ),
+		'label'								     => esc_html__( 'Text Link Hover Color', 'ecomodernist' ),
 		'section'							     => 'colors',
 		'settings'						     => 'ecomodernist_linkhover_color',
 	) ) );
@@ -225,7 +225,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'ecomodernist_footer_bg_color', array(
-		'label'								     => esc_html__( 'Footer Background Color', 'uku' ),
+		'label'								     => esc_html__( 'Footer Background Color', 'ecomodernist' ),
 		'section'							     => 'colors',
 		'settings'						     => 'ecomodernist_footer_bg_color',
 	) ) );
@@ -237,7 +237,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'ecomodernist_footer_text_color', array(
-		'label'								     => esc_html__( 'Footer Text Color', 'uku' ),
+		'label'								     => esc_html__( 'Footer Text Color', 'ecomodernist' ),
 		'section'							     => 'colors',
 		'settings'						     => 'ecomodernist_footer_text_color',
 	) ) );
@@ -249,7 +249,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'ecomodernist_offcanvas_bg_color', array(
-		'label'								     => esc_html__( 'Off Canvas Background Color', 'uku' ),
+		'label'								     => esc_html__( 'Off Canvas Background Color', 'ecomodernist' ),
 		'section'							     => 'colors',
 		'settings'						     => 'ecomodernist_offcanvas_bg_color',
 	) ) );
@@ -261,7 +261,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'ecomodernist_offcanvas_text_color', array(
-		'label'								     => esc_html__( 'Off Canvas Text Color', 'uku' ),
+		'label'								     => esc_html__( 'Off Canvas Text Color', 'ecomodernist' ),
 		'section'							     => 'colors',
 		'settings'						     => 'ecomodernist_offcanvas_text_color',
 	) ) );
@@ -273,8 +273,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'ecomodernist_frontsection_bg_color', array(
-		'label'								     => esc_html__( 'Posts on Background Color', 'uku' ),
-		'description'					     => esc_html__( 'Background color of the "Posts on Background" section.', 'uku' ),
+		'label'								     => esc_html__( 'Posts on Background Color', 'ecomodernist' ),
+		'description'					     => esc_html__( 'Background color of the "Posts on Background" section.', 'ecomodernist' ),
 		'section'							     => 'colors',
 		'settings'						     => 'ecomodernist_frontsection_bg_color',
 	) ) );
@@ -286,8 +286,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'ecomodernist_subscribe_bg_color', array(
-		'label'								     => esc_html__( 'Subscribe Widget Background Color', 'uku' ),
-		'description'					     => esc_html__( 'Background color of the Jetpack Blog Subscribe or Mailchimp newsletter widget.', 'uku' ),
+		'label'								     => esc_html__( 'Subscribe Widget Background Color', 'ecomodernist' ),
+		'description'					     => esc_html__( 'Background color of the Jetpack Blog Subscribe or Mailchimp newsletter widget.', 'ecomodernist' ),
 		'section'							     => 'colors',
 		'settings'						     => 'ecomodernist_subscribe_bg_color',
 	) ) );
@@ -299,8 +299,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'ecomodernist_aboutsection_bg_color', array(
-		'label'								     => esc_html__( 'About Section Background Color', 'uku' ),
-		'description'					     => esc_html__( 'Transparent About section background color (Serif Design style only).', 'uku' ),
+		'label'								     => esc_html__( 'About Section Background Color', 'ecomodernist' ),
+		'description'					     => esc_html__( 'Transparent About section background color (Serif Design style only).', 'ecomodernist' ),
 		'section'							     => 'colors',
 		'settings'						     => 'ecomodernist_aboutsection_bg_color',
 	) ) );
@@ -312,8 +312,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'ecomodernist_shopcats_bg_color', array(
-		'label'								     => esc_html__( 'Shop Categories Background Color', 'uku' ),
-		'description'					     => esc_html__( 'Background color of the "Shop Categories" Shop Front page section (only available, when WooCommerce is activated.)', 'uku' ),
+		'label'								     => esc_html__( 'Shop Categories Background Color', 'ecomodernist' ),
+		'description'					     => esc_html__( 'Background color of the "Shop Categories" Shop Front page section (only available, when WooCommerce is activated.)', 'ecomodernist' ),
 		'section'							     => 'colors',
 		'settings'						     => 'ecomodernist_shopcats_bg_color',
 	) ) );
@@ -325,7 +325,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_hidetagline', array(
-		'label'								     => esc_html__( 'Hide tagline only', 'uku' ),
+		'label'								     => esc_html__( 'Hide tagline only', 'ecomodernist' ),
 		'section'							     => 'title_tagline',
 		'type'								     => 'checkbox',
 		'priority'						     => 22,
@@ -337,7 +337,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_titleuppercase', array(
-		'label'								     => esc_html__( 'Title in uppercase font', 'uku' ),
+		'label'								     => esc_html__( 'Title in uppercase font', 'ecomodernist' ),
 		'section'							     => 'title_tagline',
 		'type'								     => 'checkbox',
 		'priority'						     => 23,
@@ -349,8 +349,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_customlogofooter', array(
-		'label'								     => esc_html__( 'Show custom logo in footer', 'uku' ),
-		'description'					     => esc_html__( '(Only available with the "standard" and "neo" design style, see Theme Options / Design Style.).', 'uku' ),
+		'label'								     => esc_html__( 'Show custom logo in footer', 'ecomodernist' ),
+		'description'					     => esc_html__( '(Only available with the "standard" and "neo" design style, see Theme Options / Design Style.).', 'ecomodernist' ),
 		'section'							     => 'title_tagline',
 		'type'								     => 'checkbox',
 		'priority'						     => 24,
@@ -363,15 +363,15 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_headerstyle', array(
-		'label' 			             => esc_html__( 'Header Image Style', 'uku' ),
-		'description'					     => esc_html__( 'Choose the Header image style you like to use.', 'uku' ),
+		'label' 			             => esc_html__( 'Header Image Style', 'ecomodernist' ),
+		'description'					     => esc_html__( 'Choose the Header image style you like to use.', 'ecomodernist' ),
 		'section' 			           => 'header_image',
 		'priority' 			           => 10,
 		'type' 			               => 'select',
 		'choices' 						     => array(
-					'header-fullwidth' 	 => esc_html__( 'fullwidth', 'uku' ),
-					'header-boxed' 			 => esc_html__( 'boxed', 'uku' ),
-					'header-fullscreen'  => esc_html__( 'fullscreen (serif and standard only)', 'uku' ),
+					'header-fullwidth' 	 => esc_html__( 'fullwidth', 'ecomodernist' ),
+					'header-boxed' 			 => esc_html__( 'boxed', 'ecomodernist' ),
+					'header-fullscreen'  => esc_html__( 'fullscreen (serif and standard only)', 'ecomodernist' ),
 		),
 	) );
 
@@ -381,8 +381,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_custom_header_intro', array(
-		'label' 			             => esc_html__( 'Header Image Intro Text', 'uku' ),
-		'description'					     => esc_html__( 'Add a short intro text that will displayed centered on your header image. (Design style "serif" only.)', 'uku' ),
+		'label' 			             => esc_html__( 'Header Image Intro Text', 'ecomodernist' ),
+		'description'					     => esc_html__( 'Add a short intro text that will displayed centered on your header image. (Design style "serif" only.)', 'ecomodernist' ),
 		'section' 			           => 'header_image',
 		'type' 			               => 'textarea',
 		'priority'						     => 11,
@@ -394,8 +394,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_scrolldownbtn_text', array(
-		'label'								     => esc_html__( 'Customize "Scroll Down" button text', 'uku' ),
-		'description'					     => esc_html__( '(Design style "serif" only.)', 'uku' ),
+		'label'								     => esc_html__( 'Customize "Scroll Down" button text', 'ecomodernist' ),
+		'description'					     => esc_html__( '(Design style "serif" only.)', 'ecomodernist' ),
 		'section' 					       => 'header_image',
 		'type' 			               => 'text',
 		'priority'						     => 12,
@@ -408,13 +408,13 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_sidebar', array(
-		'label' 			             => esc_html__( 'Sidebar Position', 'uku' ),
+		'label' 			             => esc_html__( 'Sidebar Position', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_general',
 		'priority' 			           => 2,
 		'type' 			               => 'select',
 		'choices'							     => array(
-					'sidebar-right' 	   => esc_html__( 'sidebar right', 'uku' ),
-					'sidebar-left' 		   => esc_html__( 'sidebar left', 'uku' ),
+					'sidebar-right' 	   => esc_html__( 'sidebar right', 'ecomodernist' ),
+					'sidebar-left' 		   => esc_html__( 'sidebar left', 'ecomodernist' ),
 		),
 	) );
 
@@ -424,15 +424,16 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_sidebar_hide', array(
-		'label' 			             => esc_html__( 'Sidebar Visibility', 'uku' ),
+		'label' 			             => esc_html__( 'Sidebar Visibility', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_general',
 		'priority' 			           => 3,
 		'type' 			               => 'select',
 		'choices' 						     => array(
-					'sidebar-show'			 => esc_html__( 'Show sidebar', 'uku' ),
-					'sidebar-no'				 => esc_html__( 'Hide sidebar', 'uku' ),
-					'sidebar-no-single'	 => esc_html__( 'Hide sidebar on single posts', 'uku' ),
-					'sidebar-no-front'	 => esc_html__( 'Hide sidebar on Front page', 'uku' ),
+					'sidebar-show'			 => esc_html__( 'Show sidebar', 'ecomodernist' ),
+					'sidebar-no'				 => esc_html__( 'Hide sidebar', 'ecomodernist' ),
+					'sidebar-no-single'	 => esc_html__( 'Hide sidebar on single posts', 'ecomodernist' ),
+					'sidebar-no-front'	 => esc_html__( 'Hide sidebar on front page', 'ecomodernist' ),
+
 		),
 	) );
 
@@ -442,8 +443,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_hidecomments', array(
-		'label'								     => esc_html__( 'Show Comments button on single posts', 'uku' ),
-		'description'					     => esc_html__( '(Hides comments behind a Show Comments button on single posts.)', 'uku' ),
+		'label'								     => esc_html__( 'Show Comments button on single posts', 'ecomodernist' ),
+		'description'					     => esc_html__( '(Hides comments behind a Show Comments button on single posts.)', 'ecomodernist' ),
 		'section'							     => 'ecomodernist_general',
 		'type'								     => 'checkbox',
 		'priority'						     => 4,
@@ -455,8 +456,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_credit', array(
-		'label'								     => esc_html__( 'Footer credit text', 'uku' ),
-		'description'					     => esc_html__( 'Customize the footer credit text. (HTML is allowed)', 'uku' ),
+		'label'								     => esc_html__( 'Footer credit text', 'ecomodernist' ),
+		'description'					     => esc_html__( 'Customize the footer credit text. (HTML is allowed)', 'ecomodernist' ),
 		'section' 					       => 'ecomodernist_general',
 		'type' 			               => 'text',
 		'priority'						     => 5,
@@ -469,7 +470,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_hidesearch', array(
-		'label'								     => esc_html__( 'Hide search in Header', 'uku' ),
+		'label'								     => esc_html__( 'Hide search in Header', 'ecomodernist' ),
 		'section'							     => 'ecomodernist_header',
 		'type'								     => 'checkbox',
 		'priority'						     => 1,
@@ -481,14 +482,14 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_header_font', array(
-		'label' 			             => esc_html__( 'Header Font', 'uku' ),
-		'description'					     => esc_html__( 'You can choose the light header font in combination with the fullscreen header image or fullscreen slider style.', 'uku' ),
+		'label' 			             => esc_html__( 'Header Font', 'ecomodernist' ),
+		'description'					     => esc_html__( 'You can choose the light header font in combination with the fullscreen header image or fullscreen slider style.', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_header',
 		'priority' 			           => 2,
 		'type' 			               => 'select',
 		'choices' 							   => array(
-					'light' 	           => esc_html__( 'light', 'uku' ),
-					'dark' 		           => esc_html__( 'dark', 'uku' ),
+					'light' 	           => esc_html__( 'light', 'ecomodernist' ),
+					'dark' 		           => esc_html__( 'dark', 'ecomodernist' ),
 		),
 	) );
 
@@ -498,14 +499,14 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_fixedheader_style', array(
-		'label' 			             => esc_html__( 'Fix-positioned Header style', 'uku' ),
-		'description'					     => esc_html__( 'Choose a dark or light colored fix-positioned header bar.', 'uku' ),
+		'label' 			             => esc_html__( 'Fix-positioned Header style', 'ecomodernist' ),
+		'description'					     => esc_html__( 'Choose a dark or light colored fix-positioned header bar.', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_header',
 		'priority' 			           => 3,
 		'type' 			               => 'select',
 		'choices' 						     => array(
-					'light' 	           => esc_html__( 'light', 'uku' ),
-					'dark' 		           => esc_html__( 'dark', 'uku' ),
+					'light' 	           => esc_html__( 'light', 'ecomodernist' ),
+					'dark' 		           => esc_html__( 'dark', 'ecomodernist' ),
 		),
 	) );
 
@@ -515,8 +516,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_fixedheader', array(
-		'label'								     => esc_html__( 'Hide fix-positioned Header', 'uku' ),
-		'description'					     => esc_html__( '(By default the fix-positioned Header is visible on wider screens, if the browser window is scrolled.)', 'uku' ),
+		'label'								     => esc_html__( 'Hide fix-positioned Header', 'ecomodernist' ),
+		'description'					     => esc_html__( '(By default the fix-positioned Header is visible on wider screens, if the browser window is scrolled.)', 'ecomodernist' ),
 		'section'							     => 'ecomodernist_header',
 		'type'								     => 'checkbox',
 		'priority'						     => 4,
@@ -529,23 +530,23 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_imggradient', array(
-		'label' 			             => esc_html__( 'Image Bottom Gradient', 'uku' ),
-		'description'					     => esc_html__( 'Level of transparency (in percent) for the bottom gradient of Featured images with text on the image. (The default value is 70%. Ecomodernist standard only.)', 'uku' ),
+		'label' 			             => esc_html__( 'Image Bottom Gradient', 'ecomodernist' ),
+		'description'					     => esc_html__( 'Level of transparency (in percent) for the bottom gradient of Featured images with text on the image. (The default value is 70%. Ecomodernist standard only.)', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_images',
 		'priority' 			           => 1,
 		'type' 			               => 'select',
 		'choices' 						     => array(
-			'0'                      => esc_html__( '0', 'uku' ),
-					'0.1'		             => esc_html__( '10', 'uku' ),
-					'0.2'		             => esc_html__( '20', 'uku' ),
-					'0.3' 	             => esc_html__( '30', 'uku' ),
-					'0.4'		             => esc_html__( '40', 'uku' ),
-					'0.5' 	             => esc_html__( '50', 'uku' ),
-					'0.6' 	             => esc_html__( '60', 'uku' ),
-					'0.7' 	             => esc_html__( '70', 'uku' ),
-					'0.8' 	             => esc_html__( '80', 'uku' ),
-					'0.9' 	             => esc_html__( '90', 'uku' ),
-					'0.99'	             => esc_html__( '100', 'uku' ),
+			'0'                      => esc_html__( '0', 'ecomodernist' ),
+					'0.1'		             => esc_html__( '10', 'ecomodernist' ),
+					'0.2'		             => esc_html__( '20', 'ecomodernist' ),
+					'0.3' 	             => esc_html__( '30', 'ecomodernist' ),
+					'0.4'		             => esc_html__( '40', 'ecomodernist' ),
+					'0.5' 	             => esc_html__( '50', 'ecomodernist' ),
+					'0.6' 	             => esc_html__( '60', 'ecomodernist' ),
+					'0.7' 	             => esc_html__( '70', 'ecomodernist' ),
+					'0.8' 	             => esc_html__( '80', 'ecomodernist' ),
+					'0.9' 	             => esc_html__( '90', 'ecomodernist' ),
+					'0.99'	             => esc_html__( '100', 'ecomodernist' ),
 		),
 	) );
 
@@ -556,8 +557,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( new WP_Customize_Color_Control( $wp_customize, 'ecomodernist_imgoverlay_color', array(
-		'label'								     => esc_html__( 'Image Overlay Color', 'uku' ),
-		'description'					     => esc_html__( 'Image overlay color for Featured images with text on the image.', 'uku' ),
+		'label'								     => esc_html__( 'Image Overlay Color', 'ecomodernist' ),
+		'description'					     => esc_html__( 'Image overlay color for Featured images with text on the image.', 'ecomodernist' ),
 		'section'							     => 'ecomodernist_images',
 		'priority' 			           => 2,
 		'settings'						     => 'ecomodernist_imgoverlay_color',
@@ -569,23 +570,23 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_imgoverlay_transparency', array(
-		'label' 			             => esc_html__( 'Image Overlay Transparency', 'uku' ),
-		'description'					     => esc_html__( 'Overlay transparency (in percent) for Featured images with text on the image.', 'uku' ),
+		'label' 			             => esc_html__( 'Image Overlay Transparency', 'ecomodernist' ),
+		'description'					     => esc_html__( 'Overlay transparency (in percent) for Featured images with text on the image.', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_images',
 		'priority' 			           => 3,
 		'type' 			               => 'select',
 		'choices' 						     => array(
-			'0'                      => esc_html__( '0', 'uku' ),
-					'0.1'		             => esc_html__( '10', 'uku' ),
-					'0.2' 	             => esc_html__( '20', 'uku' ),
-					'0.3' 	             => esc_html__( '30', 'uku' ),
-					'0.4' 	             => esc_html__( '40', 'uku' ),
-					'0.5' 	             => esc_html__( '50', 'uku' ),
-					'0.6' 	             => esc_html__( '60', 'uku' ),
-					'0.7'		             => esc_html__( '70', 'uku' ),
-					'0.8' 	             => esc_html__( '80', 'uku' ),
-					'0.9'		             => esc_html__( '90', 'uku' ),
-					'1' 		             => esc_html__( '100', 'uku' ),
+			'0'                      => esc_html__( '0', 'ecomodernist' ),
+					'0.1'		             => esc_html__( '10', 'ecomodernist' ),
+					'0.2' 	             => esc_html__( '20', 'ecomodernist' ),
+					'0.3' 	             => esc_html__( '30', 'ecomodernist' ),
+					'0.4' 	             => esc_html__( '40', 'ecomodernist' ),
+					'0.5' 	             => esc_html__( '50', 'ecomodernist' ),
+					'0.6' 	             => esc_html__( '60', 'ecomodernist' ),
+					'0.7'		             => esc_html__( '70', 'ecomodernist' ),
+					'0.8' 	             => esc_html__( '80', 'ecomodernist' ),
+					'0.9'		             => esc_html__( '90', 'ecomodernist' ),
+					'1' 		             => esc_html__( '100', 'ecomodernist' ),
 		),
 	) );
 
@@ -595,14 +596,14 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_image_font', array(
-		'label' 			             => esc_html__( 'Image Font', 'uku' ),
-		'description'					     => esc_html__( 'You can choose a dark image font, if you have Featured images in very light colors. (Ecomodernist standard only)', 'uku' ),
+		'label' 			             => esc_html__( 'Image Font', 'ecomodernist' ),
+		'description'					     => esc_html__( 'You can choose a dark image font, if you have Featured images in very light colors. (Ecomodernist standard only)', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_images',
 		'priority' 			           => 4,
 		'type' 			               => 'select',
 		'choices' 						     => array(
-					'light' 	           => esc_html__( 'light', 'uku' ),
-					'dark' 		           => esc_html__( 'dark', 'uku' ),
+					'light' 	           => esc_html__( 'light', 'ecomodernist' ),
+					'dark' 		           => esc_html__( 'dark', 'ecomodernist' ),
 		),
 	) );
 
@@ -614,8 +615,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_footerfeature_title', array(
-		'label' 			             => esc_html__( 'Title', 'uku' ),
-		'description'					     => esc_html__( 'A small title text visible at the top of the area.', 'uku' ),
+		'label' 			             => esc_html__( 'Title', 'ecomodernist' ),
+		'description'					     => esc_html__( 'A small title text visible at the top of the area.', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_footerfeature',
 		'type' 			               => 'text',
 		'priority'						     => 1,
@@ -627,7 +628,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize,'ecomodernist_footerfeature_image', array(
-				'label'						     => esc_html__( 'Upload Featured image', 'uku' ),
+				'label'						     => esc_html__( 'Upload Featured image', 'ecomodernist' ),
 				'section'					     => 'ecomodernist_footerfeature',
 				'priority'				     => 2,
 	) ) );
@@ -638,10 +639,10 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_footerfeature_text_big', array(
-		'label' 			             => esc_html__( 'Big Text', 'uku' ),
+		'label' 			             => esc_html__( 'Big Text', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_footerfeature',
 		'type' 			               => 'textarea',
-		'description'					     => esc_html__( 'A big slogan text next to the image (HTML is allowed.)', 'uku' ),
+		'description'					     => esc_html__( 'A big slogan text next to the image (HTML is allowed.)', 'ecomodernist' ),
 		'priority'						     => 3,
 	) );
 
@@ -651,8 +652,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_footerfeature_text_small', array(
-		'label' 			             => esc_html__( 'Small Text', 'uku' ),
-		'description'					     => esc_html__( 'An additional smaller description text below the big text (HTML is allowed.)', 'uku' ),
+		'label' 			             => esc_html__( 'Small Text', 'ecomodernist' ),
+		'description'					     => esc_html__( 'An additional smaller description text below the big text (HTML is allowed.)', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_footerfeature',
 		'type' 			               => 'textarea',
 		'priority'						     => 4,
@@ -664,8 +665,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_footerfeature_btn_text', array(
-		'label' 			             => esc_html__( 'Button Text', 'uku' ),
-		'description'					     => esc_html__( 'If you want to add a "Call to Action" button, include the button text here.', 'uku' ),
+		'label' 			             => esc_html__( 'Button Text', 'ecomodernist' ),
+		'description'					     => esc_html__( 'If you want to add a "Call to Action" button, include the button text here.', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_footerfeature',
 		'type' 			               => 'text',
 		'priority'						     => 5,
@@ -677,8 +678,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_footerfeature_btn_link', array(
-		'label' 			             => esc_html__( 'Button Link URL', 'uku' ),
-		'description'					     => esc_html__( 'The URL the button should link to.', 'uku' ),
+		'label' 			             => esc_html__( 'Button Link URL', 'ecomodernist' ),
+		'description'					     => esc_html__( 'The URL the button should link to.', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_footerfeature',
 		'type' 			               => 'text',
 		'priority'						     => 6,
@@ -692,17 +693,17 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_bloglayout', array(
-		'label' 			             => esc_html__( 'Blog Layout', 'uku' ),
-		'description'					     => esc_html__( 'Choose your blog layout', 'uku' ),
+		'label' 			             => esc_html__( 'Blog Layout', 'ecomodernist' ),
+		'description'					     => esc_html__( 'Choose your blog layout', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_frontpage_general',
 		'priority' 			           => 1,
 		'type' 			               => 'select',
 		'choices' 						     => array(
-					'default'						=> esc_html__( 'default', 'uku' ),
-					'fourthhighlighted' => esc_html__( 'default, every 4. post highlighted', 'uku' ),
-					'classic' 					=> esc_html__( 'classic', 'uku' ),
-					'threecolumns' 			=> esc_html__( '3-column grid', 'uku' ),
-					'fourcolumns' 			=> esc_html__( '4-column grid', 'uku' ),
+					'default'						=> esc_html__( 'default', 'ecomodernist' ),
+					'fourthhighlighted' => esc_html__( 'default, every 4. post highlighted', 'ecomodernist' ),
+					'classic' 					=> esc_html__( 'classic', 'ecomodernist' ),
+					'threecolumns' 			=> esc_html__( '3-column grid', 'ecomodernist' ),
+					'fourcolumns' 			=> esc_html__( '4-column grid', 'ecomodernist' ),
 		),
 	) );
 
@@ -712,7 +713,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_hideblog', array(
-		'label'								     => esc_html__( 'Hide blog on Front page', 'uku' ),
+		'label'								     => esc_html__( 'Hide blog on Front page', 'ecomodernist' ),
 		'section'							     => 'ecomodernist_frontpage_general',
 		'type'								     => 'checkbox',
 		'priority'						     => 2,
@@ -724,7 +725,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_hidedate', array(
-		'label'								     => esc_html__( 'Hide date on Front page', 'uku' ),
+		'label'								     => esc_html__( 'Hide date on Front page', 'ecomodernist' ),
 		'section'							     => 'ecomodernist_frontpage_general',
 		'type'								     => 'checkbox',
 		'priority'						     => 3,
@@ -736,7 +737,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_hidecomments', array(
-		'label'								     => esc_html__( 'Hide comments count on Front page', 'uku' ),
+		'label'								     => esc_html__( 'Hide comments count on Front page', 'ecomodernist' ),
 		'section'							     => 'ecomodernist_frontpage_general',
 		'type'								     => 'checkbox',
 		'priority'						     => 4,
@@ -748,7 +749,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_hidecats', array(
-		'label'								     => esc_html__( 'Hide categories on Front page', 'uku' ),
+		'label'								     => esc_html__( 'Hide categories on Front page', 'ecomodernist' ),
 		'section'							     => 'ecomodernist_frontpage_general',
 		'type'								     => 'checkbox',
 		'priority'						     => 5,
@@ -760,7 +761,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_hideauthor', array(
-		'label'								     => esc_html__( 'Hide author name on Front page', 'uku' ),
+		'label'								     => esc_html__( 'Hide author name on Front page', 'ecomodernist' ),
 		'section'							     => 'ecomodernist_frontpage_general',
 		'type'								     => 'checkbox',
 		'priority'						     => 6,
@@ -772,8 +773,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_custom_latestposts', array(
-		'label' 			             => esc_html__( 'Latest Posts title', 'uku' ),
-		'description'					     => esc_html__( 'Customize the "Latest Posts" title text above the blog content on your blog front page.', 'uku' ),
+		'label' 			             => esc_html__( 'Latest Posts title', 'ecomodernist' ),
+		'description'					     => esc_html__( 'Customize the "Latest Posts" title text above the blog content on your blog front page.', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_frontpage_general',
 		'type' 			               => 'text',
 		'priority'						     => 7,
@@ -785,7 +786,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_hidelatestpoststitle', array(
-		'label'								     => esc_html__( 'Hide Latest Posts title', 'uku' ),
+		'label'								     => esc_html__( 'Hide Latest Posts title', 'ecomodernist' ),
 		'section'							     => 'ecomodernist_frontpage_general',
 		'type'								     => 'checkbox',
 		'priority'						     => 8,
@@ -797,8 +798,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_custom_followus', array(
-		'label' 			             => esc_html__( 'Follow us text', 'uku' ),
-		'description'					     => esc_html__( 'Customize the "Follow us" text in your About section and footer social menus.', 'uku' ),
+		'label' 			             => esc_html__( 'Follow us text', 'ecomodernist' ),
+		'description'					     => esc_html__( 'Customize the "Follow us" text in your About section and footer social menus.', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_frontpage_general',
 		'type' 			               => 'text',
 		'priority'						     => 9,
@@ -812,7 +813,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control(new WP_Customize_Tag_Control($wp_customize,'ecomodernist_featuredtag', array(
-		'label' 			             => esc_html__( 'Featured Slider tag (required)', 'uku' ),
+		'label' 			             => esc_html__( 'Featured Slider tag (required)', 'ecomodernist' ),
 		'settings' 						     => 'ecomodernist_featuredtag',
 		'section' 						     => 'ecomodernist_slider',
 		'priority'						     => 1,
@@ -824,15 +825,15 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_sliderstyle', array(
-		'label' 			             => esc_html__( 'Slider Style', 'uku' ),
-		'description'					     => esc_html__( 'Choose the slider design.', 'uku' ),
+		'label' 			             => esc_html__( 'Slider Style', 'ecomodernist' ),
+		'description'					     => esc_html__( 'Choose the slider design.', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_slider',
 		'priority' 			           => 2,
 		'type' 			               => 'select',
 		'choices' 						     => array(
-			'slider-fullwidth'	 => esc_html__( 'fullwidth', 'uku' ),
-			'slider-boxed' 			 => esc_html__( 'boxed', 'uku' ),
-			'slider-fullscreen'  => esc_html__( 'fullscreen', 'uku' ),
+			'slider-fullwidth'	 => esc_html__( 'fullwidth', 'ecomodernist' ),
+			'slider-boxed' 			 => esc_html__( 'boxed', 'ecomodernist' ),
+			'slider-fullscreen'  => esc_html__( 'fullscreen', 'ecomodernist' ),
 		),
 	) );
 
@@ -842,14 +843,14 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_slideranimation', array(
-		'label' 			             => esc_html__( 'Slider Image Animation', 'uku' ),
-		'description'					     => esc_html__( 'Choose, if you want the slider images to fade or slide from one image to the next.', 'uku' ),
+		'label' 			             => esc_html__( 'Slider Image Animation', 'ecomodernist' ),
+		'description'					     => esc_html__( 'Choose, if you want the slider images to fade or slide from one image to the next.', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_slider',
 		'priority' 			           => 3,
 		'type' 			               => 'select',
 		'choices' 						     => array(
-			'slider-slide'	 => esc_html__( 'slide', 'uku' ),
-			'slider-fade' 			 => esc_html__( 'fade', 'uku' ),
+			'slider-slide'	 => esc_html__( 'slide', 'ecomodernist' ),
+			'slider-fade' 			 => esc_html__( 'fade', 'ecomodernist' ),
 		),
 	) );
 
@@ -860,8 +861,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_section_one_title', array(
-		'label' 			             => esc_html__( 'Section Title (optional)', 'uku' ),
-		'description'					     => esc_html__( 'The title will appear at the top of the section.', 'uku' ),
+		'label' 			             => esc_html__( 'Section Title (optional)', 'ecomodernist' ),
+		'description'					     => esc_html__( 'The title will appear at the top of the section.', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_front_section_one',
 		'type' 			               => 'text',
 		'priority'						     => 1,
@@ -873,7 +874,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control(new WP_Customize_Category_Control($wp_customize,'ecomodernist_front_section_one_cat', array(
-		'label' 							     => esc_html__( 'Section category', 'uku' ),
+		'label' 							     => esc_html__( 'Section category', 'ecomodernist' ),
 		'settings' 						     => 'ecomodernist_front_section_one_cat',
 		'section' 						     => 'ecomodernist_front_section_one',
 		'priority'						     => 2,
@@ -885,7 +886,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control(new WP_Customize_Tag_Control($wp_customize,'ecomodernist_front_section_one_tag', array(
-		'label' 			             => esc_html__( 'Section tag', 'uku' ),
+		'label' 			             => esc_html__( 'Section tag', 'ecomodernist' ),
 		'settings' 						     => 'ecomodernist_front_section_one_tag',
 		'section' 						     => 'ecomodernist_front_section_one',
 		'priority'						     => 3,
@@ -898,8 +899,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_section_two_title', array(
-		'label' 			             => esc_html__( 'Section Title (optional)', 'uku' ),
-		'description'					     => esc_html__( 'The title will appear at the top of the section.', 'uku' ),
+		'label' 			             => esc_html__( 'Section Title (optional)', 'ecomodernist' ),
+		'description'					     => esc_html__( 'The title will appear at the top of the section.', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_front_section_two',
 		'type' 			               => 'text',
 		'priority'						     => 1,
@@ -911,7 +912,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control(new WP_Customize_Category_Control($wp_customize,'ecomodernist_front_section_two_cat', array(
-		'label' 							     => esc_html__( 'Section category', 'uku' ),
+		'label' 							     => esc_html__( 'Section category', 'ecomodernist' ),
 		'settings' 						     => 'ecomodernist_front_section_two_cat',
 		'section' 						     => 'ecomodernist_front_section_two',
 		'priority'						     => 2,
@@ -923,7 +924,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control(new WP_Customize_Tag_Control($wp_customize,'ecomodernist_front_section_two_tag', array(
-		'label' 			             => esc_html__( 'Section tag', 'uku' ),
+		'label' 			             => esc_html__( 'Section tag', 'ecomodernist' ),
 		'settings' 						     => 'ecomodernist_front_section_two_tag',
 		'section' 						     => 'ecomodernist_front_section_two',
 		'priority'						     => 3,
@@ -936,8 +937,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_section_three_title', array(
-		'label' 			             => esc_html__( 'Section Title (optional)', 'uku' ),
-		'description'					     => esc_html__( 'The title will appear at the top of the section.', 'uku' ),
+		'label' 			             => esc_html__( 'Section Title (optional)', 'ecomodernist' ),
+		'description'					     => esc_html__( 'The title will appear at the top of the section.', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_front_section_three',
 		'type' 			               => 'text',
 		'priority'						     => 1,
@@ -949,7 +950,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control(new WP_Customize_Category_Control($wp_customize,'ecomodernist_front_section_three_cat', array(
-		'label' 							     => esc_html__( 'Section category', 'uku' ),
+		'label' 							     => esc_html__( 'Section category', 'ecomodernist' ),
 		'settings' 						     => 'ecomodernist_front_section_three_cat',
 		'section' 						     => 'ecomodernist_front_section_three',
 		'priority'						     => 2,
@@ -961,7 +962,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control(new WP_Customize_Tag_Control($wp_customize,'ecomodernist_front_section_three_tag', array(
-		'label' 			             => esc_html__( 'Section tag', 'uku' ),
+		'label' 			             => esc_html__( 'Section tag', 'ecomodernist' ),
 		'settings' 						     => 'ecomodernist_front_section_three_tag',
 		'section' 						     => 'ecomodernist_front_section_three',
 		'priority'						     => 3,
@@ -974,7 +975,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control(new WP_Customize_Category_Control($wp_customize,'ecomodernist_front_section_four_cat', array(
-		'label' 							     => esc_html__( 'Section category', 'uku' ),
+		'label' 							     => esc_html__( 'Section category', 'ecomodernist' ),
 		'settings' 						     => 'ecomodernist_front_section_four_cat',
 		'section' 						     => 'ecomodernist_front_section_four',
 		'priority'						     => 1,
@@ -986,7 +987,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control(new WP_Customize_Tag_Control($wp_customize,'ecomodernist_front_section_four_tag', array(
-		'label' 			             => esc_html__( 'Section tag', 'uku' ),
+		'label' 			             => esc_html__( 'Section tag', 'ecomodernist' ),
 		'settings' 						     => 'ecomodernist_front_section_four_tag',
 		'section' 						     => 'ecomodernist_front_section_four',
 		'priority'						     => 2,
@@ -999,7 +1000,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_section_about_title', array(
-		'label' 			             => esc_html__( 'Section Title', 'uku' ),
+		'label' 			             => esc_html__( 'Section Title', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_front_section_about',
 		'type' 			               => 'text',
 		'priority'						     => 1,
@@ -1011,8 +1012,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize,'ecomodernist_front_section_about_image', array(
-				'label'						     => esc_html__( 'Upload About image', 'uku' ),
-				'description'			     => esc_html__( 'The recommended image width for the About image is 580 pixels for Ecomodernist standard and 1500 pixels for the Ecomodernist neo and serif design style.', 'uku' ),
+				'label'						     => esc_html__( 'Upload About image', 'ecomodernist' ),
+				'description'			     => esc_html__( 'The recommended image width for the About image is 580 pixels for Ecomodernist standard and 1500 pixels for the Ecomodernist neo and serif design style.', 'ecomodernist' ),
 				'section'					     => 'ecomodernist_front_section_about',
 				'priority'				     => 2,
 	) ) );
@@ -1023,10 +1024,10 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_section_about_text', array(
-		'label' 			             => esc_html__( 'About Text (required)', 'uku' ),
+		'label' 			             => esc_html__( 'About Text (required)', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_front_section_about',
 		'type' 			               => 'textarea',
-		'description'					     => esc_html__( '(HTML is allowed.)', 'uku' ),
+		'description'					     => esc_html__( '(HTML is allowed.)', 'ecomodernist' ),
 		'priority'						     => 3,
 	) );
 
@@ -1038,8 +1039,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_section_twocolumn_title', array(
-		'label' 			             => esc_html__( 'Section Title (optional)', 'uku' ),
-		'description'					     => esc_html__( 'The title will appear at the top of the section.', 'uku' ),
+		'label' 			             => esc_html__( 'Section Title (optional)', 'ecomodernist' ),
+		'description'					     => esc_html__( 'The title will appear at the top of the section.', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_front_section_twocolumn',
 		'type' 			               => 'text',
 		'priority'						     => 1,
@@ -1051,7 +1052,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control(new WP_Customize_Category_Control($wp_customize,'ecomodernist_front_section_twocolumn_cat', array(
-		'label' 							     => esc_html__( 'Section category', 'uku' ),
+		'label' 							     => esc_html__( 'Section category', 'ecomodernist' ),
 		'settings' 						     => 'ecomodernist_front_section_twocolumn_cat',
 		'section' 						     => 'ecomodernist_front_section_twocolumn',
 		'priority'						     => 2,
@@ -1063,7 +1064,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control(new WP_Customize_Tag_Control($wp_customize,'ecomodernist_front_section_twocolumn_tag', array(
-		'label' 			             => esc_html__( 'Section tag', 'uku' ),
+		'label' 			             => esc_html__( 'Section tag', 'ecomodernist' ),
 		'settings' 						     => 'ecomodernist_front_section_twocolumn_tag',
 		'section' 						     => 'ecomodernist_front_section_twocolumn',
 		'priority'						     => 2,
@@ -1075,7 +1076,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_section_twocolumn_number', array(
-		'label' 			             => esc_html__( 'Number of posts', 'uku' ),
+		'label' 			             => esc_html__( 'Number of posts', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_front_section_twocolumn',
 		'priority' 			           => 4,
 		'type' 			               => 'text',
@@ -1087,7 +1088,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_section_twocolumn_excerpt', array(
-		'label'								     => esc_html__( 'Show post excerpt texts', 'uku' ),
+		'label'								     => esc_html__( 'Show post excerpt texts', 'ecomodernist' ),
 		'section'							     => 'ecomodernist_front_section_twocolumn',
 		'type'								     => 'checkbox',
 		'priority'						     => 5,
@@ -1100,8 +1101,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_section_threecolumn_title', array(
-		'label' 			             => esc_html__( 'Section Title (optional)', 'uku' ),
-		'description'					     => esc_html__( 'The title will appear at the top of the section.', 'uku' ),
+		'label' 			             => esc_html__( 'Section Title (optional)', 'ecomodernist' ),
+		'description'					     => esc_html__( 'The title will appear at the top of the section.', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_front_section_threecolumn',
 		'type' 			               => 'text',
 		'priority'						     => 1,
@@ -1113,7 +1114,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control(new WP_Customize_Category_Control($wp_customize,'ecomodernist_front_section_threecolumn_cat', array(
-		'label' 							     => esc_html__( 'Section category', 'uku' ),
+		'label' 							     => esc_html__( 'Section category', 'ecomodernist' ),
 		'settings' 						     => 'ecomodernist_front_section_threecolumn_cat',
 		'section' 						     => 'ecomodernist_front_section_threecolumn',
 		'priority'						     => 2,
@@ -1125,7 +1126,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control(new WP_Customize_Tag_Control($wp_customize,'ecomodernist_front_section_threecolumn_tag', array(
-		'label' 			             => esc_html__( 'Section tag', 'uku' ),
+		'label' 			             => esc_html__( 'Section tag', 'ecomodernist' ),
 		'settings' 						     => 'ecomodernist_front_section_threecolumn_tag',
 		'section' 						     => 'ecomodernist_front_section_threecolumn',
 		'priority'						     => 3,
@@ -1137,7 +1138,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_section_threecolumn_number', array(
-		'label' 			             => esc_html__( 'Number of posts', 'uku' ),
+		'label' 			             => esc_html__( 'Number of posts', 'ecomodernist' ),
 		'section' 			           => 'ecomodernist_front_section_threecolumn',
 		'priority' 			           => 4,
 		'type' 			               => 'text',
@@ -1149,7 +1150,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_section_threecolumn_excerpt', array(
-		'label'								     => esc_html__( 'Show post excerpt texts', 'uku' ),
+		'label'								     => esc_html__( 'Show post excerpt texts', 'ecomodernist' ),
 		'section'							     => 'ecomodernist_front_section_threecolumn',
 		'type'								     => 'checkbox',
 		'priority'						     => 5,
@@ -1163,8 +1164,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_section_fourcolumn_title', array(
-		'label' 			           => esc_html__( 'Section title (optional)', 'uku' ),
-		'description'					   => esc_html__( 'The title will appear at the top of the section.', 'uku' ),
+		'label' 			           => esc_html__( 'Section title (optional)', 'ecomodernist' ),
+		'description'					   => esc_html__( 'The title will appear at the top of the section.', 'ecomodernist' ),
 		'section' 			         => 'ecomodernist_front_section_fourcolumn',
 		'type' 			             => 'text',
 		'priority'						   => 1,
@@ -1176,7 +1177,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control(new WP_Customize_Category_Control($wp_customize,'ecomodernist_front_section_fourcolumn_cat', array(
-		'label' 							   => esc_html__( 'Section category', 'uku' ),
+		'label' 							   => esc_html__( 'Section category', 'ecomodernist' ),
 		'settings' 						   => 'ecomodernist_front_section_fourcolumn_cat',
 		'section' 						   => 'ecomodernist_front_section_fourcolumn',
 		'priority'						   => 2,
@@ -1188,7 +1189,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control(new WP_Customize_Tag_Control($wp_customize,'ecomodernist_front_section_fourcolumn_tag', array(
-		'label' 			           => esc_html__( 'Section tag', 'uku' ),
+		'label' 			           => esc_html__( 'Section tag', 'ecomodernist' ),
 		'settings' 						   => 'ecomodernist_front_section_fourcolumn_tag',
 		'section' 						   => 'ecomodernist_front_section_fourcolumn',
 		'priority'						   => 3,
@@ -1200,7 +1201,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_section_fourcolumn_number', array(
-		'label' 			           => esc_html__( 'Number of posts', 'uku' ),
+		'label' 			           => esc_html__( 'Number of posts', 'ecomodernist' ),
 		'section' 			         => 'ecomodernist_front_section_fourcolumn',
 		'priority' 			         => 4,
 		'type' 			             => 'text',
@@ -1212,7 +1213,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_section_fourcolumn_excerpt', array(
-		'label'								   => esc_html__( 'Show post excerpt texts', 'uku' ),
+		'label'								   => esc_html__( 'Show post excerpt texts', 'ecomodernist' ),
 		'section'							   => 'ecomodernist_front_section_fourcolumn',
 		'type'								   => 'checkbox',
 		'priority'						   => 5,
@@ -1226,8 +1227,8 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_section_sixcolumn_title', array(
-		'label' 			           => esc_html__( 'Section Title (optional)', 'uku' ),
-		'description'					   => esc_html__( 'The title will appear at the top of the section.', 'uku' ),
+		'label' 			           => esc_html__( 'Section Title (optional)', 'ecomodernist' ),
+		'description'					   => esc_html__( 'The title will appear at the top of the section.', 'ecomodernist' ),
 		'section' 			         => 'ecomodernist_front_section_sixcolumn',
 		'type' 			             => 'text',
 		'priority'						   => 1,
@@ -1239,7 +1240,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control(new WP_Customize_Category_Control($wp_customize,'ecomodernist_front_section_sixcolumn_cat', array(
-		'label' 							   => esc_html__( 'Section category', 'uku' ),
+		'label' 							   => esc_html__( 'Section category', 'ecomodernist' ),
 		'settings' 						   => 'ecomodernist_front_section_sixcolumn_cat',
 		'section' 						   => 'ecomodernist_front_section_sixcolumn',
 		'priority'						   => 2,
@@ -1251,7 +1252,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control(new WP_Customize_Tag_Control($wp_customize,'ecomodernist_front_section_sixcolumn_tag', array(
-			'label' 			         => esc_html__( 'Section tag', 'uku' ),
+			'label' 			         => esc_html__( 'Section tag', 'ecomodernist' ),
 			'settings' 						 => 'ecomodernist_front_section_sixcolumn_tag',
 			'section' 						 => 'ecomodernist_front_section_sixcolumn',
 			'priority'						 => 3,
@@ -1263,7 +1264,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_section_sixcolumn_number', array(
-			'label' 			         => esc_html__( 'Number of posts', 'uku' ),
+			'label' 			         => esc_html__( 'Number of posts', 'ecomodernist' ),
 			'section' 			       => 'ecomodernist_front_section_sixcolumn',
 			'priority' 			       => 4,
 			'type' 			           => 'text',
@@ -1275,7 +1276,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_front_section_sixcolumn_excerpt', array(
-			'label'								 => esc_html__( 'Show post excerpt texts', 'uku' ),
+			'label'								 => esc_html__( 'Show post excerpt texts', 'ecomodernist' ),
 			'section'							 => 'ecomodernist_front_section_sixcolumn',
 			'type'								 => 'checkbox',
 			'priority'						 => 5,
@@ -1292,7 +1293,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 
 	$wp_customize->add_control( 'ecomodernist_shopfront_about_activate', array(
 		'type'              => 'checkbox',
-		'label'             => esc_html__('Show About Section on Shop Front Page', 'uku'),
+		'label'             => esc_html__('Show About Section on Shop Front Page', 'ecomodernist'),
 		'section'           => 'ecomodernist_shop_front_general',
 		'priority'          => 1,
 	) );
@@ -1304,7 +1305,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 
 	$wp_customize->add_control( 'ecomodernist_shopfront_blog_activate', array(
 		'type'              => 'checkbox',
-		'label'             => esc_html__('Show "Posts on a Background" Section on Shop Front Page', 'uku'),
+		'label'             => esc_html__('Show "Posts on a Background" Section on Shop Front Page', 'ecomodernist'),
 		'section'           => 'ecomodernist_shop_front_general',
 		'priority'          => 2,
 	) );
@@ -1317,7 +1318,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 
 	$wp_customize->add_control( 'ecomodernist_shopcats_activate', array(
 		'type'              => 'checkbox',
-		'label'             => esc_html__('Show product categories', 'uku'),
+		'label'             => esc_html__('Show product categories', 'ecomodernist'),
 		'section'           => 'ecomodernist_shop_front_cats',
 		'priority'          => 1,
 	) );
@@ -1329,19 +1330,19 @@ function ecomodernist_customize_register( $wp_customize ) {
 
 	$wp_customize->add_control( 'ecomodernist_shopcats_number', array(
 		'type'              => 'number',
-		'label'             => esc_html__('Number of product categories', 'uku'),
+		'label'             => esc_html__('Number of product categories', 'ecomodernist'),
 		'section'           => 'ecomodernist_shop_front_cats',
 		'priority'          => 2,
 	) );
 
 	$wp_customize->add_setting('ecomodernist_shopcats_title', array(
-		'default'           => esc_html__('Product categories', 'uku'),
+		'default'           => esc_html__('Product categories', 'ecomodernist'),
 		'sanitize_callback' => 'wp_kses_post',
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_shopcats_title', array(
 		'type'              => 'text',
-		'label'             => esc_html__('Product categories title', 'uku'),
+		'label'             => esc_html__('Product categories title', 'ecomodernist'),
 		'section'           => 'ecomodernist_shop_front_cats',
 		'priority'          => 3,
 	) );
@@ -1354,7 +1355,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 
 	$wp_customize->add_control( 'ecomodernist_shopfeatured_activate', array(
 		'type'              => 'checkbox',
-		'label'             => esc_html__('Show Featured products', 'uku'),
+		'label'             => esc_html__('Show Featured products', 'ecomodernist'),
 		'section'           => 'ecomodernist_shop_front_featured',
 		'priority'          => 1,
 	) );
@@ -1366,19 +1367,19 @@ function ecomodernist_customize_register( $wp_customize ) {
 
 	$wp_customize->add_control( 'ecomodernist_shopfeatured_number', array(
 		'type'              => 'number',
-		'label'             => esc_html__('Number of Featured products', 'uku'),
+		'label'             => esc_html__('Number of Featured products', 'ecomodernist'),
 		'section'           => 'ecomodernist_shop_front_featured',
 		'priority'          => 2,
 	) );
 
 	$wp_customize->add_setting('ecomodernist_shopfeatured_title', array(
-		'default'           => esc_html__('Featured Products', 'uku'),
+		'default'           => esc_html__('Featured Products', 'ecomodernist'),
 		'sanitize_callback' => 'wp_kses_post',
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_shopfeatured_title', array(
 		'type'              => 'text',
-		'label'             => esc_html__('Featured products title', 'uku'),
+		'label'             => esc_html__('Featured products title', 'ecomodernist'),
 		'section'           => 'ecomodernist_shop_front_featured',
 		'priority'          => 3,
 	) );
@@ -1391,7 +1392,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 
 	$wp_customize->add_control( 'ecomodernist_shoplatest_activate', array(
 		'type'              => 'checkbox',
-		'label'             => esc_html__('Show Latest products', 'uku'),
+		'label'             => esc_html__('Show Latest products', 'ecomodernist'),
 		'section'           => 'ecomodernist_shop_front_latest',
 		'priority'          => 1,
 	) );
@@ -1403,19 +1404,19 @@ function ecomodernist_customize_register( $wp_customize ) {
 
 	$wp_customize->add_control( 'ecomodernist_shoplatest_number', array(
 		'type'              => 'number',
-		'label'             => esc_html__('Number of Latest products', 'uku'),
+		'label'             => esc_html__('Number of Latest products', 'ecomodernist'),
 		'section'           => 'ecomodernist_shop_front_latest',
 		'priority'          => 2,
 	) );
 
 	$wp_customize->add_setting('ecomodernist_shoplatest_title', array(
-		'default'           => esc_html__('Latest Products', 'uku'),
+		'default'           => esc_html__('Latest Products', 'ecomodernist'),
 		'sanitize_callback' => 'wp_kses_post',
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_shoplatest_title', array(
 		'type'              => 'text',
-		'label'             => esc_html__('Latest products title', 'uku'),
+		'label'             => esc_html__('Latest products title', 'ecomodernist'),
 		'section'           => 'ecomodernist_shop_front_latest',
 		'priority'          => 3,
 	) );
@@ -1428,7 +1429,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 
 	$wp_customize->add_control( 'ecomodernist_shoptoprated_activate', array(
 		'type'              => 'checkbox',
-		'label'             => esc_html__('Show Top Rated products', 'uku'),
+		'label'             => esc_html__('Show Top Rated products', 'ecomodernist'),
 		'section'           => 'ecomodernist_shop_front_toprated',
 		'priority'          => 1,
 	) );
@@ -1440,19 +1441,19 @@ function ecomodernist_customize_register( $wp_customize ) {
 
 	$wp_customize->add_control( 'ecomodernist_shoptoprated_number', array(
 		'type'              => 'number',
-		'label'             => esc_html__('Number of Top Rated products', 'uku'),
+		'label'             => esc_html__('Number of Top Rated products', 'ecomodernist'),
 		'section'           => 'ecomodernist_shop_front_toprated',
 		'priority'          => 2,
 	) );
 
 	$wp_customize->add_setting('ecomodernist_shoptoprated_title', array(
-		'default'           => esc_html__('Top Rated', 'uku'),
+		'default'           => esc_html__('Top Rated', 'ecomodernist'),
 		'sanitize_callback' => 'wp_kses_post',
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_shoptoprated_title', array(
 		'type'              => 'text',
-		'label'             => esc_html__('Top Rated products title', 'uku'),
+		'label'             => esc_html__('Top Rated products title', 'ecomodernist'),
 		'section'           => 'ecomodernist_shop_front_toprated',
 		'priority'          => 3,
 	) );
@@ -1465,7 +1466,7 @@ function ecomodernist_customize_register( $wp_customize ) {
 
 	$wp_customize->add_control( 'ecomodernist_shopsale_activate', array(
 		'type'              => 'checkbox',
-		'label'             => esc_html__('Show On Sale products', 'uku'),
+		'label'             => esc_html__('Show On Sale products', 'ecomodernist'),
 		'section'           => 'ecomodernist_shop_front_sale',
 		'priority'          => 1,
 	) );
@@ -1477,19 +1478,19 @@ function ecomodernist_customize_register( $wp_customize ) {
 
 	$wp_customize->add_control( 'ecomodernist_shopsale_number', array(
 		'type'              => 'number',
-		'label'             => esc_html__('Number of On Sale products', 'uku'),
+		'label'             => esc_html__('Number of On Sale products', 'ecomodernist'),
 		'section'           => 'ecomodernist_shop_front_sale',
 		'priority'          => 2,
 	) );
 
 	$wp_customize->add_setting('ecomodernist_shopsale_title', array(
-		'default'           => esc_html__('On Sale', 'uku'),
+		'default'           => esc_html__('On Sale', 'ecomodernist'),
 		'sanitize_callback' => 'wp_kses_post',
 	) );
 
 	$wp_customize->add_control( 'ecomodernist_shopsale_title', array(
 		'type'              => 'text',
-		'label'             => esc_html__('On Sale products title', 'uku'),
+		'label'             => esc_html__('On Sale products title', 'ecomodernist'),
 		'section'           => 'ecomodernist_shop_front_sale',
 		'priority'          => 3,
 	) );
@@ -1510,7 +1511,7 @@ if (class_exists('WP_Customize_Control')) {
 										'name'              => '_customize-dropdown-categories-' . $this->id,
 										'echo'              => 0,
 										'orderby'           => 'name',
-										'show_option_none'  => esc_html__( '&mdash; Select &mdash;', 'uku' ),
+										'show_option_none'  => esc_html__( '&mdash; Select &mdash;', 'ecomodernist' ),
 
 										'option_none_value' => '',
 										'selected'          => $this->value(),
@@ -1540,7 +1541,7 @@ if (class_exists('WP_Customize_Control')) {
 										'name'              => '_customize-dropdown-tags-' . $this->id,
 										'echo'              => 0,
 										'orderby'           => 'name',
-										'show_option_none'  => esc_html__( '&mdash; Select &mdash;', 'uku' ),
+										'show_option_none'  => esc_html__( '&mdash; Select &mdash;', 'ecomodernist' ),
 
 										'option_none_value' => '',
 										'taxonomy'           => 'post_tag',

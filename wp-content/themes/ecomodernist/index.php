@@ -7,6 +7,8 @@
 * @version 1.0.0
 */
 
+$GLOBALS['posts_displayed'] = array();
+
 get_header(); ?>
 
 	<div id="page-start" class="cf">
@@ -60,8 +62,18 @@ if ( '' == get_theme_mod( 'ecomodernist_front_hideblog' ) ) : ?>
 
 		<div class="posts-wrap">
 
-		<?php /* Start the Loop */ ?>
-		<?php while ( have_posts() ) : the_post(); ?>
+		<?php /* Start the Loop */ 
+
+			$args = array(
+				'post__not_in'	=> ecomodernist_get_posts_displayed(),
+			);
+
+			$ecomodernist_posts_query = new WP_Query( $args );
+		?>
+		<?php while ( $ecomodernist_posts_query->have_posts() ) : $ecomodernist_posts_query->the_post(); 
+			// add to exclude array
+			ecomodernist_add_posts_displayed( get_the_ID() );
+		?>
 
 		<?php if ( 'classic' == get_theme_mod( 'ecomodernist_bloglayout' ) ) : ?>
 			<?php get_template_part( 'content-classic' ); ?>

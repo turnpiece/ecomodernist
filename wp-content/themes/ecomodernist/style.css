@@ -5221,6 +5221,7 @@ a.standard-btn.black-btn {background: #000;}
 		right: 0;
 		border-bottom: none;
 		z-index: 1000000;
+		background-color: #000;
 	}
 
 	/* --- Front Section One --- */

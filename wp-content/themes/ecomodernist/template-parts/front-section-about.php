@@ -46,7 +46,7 @@
 				<?php if ( get_theme_mod( 'ecomodernist_custom_followus' ) ) : ?>
 					<h3 class="social-front-title"><?php echo esc_html( get_theme_mod( 'ecomodernist_custom_followus' ) ); ?></h3>
 				<?php else : ?>
-					<h3 class="social-front-title"><?php esc_html_e('Follow us', 'uku') ?></h3>
+					<h3 class="social-front-title"><?php esc_html_e('Follow us', 'ecomodernist') ?></h3>
 				<?php endif; ?>
 				<nav id="social-front" class="social-nav" role="navigation">
 					<?php wp_nav_menu( array(

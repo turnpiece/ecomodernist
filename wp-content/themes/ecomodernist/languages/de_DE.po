@@ -1074,14 +1074,6 @@ msgstr "Titel reduzierte Produkte"
 msgid "&mdash; Select &mdash;"
 msgstr "&mdash; Auswählen &mdash;"
 
-#: ../inc/demo-installer.php:39
-msgid ""
-"Make sure you have the WooCommerce plugin installed, before importing this "
-"demo!"
-msgstr ""
-"Vergewissere dich, dass du das WooCommerce Plugin installiert hast, bevor du "
-"die Demo importierst!"
-
 #: ../inc/template-tags.php:50
 msgid "by "
 msgstr "von "

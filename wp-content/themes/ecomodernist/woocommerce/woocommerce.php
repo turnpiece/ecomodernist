@@ -99,7 +99,7 @@ add_filter( 'loop_shop_per_page', create_function( '$cols', 'return 12;' ), 20 )
 // Custom Sale translation text
 add_filter('woocommerce_sale_flash', 'avia_change_sale_content', 10, 3);
 	function avia_change_sale_content($content, $post, $product){
-	$content = '<span class="onsale">'.esc_html__( 'Sale', 'uku' ).'</span>';
+	$content = '<span class="onsale">'.esc_html__( 'Sale', 'ecomodernist' ).'</span>';
 	return $content;
 }
 
@@ -120,9 +120,9 @@ function ecomodernist_woocommerce_remove_sidebar_shop() {
 function ecomodernist_woocommerce_widgets_init() {
 
 register_sidebar( array (
-	'name'          => esc_html__( 'Shop Sidebar', 'uku' ),
+	'name'          => esc_html__( 'Shop Sidebar', 'ecomodernist' ),
 	'id'            => 'sidebar-shop',
-	'description'   => esc_html__( 'Widgets for the sidebar on the WooCommerce shop page.', 'uku' ),
+	'description'   => esc_html__( 'Widgets for the sidebar on the WooCommerce shop page.', 'ecomodernist' ),
 	'before_widget' => '<section id="%1$s" class="widget %2$s">',
 	'after_widget'  => "</section>",
 	'before_title'  => '<h2 class="widget-title">',
@@ -163,9 +163,9 @@ add_filter( 'woocommerce_add_to_cart_fragments', 'woocommerce_header_add_to_cart
 function woocommerce_header_add_to_cart_fragment( $fragments ) {
 				ob_start();
 				?>
-				<a class="cart-btn" href="<?php echo WC()->cart->get_cart_url(); ?>" title="<?php esc_html_e( 'View Cart', 'uku' ); ?>">
-					<span class="btn-text"><?php esc_html_e('Cart', 'uku') ?></span>
-					<span class="cart-count"><?php echo sprintf ( esc_html__('%d', 'uku'), WC()->cart->cart_contents_count ); ?></span>
+				<a class="cart-btn" href="<?php echo WC()->cart->get_cart_url(); ?>" title="<?php esc_html_e( 'View Cart', 'ecomodernist' ); ?>">
+					<span class="btn-text"><?php esc_html_e('Cart', 'ecomodernist') ?></span>
+					<span class="cart-count"><?php echo sprintf ( esc_html__('%d', 'ecomodernist'), WC()->cart->cart_contents_count ); ?></span>
 				</a>
 				<?php
 

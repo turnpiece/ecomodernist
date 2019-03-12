@@ -21,19 +21,22 @@ $ecomodernist_section_twocolumn_query = new WP_Query( array(
 	'cat' 								=> $postcat,
 	'post_status'					=> 'publish',
 	'ignore_sticky_posts'	=> 1,
+	'post__not_in'			=> ecomodernist_get_posts_displayed(),
 ) );
 ?>
 
 <section id="front-section-twocolumn" class="front-section columns-wrap cf">
 
 	<?php if ( '' != get_theme_mod( 'ecomodernist_front_section_twocolumn_title' ) && '' != get_theme_mod( 'ecomodernist_front_section_twocolumn_cat') ) : ?>
-		<h3 class="front-section-title"><?php echo esc_html( get_theme_mod( 'ecomodernist_front_section_twocolumn_title' ) ); ?><span><a class="all-posts-link" href="<?php echo esc_url( $category_link ); ?>"><?php esc_html_e('All posts', 'uku') ?></a></span></h3>
+		<h3 class="front-section-title"><?php echo esc_html( get_theme_mod( 'ecomodernist_front_section_twocolumn_title' ) ); ?><span><a class="all-posts-link" href="<?php echo esc_url( $category_link ); ?>"><?php esc_html_e('All posts', 'ecomodernist') ?></a></span></h3>
 	<?php elseif ( '' != get_theme_mod( 'ecomodernist_front_section_twocolumn_title' ) && '' != get_theme_mod( 'ecomodernist_front_section_twocolumn_tag' ) ) : ?>
-		<h3 class="front-section-title"><?php echo esc_html( get_theme_mod( 'ecomodernist_front_section_twocolumn_title' ) ); ?><span><a class="all-posts-link" href="<?php echo esc_url( $tag_link ); ?>"><?php esc_html_e('All posts', 'uku') ?></a></span></h3>
+		<h3 class="front-section-title"><?php echo esc_html( get_theme_mod( 'ecomodernist_front_section_twocolumn_title' ) ); ?><span><a class="all-posts-link" href="<?php echo esc_url( $tag_link ); ?>"><?php esc_html_e('All posts', 'ecomodernist') ?></a></span></h3>
 	<?php endif; ?>
 
 	<?php if($ecomodernist_section_twocolumn_query->have_posts()) : ?>
 		<?php while($ecomodernist_section_twocolumn_query->have_posts()) : $ecomodernist_section_twocolumn_query->the_post() ?>
+
+			<?php ecomodernist_add_posts_displayed( get_the_ID() ); // add post to exclude array ?>
 
 			<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 

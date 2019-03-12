@@ -1,0 +1,36 @@
+
+/*-----------------------------------------------------------------------------------*/
+/*	10.0 Default Page
+/*-----------------------------------------------------------------------------------*/
+
+.page-template-default #primary .hentry, .page-fullwidth #primary .hentry, .page-template-no-sidebar #primary .hentry, .error404 #primary .page {
+  padding: 0;
+  border-top: 4px solid #1a1a1a;
+}
+
+.page {
+  h1.entry-title {
+    display: block;
+    margin: 0 0 20px;
+    padding: 6px 0 20px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+  a.post-edit-link {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    margin-top: 30px;
+    display: inline-block;
+  }
+  &.has-thumb {
+    .content-wrap {
+      padding-top: 0;
+    }
+    .blog-wrap {
+      padding-top: 35px;
+    }
+    .entry-thumbnail img {
+      width: 100%;
+    }
+  }
+}

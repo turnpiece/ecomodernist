@@ -17,6 +17,7 @@
 			'posts_per_page'=> 6,
 			'post_status'	=> 'publish',
 			'tag_id'  		=> $featuredtag,
+			'post__not_in'	=> ecomodernist_get_posts_displayed(),
 	);
 
 	$ecomodernist_front_query = new WP_Query( $args );
@@ -27,6 +28,9 @@
 	  	<?php while($ecomodernist_front_query->have_posts()) : $ecomodernist_front_query->the_post() ?>
 	
 	<?php
+		// add to exclude array
+		ecomodernist_add_posts_displayed( get_the_ID() );
+
 		// Include the featured content template.
 		 get_template_part( 'template-parts/content', 'featured-post' );
 	 ?>

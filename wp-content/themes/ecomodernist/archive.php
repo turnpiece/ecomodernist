@@ -42,11 +42,11 @@ get_header(); ?>
 
 				// Previous/next page navigation.
 				the_posts_pagination( array(
-					'next_text' => '<span aria-hidden="true" class="meta-nav">' . esc_html__( 'Older', 'uku' ) . '</span> ' .
-					'<span class="screen-reader-text">' . esc_html__( 'Older Posts', 'uku' ) . '</span> ',
-					'prev_text' => '<span aria-hidden="true" class="meta-nav">' . esc_html__( 'Newer', 'uku' ) . '</span> ' .
-					'<span class="screen-reader-text">' . esc_html__( 'Newer Posts', 'uku' ) . '</span> ',
-					'before_page_number' => '<span class="meta-nav screen-reader-text">' . esc_html__( 'Page', 'uku' ) . ' </span>',
+					'next_text' => '<span aria-hidden="true" class="meta-nav">' . esc_html__( 'Older', 'ecomodernist' ) . '</span> ' .
+					'<span class="screen-reader-text">' . esc_html__( 'Older Posts', 'ecomodernist' ) . '</span> ',
+					'prev_text' => '<span aria-hidden="true" class="meta-nav">' . esc_html__( 'Newer', 'ecomodernist' ) . '</span> ' .
+					'<span class="screen-reader-text">' . esc_html__( 'Newer Posts', 'ecomodernist' ) . '</span> ',
+					'before_page_number' => '<span class="meta-nav screen-reader-text">' . esc_html__( 'Page', 'ecomodernist' ) . ' </span>',
 			) );
 			?>
 			

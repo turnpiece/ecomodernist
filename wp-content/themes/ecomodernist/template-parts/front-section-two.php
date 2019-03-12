@@ -40,6 +40,7 @@ if ( 'neo' == get_theme_mod('ecomodernist_main_design') ){
 		'tag_id' 							=> $posttag,
 		'cat' 								=> $postcat,
 		'ignore_sticky_posts'	=> 1,
+		'post__not_in'			=> ecomodernist_get_posts_displayed(),
 	);
 }
 $ecomodernist_section_two_second_query = new WP_Query( $args );
@@ -48,14 +49,16 @@ $ecomodernist_section_two_second_query = new WP_Query( $args );
 <section id="front-section-two" class="front-section cf">
 
 	<?php if ( '' != get_theme_mod( 'ecomodernist_front_section_two_title' ) && '' != get_theme_mod( 'ecomodernist_front_section_two_cat') ) : ?>
-		<h3 class="front-section-title"><?php echo esc_html( get_theme_mod( 'ecomodernist_front_section_two_title' ) ); ?><span><a class="all-posts-link" href="<?php echo esc_url( $category_link ); ?>"><?php esc_html_e('All posts', 'uku') ?></a></span></h3>
+		<h3 class="front-section-title"><?php echo esc_html( get_theme_mod( 'ecomodernist_front_section_two_title' ) ); ?><span><a class="all-posts-link" href="<?php echo esc_url( $category_link ); ?>"><?php esc_html_e('All posts', 'ecomodernist') ?></a></span></h3>
 	<?php elseif ( '' != get_theme_mod( 'ecomodernist_front_section_two_title' ) && '' != get_theme_mod( 'ecomodernist_front_section_two_tag' ) ) : ?>
-		<h3 class="front-section-title"><?php echo esc_html( get_theme_mod( 'ecomodernist_front_section_two_title' ) ); ?><span><a class="all-posts-link" href="<?php echo esc_url( $tag_link ); ?>"><?php esc_html_e('All posts', 'uku') ?></a></span></h3>
+		<h3 class="front-section-title"><?php echo esc_html( get_theme_mod( 'ecomodernist_front_section_two_title' ) ); ?><span><a class="all-posts-link" href="<?php echo esc_url( $tag_link ); ?>"><?php esc_html_e('All posts', 'ecomodernist') ?></a></span></h3>
 	<?php endif; ?>
 
 	<div class="section-two-column-one">
 		<?php if($ecomodernist_section_two_first_query->have_posts()) : ?>
 			<?php while($ecomodernist_section_two_first_query->have_posts()) : $ecomodernist_section_two_first_query->the_post() ?>
+
+				<?php ecomodernist_add_posts_displayed( get_the_ID() ); // add post to exclude array ?>
 
 				<?php if ( 'neo' == get_theme_mod( 'ecomodernist_main_design' ) ) : ?>
 					<?php get_template_part('template-parts/content-frontpost-featuredbottom' ); ?>

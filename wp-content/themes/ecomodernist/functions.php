@@ -7,13 +7,15 @@
  * @version 1.0.9
  */
 
+define( 'ECOMODERNIST_VERSION', '1.0.9' );
+
 /*-----------------------------------------------------------------------------------*/
 /* Sets up theme defaults and registers support for various WordPress features.
 /*-----------------------------------------------------------------------------------*/
 function ecomodernist_setup() {
 
 	// Make Ecomodernist available for translation. Translations can be added to the /languages/ directory.
-	load_theme_textdomain( 'uku', get_template_directory() . '/languages' );
+	load_theme_textdomain( 'ecomodernist', get_template_directory() . '/languages' );
 
 	// This theme styles the visual editor to resemble the theme style.
 	if ( 'neo' == get_theme_mod( 'ecomodernist_main_design' ) ) {
@@ -34,13 +36,13 @@ function ecomodernist_setup() {
 
 	// This theme uses wp_nav_menu().
 	register_nav_menus( array (
-		'primary'				=> esc_html__( 'Main menu', 'uku' ),
-		'social' 				=> esc_html__( 'Social Icons', 'uku' ),
-		'social-front' 	=> esc_html__( 'Social menu', 'uku' ),
-		'footer-one' 		=> esc_html__( 'Footer 1', 'uku' ),
-		'footer-two' 		=> esc_html__( 'Footer 2', 'uku' ),
-		'footer-three' 	=> esc_html__( 'Footer 3', 'uku' ),
-		'footer-four' 	=> esc_html__( 'Footer 4', 'uku' ),
+		'primary'				=> esc_html__( 'Main menu', 'ecomodernist' ),
+		'social' 				=> esc_html__( 'Social Icons', 'ecomodernist' ),
+		'social-front' 	=> esc_html__( 'Social menu', 'ecomodernist' ),
+		'footer-one' 		=> esc_html__( 'Footer 1', 'ecomodernist' ),
+		'footer-two' 		=> esc_html__( 'Footer 2', 'ecomodernist' ),
+		'footer-three' 	=> esc_html__( 'Footer 3', 'ecomodernist' ),
+		'footer-four' 	=> esc_html__( 'Footer 4', 'ecomodernist' ),
 	) );
 
 	// Switch default core markup to output valid HTML5.
@@ -113,27 +115,27 @@ function ecomodernist_fonts_url() {
 	$subsets   = 'latin,latin-ext';
 
 	/* translators: If there are characters in your language that are not supported by Noticia Text, translate this to 'off'. Do not translate into your own language. */
-	if ( 'off' !== esc_html_x( 'on', 'Noticia Text font: on or off', 'uku' ) && 'standard' == get_theme_mod( 'ecomodernist_main_design' ) || '' == get_theme_mod( 'ecomodernist_main_design' ) ) {
+	if ( 'off' !== esc_html_x( 'on', 'Noticia Text font: on or off', 'ecomodernist' ) && 'standard' == get_theme_mod( 'ecomodernist_main_design' ) || '' == get_theme_mod( 'ecomodernist_main_design' ) ) {
 		$fonts[] = 'Noticia Text:400,400italic,700,700italic';
 	}
 
 	/* translators: If there are characters in your language that are not supported by Kanit, translate this to 'off'. Do not translate into your own language. */
-	if ( 'off' !== esc_html_x( 'on', 'Kanit font: on or off', 'uku' ) && 'standard' == get_theme_mod( 'ecomodernist_main_design' ) || '' == get_theme_mod( 'ecomodernist_main_design' )) {
+	if ( 'off' !== esc_html_x( 'on', 'Kanit font: on or off', 'ecomodernist' ) && 'standard' == get_theme_mod( 'ecomodernist_main_design' ) || '' == get_theme_mod( 'ecomodernist_main_design' )) {
 		$fonts[] = 'Kanit:400,500,600,700';
 	}
 
 	/* translators: If there are characters in your language that are not supported by Source Serif Pro, translate this to 'off'. Do not translate into your own language. */
-	if ( 'off' !== esc_html_x( 'on', 'Source Serif Pro font: on or off', 'uku' ) && 'neo' == get_theme_mod( 'ecomodernist_main_design' ) ) {
+	if ( 'off' !== esc_html_x( 'on', 'Source Serif Pro font: on or off', 'ecomodernist' ) && 'neo' == get_theme_mod( 'ecomodernist_main_design' ) ) {
 		$fonts[] = 'Source Serif Pro:400,600,700';
 	}
 
 	/* translators: If there are characters in your language that are not supported by Poppins, translate this to 'off'. Do not translate into your own language. */
-	if ( 'off' !== esc_html_x( 'on', 'Poppins font: on or off', 'uku' ) && 'neo' == get_theme_mod( 'ecomodernist_main_design') || 'serif' == get_theme_mod( 'ecomodernist_main_design' ) ) {
+	if ( 'off' !== esc_html_x( 'on', 'Poppins font: on or off', 'ecomodernist' ) && 'neo' == get_theme_mod( 'ecomodernist_main_design') || 'serif' == get_theme_mod( 'ecomodernist_main_design' ) ) {
 		$fonts[] = 'Poppins:400,500,600,700';
 	}
 
 	/* translators: If there are characters in your language that are not supported by Cormorant Garamond, translate this to 'off'. Do not translate into your own language. */
-	if ( 'off' !== esc_html_x( 'on', 'Cormorant Garamond font: on or off', 'uku' ) && 'serif' == get_theme_mod( 'ecomodernist_main_design' ) ) {
+	if ( 'off' !== esc_html_x( 'on', 'Cormorant Garamond font: on or off', 'ecomodernist' ) && 'serif' == get_theme_mod( 'ecomodernist_main_design' ) ) {
 		$fonts[] = 'Cormorant Garamond:400,500,700,400i,700i';
 	}
 
@@ -172,21 +174,21 @@ function ecomodernist_scripts() {
 	}
 
 	// Loads stylesheets.
-	wp_enqueue_style( 'ecomodernist-style', get_stylesheet_uri(), array(), '20160507' );
+	wp_enqueue_style( 'ecomodernist-style', get_stylesheet_directory_uri(). '/assets/css/main.css', array(), ECOMODERNIST_VERSION );
 
 	if ( 'neo' == get_theme_mod( 'ecomodernist_main_design' ) ) {
-		wp_enqueue_style( 'ecomodernist-neo-style', get_template_directory_uri(). '/assets/css/neo-style.css' , array(), '1.0' );
+		wp_enqueue_style( 'ecomodernist-neo-style', get_template_directory_uri(). '/assets/css/neo-style.css' , array(), ECOMODERNIST_VERSION );
 	}
 
 	if ( 'serif' == get_theme_mod( 'ecomodernist_main_design' ) ) {
-		wp_enqueue_style( 'ecomodernist-serif-style', get_template_directory_uri(). '/assets/css/serif-style.css' , array(), '1.0' );
+		wp_enqueue_style( 'ecomodernist-serif-style', get_template_directory_uri(). '/assets/css/serif-style.css' , array(), ECOMODERNIST_VERSION );
 	}
 
 	// Loads Custom Ecomodernist JavaScript functionality
 	wp_enqueue_script( 'ecomodernist-script', get_template_directory_uri() . '/assets/js/functions.js', array( 'jquery' ), '20160507', true );
 	wp_localize_script( 'ecomodernist-script', 'screenReaderText', array(
-		'expand'   => '<span class="screen-reader-text">' . esc_html__( 'expand child menu', 'uku' ) . '</span>',
-		'collapse' => '<span class="screen-reader-text">' . esc_html__( 'collapse child menu', 'uku' ) . '</span>',
+		'expand'   => '<span class="screen-reader-text">' . esc_html__( 'expand child menu', 'ecomodernist' ) . '</span>',
+		'collapse' => '<span class="screen-reader-text">' . esc_html__( 'collapse child menu', 'ecomodernist' ) . '</span>',
 	) );
 
 	// Add Genericons font, used in the main stylesheet.
@@ -484,7 +486,7 @@ function ecomodernist_customize_css() {
 		}
 		<?php } ?>
 		<?php if ('#f4f4f4' != get_theme_mod( 'ecomodernist_offcanvas_bg_color' ) ) { ?>
-			.mobile-search, .inner-offcanvas-wrap {background: <?php echo get_theme_mod('ecomodernist_offcanvas_bg_color'); ?>;}
+			.mobile-search, .inner-offcanvas-wrap, .close-btn-wrap {background: <?php echo get_theme_mod('ecomodernist_offcanvas_bg_color'); ?>;}
 		<?php } ?>
 		<?php if ('#2b2b2b' != get_theme_mod( 'ecomodernist_offcanvas_text_color' ) ) { ?>
 			#mobile-social ul li a,
@@ -493,7 +495,8 @@ function ecomodernist_customize_css() {
 			.dropdown-toggle,
 			#sidebar-offcanvas .widget h2.widget-title,
 			#sidebar-offcanvas .widget,
-			#sidebar-offcanvas .widget a {
+			#sidebar-offcanvas .widget a,
+			.close-btn-wrap {
 				color: <?php echo get_theme_mod('ecomodernist_offcanvas_text_color'); ?>;
 			}
 			#sidebar-offcanvas .widget h2.widget-title {border-color: <?php echo get_theme_mod('ecomodernist_offcanvas_text_color'); ?>;}
@@ -624,22 +627,22 @@ function ecomodernist_comment( $comment, $args, $depth ) {
 						<span class="comment-time"><a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>">
 							<?php
 							/* translators: 1: date */
-								printf( esc_html__( '%1$s', 'uku' ),
+								printf( esc_html__( '%1$s', 'ecomodernist' ),
 								get_comment_date());
 							?></a>
 						</span>
-						<?php edit_comment_link( esc_html__(' Edit', 'uku'), '<span class="comment-edit">', '</span>'); ?>
+						<?php edit_comment_link( esc_html__(' Edit', 'ecomodernist'), '<span class="comment-edit">', '</span>'); ?>
 					</div><!-- end .comment-meta -->
 				</div><!-- end .comment-details -->
 
 				<div class="comment-text">
 				<?php comment_text(); ?>
 					<?php if ( $comment->comment_approved == '0' ) : ?>
-						<p class="comment-awaiting-moderation"><?php esc_html_e( 'Your comment is awaiting moderation.', 'uku' ); ?></p>
+						<p class="comment-awaiting-moderation"><?php esc_html_e( 'Your comment is awaiting moderation.', 'ecomodernist' ); ?></p>
 					<?php endif; ?>
 				</div><!-- end .comment-text -->
 				<?php if ( comments_open () ) : ?>
-					<div class="comment-reply"><?php comment_reply_link( array_merge( $args, array( 'reply_text' => esc_html__( 'Reply', 'uku' ), 'depth' => $depth, 'max_depth' => $args['max_depth'] ) ) ); ?></div>
+					<div class="comment-reply"><?php comment_reply_link( array_merge( $args, array( 'reply_text' => esc_html__( 'Reply', 'ecomodernist' ), 'depth' => $depth, 'max_depth' => $args['max_depth'] ) ) ); ?></div>
 				<?php endif; ?>
 			</div><!-- end .comment-wrap -->
 		</div><!-- end .comment -->
@@ -650,7 +653,7 @@ function ecomodernist_comment( $comment, $args, $depth ) {
 		case 'trackback' :
 	?>
 	<li class="pingback">
-		<p><?php esc_html_e( 'Pingback:', 'uku' ); ?> <?php comment_author_link(); ?></p>
+		<p><?php esc_html_e( 'Pingback:', 'ecomodernist' ); ?> <?php comment_author_link(); ?></p>
 		<p class="pingback-edit"><?php edit_comment_link(); ?></p>
 	<?php
 			break;
@@ -664,9 +667,9 @@ endif;
 function ecomodernist_widgets_init() {
 
 	register_sidebar( array (
-		'name'          => esc_html__( 'Blog Sidebar', 'uku' ),
+		'name'          => esc_html__( 'Blog Sidebar', 'ecomodernist' ),
 		'id'            => 'sidebar-1',
-		'description'   => esc_html__( 'Widgets appear in the default sidebar.', 'uku' ),
+		'description'   => esc_html__( 'Widgets appear in the default sidebar.', 'ecomodernist' ),
 		'before_widget' => '<section id="%1$s" class="widget %2$s">',
 		'after_widget'  => "</section>",
 		'before_title'  => '<h2 class="widget-title">',
@@ -674,9 +677,9 @@ function ecomodernist_widgets_init() {
 	) );
 
 	register_sidebar( array (
-		'name'          => esc_html__( 'Page Sidebar', 'uku' ),
+		'name'          => esc_html__( 'Page Sidebar', 'ecomodernist' ),
 		'id'            => 'sidebar-2',
-		'description'   => esc_html__( 'Widgets appear in the sidebar on pages.', 'uku' ),
+		'description'   => esc_html__( 'Widgets appear in the sidebar on pages.', 'ecomodernist' ),
 		'before_widget' => '<section id="%1$s" class="widget %2$s">',
 		'after_widget'  => "</section>",
 		'before_title'  => '<h2 class="widget-title">',
@@ -684,9 +687,9 @@ function ecomodernist_widgets_init() {
 	) );
 
 	register_sidebar( array (
-		'name'          => esc_html__( 'Off Canvas Widget Area', 'uku' ),
+		'name'          => esc_html__( 'Off Canvas Widget Area', 'ecomodernist' ),
 		'id'            => 'sidebar-offcanvas',
-		'description'   => esc_html__( 'Widgets appear in the off canvas area.', 'uku' ),
+		'description'   => esc_html__( 'Widgets appear in the off canvas area.', 'ecomodernist' ),
 		'before_widget' => '<section id="%1$s" class="widget %2$s">',
 		'after_widget'  => "</section>",
 		'before_title'  => '<h2 class="widget-title">',
@@ -694,9 +697,9 @@ function ecomodernist_widgets_init() {
 	) );
 
 	register_sidebar( array (
-		'name'          => esc_html__( 'Big Footer Instagram Widget Area', 'uku' ),
+		'name'          => esc_html__( 'Big Footer Instagram Widget Area', 'ecomodernist' ),
 		'id'            => 'sidebar-instagram',
-		'description'   => esc_html__( 'Widget area to show the WP Instagram Widget in a big one-column footer area .', 'uku' ),
+		'description'   => esc_html__( 'Widget area to show the WP Instagram Widget in a big one-column footer area .', 'ecomodernist' ),
 		'before_widget' => '<section id="%1$s" class="widget %2$s">',
 		'after_widget'  => "</section>",
 		'before_title'  => '<h2 class="widget-title">',
@@ -705,9 +708,9 @@ function ecomodernist_widgets_init() {
 
 	if ( 'serif' == get_theme_mod( 'ecomodernist_main_design' ) ) {
 		register_sidebar( array (
-			'name'          => esc_html__( 'Big Footer Mailchimp Widget Area', 'uku' ),
+			'name'          => esc_html__( 'Big Footer Mailchimp Widget Area', 'ecomodernist' ),
 			'id'            => 'sidebar-newsletter',
-			'description'   => esc_html__( 'Widget area to show the Mailchimp Newsletter Widget in a big one-column footer area .', 'uku' ),
+			'description'   => esc_html__( 'Widget area to show the Mailchimp Newsletter Widget in a big one-column footer area .', 'ecomodernist' ),
 			'before_widget' => '<section id="%1$s" class="widget %2$s">',
 			'after_widget'  => "</section>",
 			'before_title'  => '<h2 class="widget-title">',
@@ -717,6 +720,32 @@ function ecomodernist_widgets_init() {
 
 }
 add_action( 'widgets_init', 'ecomodernist_widgets_init' );
+
+
+/*-----------------------------------------------------------------------------------*/
+/* Posts displayed on front page
+/*-----------------------------------------------------------------------------------*/
+
+function ecomodernist_add_posts_displayed( $posts ) {
+	global $posts_displayed;
+	array_push( $posts_displayed, $posts );
+}
+
+function ecomodernist_get_posts_displayed() {
+	global $posts_displayed;
+	return $posts_displayed;
+}
+
+/*-----------------------------------------------------------------------------------*/
+/* Excerpt length
+/*-----------------------------------------------------------------------------------*/
+
+function ecomodernist_excerpt_length( $length ) {
+	return 40;
+}
+add_filter( 'excerpt_length', 'ecomodernist_excerpt_length', 999 );
+
+
 
 /*-----------------------------------------------------------------------------------*/
 /* Customizer additions
@@ -748,7 +777,3 @@ require get_template_directory() . '/inc/jetpack.php';
 /*-----------------------------------------------------------------------------------*/
 require get_template_directory() . '/woocommerce/woocommerce.php';
 
-/*-----------------------------------------------------------------------------------*/
-/* Add DemoInstaller code.
-/*-----------------------------------------------------------------------------------*/
-require get_template_directory() . '/inc/demo-installer.php';

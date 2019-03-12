@@ -39,14 +39,14 @@ $custom_class = get_post_meta($post->ID, 'post_class', true);
 				<?php if ( comments_open() ) : ?>
 				<div class="entry-comments">
 					<?php comments_popup_link(
-						'<span class="leave-reply"><span class="comment-name">' . esc_html__( 'Comments', 'uku' ) .  '</span>' . esc_html__( '0', 'uku' ) . '</span>',
-						'<span class="comment-name">' . esc_html__( 'Comments', 'uku' ) .  '</span>' . esc_html__( '1', 'uku' ),
-						'<span class="comment-name">' . esc_html__( 'Comments', 'uku' ) .  '</span>' . esc_html__( '%', 'uku' ) )
+						'<span class="leave-reply"><span class="comment-name">' . esc_html__( 'Comments', 'ecomodernist' ) .  '</span>' . esc_html__( '0', 'ecomodernist' ) . '</span>',
+						'<span class="comment-name">' . esc_html__( 'Comments', 'ecomodernist' ) .  '</span>' . esc_html__( '1', 'ecomodernist' ),
+						'<span class="comment-name">' . esc_html__( 'Comments', 'ecomodernist' ) .  '</span>' . esc_html__( '%', 'ecomodernist' ) )
 					; ?>
 				</div><!-- end .entry-comments -->
 				<?php endif; // comments_open() ?>
 
-				<?php edit_post_link( esc_html__( 'Edit Post', 'uku' ), '<span class="entry-edit">', '</span>' ); ?>
+				<?php edit_post_link( esc_html__( 'Edit Post', 'ecomodernist' ), '<span class="entry-edit">', '</span>' ); ?>
 			</div><!-- end .entry-meta -->
 
 			<?php if ( function_exists( 'sharing_display' ) ) {sharing_display( '', true );}
@@ -61,7 +61,7 @@ $custom_class = get_post_meta($post->ID, 'post_class', true);
 			<?php the_content(); ?>
 			<?php
 				wp_link_pages( array(
-					'before' => '<div class="page-links">' . esc_html__( 'Pages:', 'uku' ),
+					'before' => '<div class="page-links">' . esc_html__( 'Pages:', 'ecomodernist' ),
 					'after'  => '</div>',
 				) );
 			?>
@@ -69,13 +69,13 @@ $custom_class = get_post_meta($post->ID, 'post_class', true);
 
 			<footer class="entry-footer cf">
 				<?php if ( has_category() ) : ?>
-					<div class="entry-cats"><span><?php esc_html_e('Categories', 'uku') ?></span>
+					<div class="entry-cats"><span><?php esc_html_e('Categories', 'ecomodernist') ?></span>
 						<?php the_category(' '); ?>
 					</div><!-- end .entry-cats -->
 					<?php endif; // has_category() ?>
 				<?php $tags_list = get_the_tag_list();
 					if ( $tags_list ): ?>
-					<div class="entry-tags"><span><?php esc_html_e('Tags', 'uku') ?></span><?php the_tags('',' ', ''); ?></div>
+					<div class="entry-tags"><span><?php esc_html_e('Tags', 'ecomodernist') ?></span><?php the_tags('',' ', ''); ?></div>
 				<?php endif; ?>
 				<?php
 				// Author bio.
@@ -93,10 +93,10 @@ $custom_class = get_post_meta($post->ID, 'post_class', true);
 			?>
 
 			<?php the_post_navigation( array (
-				'next_text' => '<span class="meta-nav">' . esc_html__( 'Next Post', 'uku' ) . '</span> %title' .
-				'<span class="screen-reader-text">' . esc_html__( 'Next Post', 'uku' ) . '</span> ',
-				'prev_text' => '<span class="meta-nav">' . esc_html__( 'Previous Post', 'uku' ) . '</span> %title' .
-				'<span class="screen-reader-text">' . esc_html__( 'Previous Post', 'uku' ) . '</span> ',
+				'next_text' => '<span class="meta-nav">' . esc_html__( 'Next Post', 'ecomodernist' ) . '</span> %title' .
+				'<span class="screen-reader-text">' . esc_html__( 'Next Post', 'ecomodernist' ) . '</span> ',
+				'prev_text' => '<span class="meta-nav">' . esc_html__( 'Previous Post', 'ecomodernist' ) . '</span> %title' .
+				'<span class="screen-reader-text">' . esc_html__( 'Previous Post', 'ecomodernist' ) . '</span> ',
 			) ); ?>
 
 		</div><!-- end .content-wrap -->

@@ -1,0 +1,45 @@
+
+/*-----------------------------------------------------------------------------------*/
+/*	11.0 Fullwidth / Archives / Search Results / 404
+/*-----------------------------------------------------------------------------------*/
+
+.archive-header .taxonomy-description p {
+  margin: 8px 0 0 0;
+}
+
+.author .taxonomy-description {
+  display: none;
+}
+
+.entry-summary p:last-child {
+  margin-bottom: 0;
+}
+
+.archive .site-content .post {
+  clear: both;
+  overflow: hidden;
+}
+
+.search-results .site-content {
+  .post, .page {
+    clear: both;
+    overflow: hidden;
+  }
+}
+
+.search-no-results .searchform {
+  width: 420px;
+}
+
+.error404 .site-content .entry-wrap {
+  overflow: hidden;
+}
+
+.author h3.author-archive-title {
+  margin: 0;
+  padding: 80px 0 0 0;
+}
+
+.page .edit-link {
+  padding-top: 30px;
+}

@@ -28,15 +28,17 @@ $ecomodernist_section_fourcolumn_query = new WP_Query( array(
 <section id="front-section-fourcolumn" class="front-section cf">
 
 	<?php if ( '' != get_theme_mod( 'ecomodernist_front_section_fourcolumn_title' ) && '' != get_theme_mod( 'ecomodernist_front_section_fourcolumn_cat') ) : ?>
-		<h3 class="front-section-title"><?php echo esc_html( get_theme_mod( 'ecomodernist_front_section_fourcolumn_title' ) ); ?><span><a class="all-posts-link" href="<?php echo esc_url( $category_link ); ?>"><?php esc_html_e('All posts', 'uku') ?></a></span></h3>
+		<h3 class="front-section-title"><?php echo esc_html( get_theme_mod( 'ecomodernist_front_section_fourcolumn_title' ) ); ?><span><a class="all-posts-link" href="<?php echo esc_url( $category_link ); ?>"><?php esc_html_e('All posts', 'ecomodernist') ?></a></span></h3>
 	<?php elseif ( '' != get_theme_mod( 'ecomodernist_front_section_fourcolumn_title' ) && '' != get_theme_mod( 'ecomodernist_front_section_fourcolumn_tag' ) ) : ?>
-		<h3 class="front-section-title"><?php echo esc_html( get_theme_mod( 'ecomodernist_front_section_fourcolumn_title' ) ); ?><span><a class="all-posts-link" href="<?php echo esc_url( $tag_link ); ?>"><?php esc_html_e('All posts', 'uku') ?></a></span></h3>
+		<h3 class="front-section-title"><?php echo esc_html( get_theme_mod( 'ecomodernist_front_section_fourcolumn_title' ) ); ?><span><a class="all-posts-link" href="<?php echo esc_url( $tag_link ); ?>"><?php esc_html_e('All posts', 'ecomodernist') ?></a></span></h3>
 	<?php endif; ?>
 
 	<div class="section-fourcolumn-postwrap columns-wrap">
 		<?php if($ecomodernist_section_fourcolumn_query->have_posts()) : ?>
 			<?php while($ecomodernist_section_fourcolumn_query->have_posts()) : $ecomodernist_section_fourcolumn_query->the_post() ?>
 
+				<?php ecomodernist_add_posts_displayed( get_the_ID() ); // add post to exclude array ?>
+				
 				<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 
 						<?php if ( 'serif' === get_theme_mod( 'ecomodernist_main_design' ) && '' !== get_the_post_thumbnail() && ! post_password_required() ) : ?>

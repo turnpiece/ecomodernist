@@ -1,0 +1,56 @@
+/*
+Theme Name: Ecomodernist
+Theme URI: https://turnpiece.com
+Author: Turnpiece
+Author URI: https://turnpiece.com
+Description: Ecomodernist is a flexible, responsive WordPress theme with modern, bold and beautiful design styles to choose from. You can customize Ecomodernist with multiple flexible options, e.g. by adding additional posts sections on the blog front page or by showing a post slider or header image at the top of your front page. You can also change the sidebar layout, add menus and a big advertisement area to your footer.
+Version: 1.0.0
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Tags: one-column, two-columns, three-columns, four-columns, right-sidebar, left-sidebar, custom-background, custom-colors, custom-header, custom-menu, featured-image-header, footer-widgets, editor-style, featured-images, flexible-header, rtl-language-support, threaded-comments, translation-ready, full-width-template, theme-options, blog, entertainment, news, photography
+Text Domain: ecomodernist
+
+* @version 1.0.9
+*/
+
+/*--------------------------------------------------------------
+Table of Contents:
+----------------------------------------------------------------
+1.0  - Reset
+2.0  - General Styles
+3.0  - Header
+4.0  - Off Canvas Area
+5.0  - Featured Slider + Custom Header Image
+6.0  - Front Page - Post Sections
+7.0  - Blog Front
+8.0  - Blog Posts
+8.1 - Comments
+9.0  - Pagination + Infinite Scroll
+10.0  - Default Page
+11.0  - Fullwidth / Archives / Search Results / 404
+12.0  - Sidebar + Widgets
+13.0  - Social Icon Menu
+14.0  - Footer
+15.0  - Plugins + Jetpack Styles
+16.0  - Shortcodes
+17.0  - Media Queries
+--------------------------------------------------------------*/
+
+@import "partials/_reset";
+@import "partials/_general";
+@import "partials/_header";
+@import "partials/_off_canvas";
+//@import "partials/_slider";
+@import "partials/_front_posts";
+@import "partials/_front_blog";
+@import "partials/_blog_posts";
+@import "partials/_pagination";
+@import "partials/_default_page";
+@import "partials/_fullwidth_archives";
+@import "partials/_sidebar";
+@import "partials/_social";
+@import "partials/_footer";
+@import "partials/_plugins";
+@import "partials/_shortcodes";
+@import "partials/_responsive";
+
